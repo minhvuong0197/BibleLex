@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model StrongEntry {
+  id            String   @id @default(cuid())
+  strongNumber  String   @unique @map("strong_number")
+  language      Language @map("language")
+  transliteration String @map("transliteration")
+  pronunciation String?  @map("pronunciation")
+  etymology     String?  @map("etymology")
+  definition    String   @map("definition")
+  kjvDef        String?  @map("kjv_def")
+  outlineBiblicalUsage String? @map("outline_biblical_usage")
+  thayersDef    String?  @map("thayers_def")
+  bdbDef        String?  @map("bdb_def")
+  lsjDef        String?  @map("lsj_def")
+  derivation    String?  @map("derivation")
+  tdk           String?  @map("tdk")
+  gkNumber      String?  @map("gk_number")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  morphology    Morphology[]
+  verses        VerseWord[]
+  crossRefs     CrossReference[] @relation("SourceRefs")
+  crossRefTargets CrossReference[] @relation("TargetRefs")
+
+  @@index([language])
+  @@map("strong_entries")
+}
+
+model Morphology {
+  id            String   @id @default(cuid())
+  strongNumber  String   @map("strong_number")
+  parsings      String   @map("parsings")
+  count         Int      @default(1)
+  tense         Tense?
+  voice         Voice?
+  mood          Mood?
+  case_         Case?    @map("case")
+  number        Number?
+  person        Person?
+  gender        Gender?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  strongEntry   StrongEntry @relation(fields: [strongNumber], references: [strongNumber])
+
+  @@index([strongNumber])
+  @@map("morphologies")
+}
+
+model VerseWord {
+  id            String   @id @default(cuid())
+  book          String
+  chapter       Int
+  verse         Int
+  wordOrder     Int      @map("word_order")
+  hebrewGreek   String   @map("hebrew_greek")
+  transliteration String  @map("transliteration")
+  strongNumber  String?  @map("strong_number")
+  parsing       String?
+  english       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  strongEntry   StrongEntry? @relation(fields: [strongNumber], references: [strongNumber])
+
+  @@unique([book, chapter, verse, wordOrder])
+  @@index([book, chapter, verse])
+  @@index([strongNumber])
+  @@map("verse_words")
+}
+
+model CrossReference {
+  id              String       @id @default(cuid())
+  sourceStrong    String       @map("source_strong")
+  targetStrong    String       @map("target_strong")
+  type            CrossRefType @default(RELATED)
+  note            String?
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  sourceEntry     StrongEntry  @relation("SourceRefs", fields: [sourceStrong], references: [strongNumber])
+  targetEntry     StrongEntry  @relation("TargetRefs", fields: [targetStrong], references: [strongNumber])
+
+  @@index([sourceStrong])
+  @@index([targetStrong])
+  @@map("cross_references")
+}
+
+model BibleBook {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  abbreviation String  @unique
+  testament   Testament
+  bookOrder   Int      @unique @map("book_order")
+  chapters    Int
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  verses      Verse[]
+
+  @@map("bible_books")
+}
+
+model Verse {
+  id        String   @id @default(cuid())
+  bookId    String   @map("book_id")
+  chapter   Int
+  verse     Int
+  text      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  book      BibleBook @relation(fields: [bookId], references: [id])
+
+  @@unique([bookId, chapter, verse])
+  @@index([bookId, chapter])
+  @@map("verses")
+}
+
+model TopicalEntry {
+  id          String   @id @default(cuid())
+  topic       String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  references  TopicalReference[]
+
+  @@map("topical_entries")
+}
+
+model TopicalReference {
+  id            String   @id @default(cuid())
+  topicId       String   @map("topic_id")
+  book          String
+  chapter       Int
+  verseStart    Int      @map("verse_start")
+  verseEnd      Int?     @map("verse_end")
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  topic         TopicalEntry @relation(fields: [topicId], references: [id])
+
+  @@index([topicId])
+  @@index([book, chapter, verseStart])
+  @@map("topical_references")
+}
+
+enum Language {
+  HEBREW
+  GREEK
+}
+
+enum Tense {
+  PRESENT
+  IMPERFECT
+  FUTURE
+  AORIST
+  PERFECT
+  PLUPERFECT
+  FUTURE_PERFECT
+}
+
+enum Voice {
+  ACTIVE
+  MIDDLE
+  PASSIVE
+  MIDDLE_PASSIVE
+}
+
+enum Mood {
+  INDICATIVE
+  SUBJUNCTIVE
+  OPTATIVE
+  IMPERATIVE
+  INFINITIVE
+  PARTICIPLE
+}
+
+enum Case {
+  NOMINATIVE
+  GENITIVE
+  DATIVE
+  ACCUSATIVE
+  VOCATIVE
+  LOCATIVE
+  INSTRUMENTAL
+}
+
+enum Number {
+  SINGULAR
+  PLURAL
+  DUAL
+}
+
+enum Person {
+  FIRST
+  SECOND
+  THIRD
+}
+
+enum Gender {
+  MASCULINE
+  FEMININE
+  NEUTER
+}
+
+enum Testament {
+  OLD
+  NEW
+}
+
+enum CrossRefType {
+  RELATED
+  SYNONYM
+  ANTONYM
+  ROOT
+  DERIVATIVE
+  COMPOUND
+  CITATION
+  ALLUSION
+}
+
+model AiAnalysis {
+  id           String   @id @default(cuid())
+  strongNumber String   @map("strong_number")
+  type         String   @map("type")
+  content      String
+  model        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@unique([strongNumber, type])
+  @@index([strongNumber])
+  @@map("ai_analyses")
+}
