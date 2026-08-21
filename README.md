@@ -69,7 +69,7 @@ npm run import:data      # nhập dữ liệu vào SQLite
 ```bash
 npm run dev
 ```
-Mở [http://localhost:3000](http://localhost:3000).
+Mở [http://localhost:3000](http://localhost:3000) (khi chạy local). Bản triển khai chính thức: https://biblelex.app
 
 > **Môi trường bị hạn chế mạng:** nếu `npm run dev`/`start` bị crash với lỗi
 > `os.networkInterfaces` / `getifaddrs` (errno 13), hãy chạy kèm tiền tố:
