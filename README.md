@@ -59,10 +59,11 @@ Kết quả được lưu vào `data/`:
 - `morphology.json` — tổng hợp các dạng hình thái học
 
 ### 3. Tạo cơ sở dữ liệu & nhập dữ liệu
+> Dự án dùng **PostgreSQL**. Đặt `DATABASE_URL` trong `.env` trỏ vào Postgres (DB cloud như Neon/Supabase, hoặc Postgres local/Docker).
 ```bash
 npm run db:generate      # sinh Prisma Client
-npm run db:push          # tạo schema SQLite (và sinh client)
-npm run import:data      # nhập dữ liệu vào SQLite
+npm run db:push          # tạo schema PostgreSQL
+npm run import:data      # nhập dữ liệu vào PostgreSQL
 ```
 
 ### 4. Chạy ứng dụng
@@ -110,6 +111,49 @@ bible-study-app/
 ```
 
 ---
+
+## 🌐 Deploy lên Vercel (PostgreSQL)
+
+Ứng dụng dùng **PostgreSQL** (SQLite không bền vững trên môi trường serverless). Dưới đây là các bước đưa `biblelex.app` lên mạng.
+
+### Bước 1 — Tạo cơ sở dữ liệu Postgres
+Tạo một database Postgres (miễn phí): [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres), [Neon](https://neon.tech) hoặc [Supabase](https://supabase.com).
+Sao chép chuỗi kết nối dạng:
+```
+postgresql://USER:PASSWORD@HOST:5432/biblelex?schema=public
+```
+
+### Bước 2 — Các biến môi trường trên Vercel
+Trong project Vercel → **Settings → Environment Variables**, thêm:
+
+| Biến | Giá trị |
+|------|---------|
+| `DATABASE_URL` | chuỗi Postgres bước 1 |
+| `NEXT_PUBLIC_SITE_URL` | `https://biblelex.app` |
+| `NEXT_PUBLIC_APP_NAME` | `BibleLex` |
+| `NEXT_PUBLIC_APP_DESCRIPTION` | `Tra cứu tiếng Hê-bơ-rơ & Hy-lạp, nghiên cứu Kinh Thánh chuyên sâu` |
+| `AI_PROVIDER` | `gemini` |
+| `AI_API_KEY` | key Gemini của bạn (**không** commit vào Git) |
+| `AI_MODEL` | (tùy chọn) `gemini-3.6-flash` |
+| `AI_BASE_URL` | (tùy chọn) để trống để dùng mặc định Gemini |
+
+### Bước 3 — Nhập dữ liệu (một lần)
+Dữ liệu (`data/`, `dev.db`) **không** nằm trong Git. Bạn nhập một lần vào Postgres cloud, bằng máy local (đặt `DATABASE_URL` trỏ vào Postgres cloud):
+```bash
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/biblelex?schema=public" \
+  npm run db:push && npm run prepare:data && npm run import:data
+```
+(Sau này thêm dữ liệu mới thì chỉ chạy lại `npm run import:data`.)
+
+### Bước 4 — Deploy & DNS
+1. Tại Vercel, **Add New → Project**, chọn repo GitHub `minhvuong0197/BibleLex`.
+2. Build tự động chạy `vercel-build` = `prisma generate && prisma db push && next build`.
+3. Trong **Settings → Domains**, thêm `biblelex.app`. Vercel sẽ cho bạn bản ghi DNS:
+   - Nếu biblelex.app là tên miền apex → bản ghi **A/AAAA** do Vercel cung cấp.
+   - Nếu dùng www hoặc subdomain → bản ghi **CNAME**.
+4. Tại nhà đăng ký tên miền, trỏ bản ghi tương ứng về Vercel. Chờ vài phút để SSL cấp tự động.
+
+> Mọi đóng góp mã nguồn, dữ liệu, bản dịch, hay báo lỗi — đều được chào đón.
 
 ## 🤝 Đóng góp
 

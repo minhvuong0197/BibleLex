@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Import BibleLex data into SQLite.
+ * Import BibleLex data into the database.
  *
  * Consumes the JSON files produced by `scripts/prepare-data.mjs`:
  *   data/strongs.json      Strong's Hebrew + Greek dictionary entries
@@ -310,7 +310,7 @@ async function importTopicalData() {
 }
 
 async function main() {
-  console.log('BibleLex — importing data into SQLite')
+  console.log('BibleLex — importing data into the database')
   console.log('Clearing previous data (idempotent import)...')
   await prisma.crossReference.deleteMany()
   await prisma.morphology.deleteMany()
