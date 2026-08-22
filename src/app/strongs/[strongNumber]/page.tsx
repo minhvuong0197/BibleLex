@@ -94,13 +94,21 @@ const getCachedStrongEntry = unstable_cache(
   { tags: ['strongs'], revalidate: 86400 }
 )
 
+async function getStrongEntryCached(strongNumber: string) {
+  try {
+    return await getCachedStrongEntry(strongNumber)
+  } catch {
+    return getStrongEntry(strongNumber)
+  }
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { strongNumber } = await params
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return { title: 'Không tìm thấy' }
   
   const formatted = formatStrongNumber(strongNumber)
-  const data = await getCachedStrongEntry(strongNumber)
+  const data = await getStrongEntryCached(strongNumber)
   if (!data) return { title: `${formatted} - Không tìm thấy` }
   
   const entry = data.entry
@@ -118,9 +126,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function StrongsPage({ params }: PageProps) {
-  try {
   const { strongNumber } = await params
-  const data = await getCachedStrongEntry(strongNumber)
+  const data = await getStrongEntryCached(strongNumber)
   
   if (!data) {
     notFound()
@@ -157,13 +164,4 @@ export default async function StrongsPage({ params }: PageProps) {
       />
     </div>
   )
-  } catch (e: any) {
-    return (
-      <div className="container py-8 font-mono text-sm">
-        <h1 className="text-xl font-bold text-red-600">DEBUG ERROR</h1>
-        <p className="mt-2">{String(e?.message || e)}</p>
-        <pre className="mt-4 whitespace-pre-wrap bg-muted p-4 rounded">{String(e?.stack || '')}</pre>
-      </div>
-    )
-  }
 }
