@@ -186,7 +186,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
         <TabsContent value="definition" className="space-y-6">
           <div className="prose prose-sm max-w-none">
              <h3 className="font-semibold mb-2">Định nghĩa Strongs</h3>
-            <p className="whitespace-pre-wrap">{entry.definition}</p>
+            <p className="whitespace-pre-wrap">{entry.definition || 'Chưa có định nghĩa cho mục này.'}</p>
           </div>
 
           {entry.kjvDef && (

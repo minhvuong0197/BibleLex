@@ -14,27 +14,24 @@ async function getStrongEntry(strongNumber: string) {
   if (!parsed) return null
   
   const formatted = formatStrongNumber(strongNumber)
-  
-  const entry = await prisma.strongEntry.findUnique({
-    where: { strongNumber: formatted },
-    include: {
-      morphology: {
-        orderBy: { count: 'desc' }
-      },
-      crossRefs: {
-        include: { targetEntry: true },
-        orderBy: { type: 'asc' }
-      },
-      crossRefTargets: {
-        include: { sourceEntry: true },
-        orderBy: { type: 'asc' }
-      }
-    }
-  })
-  
-  if (!entry) return null
 
-  const [totalVerses, books, firstOccurrence, lastOccurrence, sampleVerses] = await Promise.all([
+  const [entry, totalVerses, books, firstOccurrence, lastOccurrence, sampleVerses] = await Promise.all([
+    prisma.strongEntry.findUnique({
+      where: { strongNumber: formatted },
+      include: {
+        morphology: {
+          orderBy: { count: 'desc' }
+        },
+        crossRefs: {
+          include: { targetEntry: true },
+          orderBy: { type: 'asc' }
+        },
+        crossRefTargets: {
+          include: { sourceEntry: true },
+          orderBy: { type: 'asc' }
+        }
+      }
+    }),
     prisma.verseWord.count({ where: { strongNumber: formatted } }),
     prisma.verseWord.findMany({
       where: { strongNumber: formatted },
@@ -76,21 +73,49 @@ async function getStrongEntry(strongNumber: string) {
     }))
   }
 
+  const stats = {
+    totalVerses,
+    books: books.map(b => b.book),
+    firstOccurrence: firstOccurrence ? { book: firstOccurrence.book, chapter: firstOccurrence.chapter, verse: firstOccurrence.verse } : null,
+    lastOccurrence: lastOccurrence ? { book: lastOccurrence.book, chapter: lastOccurrence.chapter, verse: lastOccurrence.verse } : null
+  }
+
+  if (!entry) {
+    if (totalVerses === 0) return null
+
+    const language = parsed.lang === 'H' ? 'HEBREW' : 'GREEK'
+    const placeholderEntry = {
+      strongNumber: formatted,
+      language,
+      transliteration: formatted,
+      pronunciation: null,
+      etymology: null,
+      definition: `Chưa có mục từ điển (Strongs ${formatted}) trong dữ liệu hiện tại. Từ này xuất hiện ${totalVerses} lần trong Kinh Thánh — xem các chỗ trích dẫn bên dưới.`,
+      kjvDef: null,
+      outlineBiblicalUsage: null,
+      thayersDef: null,
+      bdbDef: null,
+      lsjDef: null,
+      derivation: null,
+      tdk: null,
+      gkNumber: null,
+      morphology: [],
+      crossRefs: [],
+      crossRefTargets: [],
+    }
+    return { entry: placeholderEntry, stats, sampleVerses: verseTexts }
+  }
+
   return {
     entry,
-    stats: {
-      totalVerses,
-      books: books.map(b => b.book),
-      firstOccurrence: firstOccurrence ? { book: firstOccurrence.book, chapter: firstOccurrence.chapter, verse: firstOccurrence.verse } : null,
-      lastOccurrence: lastOccurrence ? { book: lastOccurrence.book, chapter: lastOccurrence.chapter, verse: lastOccurrence.verse } : null
-    },
+    stats,
     sampleVerses: verseTexts
   }
 }
 
 const getCachedStrongEntry = unstable_cache(
   getStrongEntry,
-  ['strongs-entry-v1'],
+  ['strongs-entry-v2'],
   { tags: ['strongs'], revalidate: 86400 }
 )
 
