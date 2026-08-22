@@ -118,6 +118,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function StrongsPage({ params }: PageProps) {
+  try {
   const { strongNumber } = await params
   const data = await getCachedStrongEntry(strongNumber)
   
@@ -156,4 +157,13 @@ export default async function StrongsPage({ params }: PageProps) {
       />
     </div>
   )
+  } catch (e: any) {
+    return (
+      <div className="container py-8 font-mono text-sm">
+        <h1 className="text-xl font-bold text-red-600">DEBUG ERROR</h1>
+        <p className="mt-2">{String(e?.message || e)}</p>
+        <pre className="mt-4 whitespace-pre-wrap bg-muted p-4 rounded">{String(e?.stack || '')}</pre>
+      </div>
+    )
+  }
 }
