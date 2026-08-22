@@ -34,7 +34,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary" aria-label="BibleLex Home">
-            <Logo className="h-6 w-6" />
+            <Logo className="h-8 w-8 sm:h-9 sm:w-9 shrink-0" />
             <span>BibleLex</span>
           </Link>
 
