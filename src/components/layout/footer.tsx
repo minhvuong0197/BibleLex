@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { BookOpen, GitBranch } from "lucide-react"
+import { GitBranch } from "lucide-react"
+import { Logo } from "@/components/layout/logo"
 
 const GITHUB_USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "minhvuong0197"
 
@@ -10,7 +11,7 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary" aria-label="Trang chủ BibleLex">
-              <BookOpen className="h-6 w-6" aria-hidden="true" />
+              <Logo className="h-6 w-6" />
               <span>BibleLex</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
