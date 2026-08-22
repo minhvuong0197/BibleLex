@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import {
+  Geist_Mono,
+  Inter,
+  Lora,
+  Playfair_Display,
+  Noto_Sans_Hebrew,
+  Gentium_Plus,
+} from "next/font/google"
 import { Providers } from "@/components/providers"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
@@ -7,9 +14,35 @@ import "./globals.css"
 
 export const dynamic = "force-dynamic"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin", "vietnamese"],
+  display: "swap",
+})
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin", "vietnamese"],
+  display: "swap",
+})
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+})
+
+const notoHebrew = Noto_Sans_Hebrew({
+  variable: "--font-noto-hebrew",
+  subsets: ["hebrew"],
+  display: "swap",
+})
+
+const gentiumGreek = Gentium_Plus({
+  variable: "--font-greek",
+  subsets: ["greek"],
+  weight: ["400", "700"],
+  display: "swap",
 })
 
 const geistMono = Geist_Mono({
@@ -63,11 +96,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="vi" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="vi" className={`${inter.variable} ${lora.variable} ${playfair.variable} ${notoHebrew.variable} ${gentiumGreek.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;700&family=Noto+Sans+Greek:wght@400;500;700&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Providers>

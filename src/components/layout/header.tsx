@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, Settings, GitBranch } from "lucide-react"
+import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, GitBranch } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
+import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useState } from "react"
 
 const navigation = [
@@ -35,7 +36,7 @@ export function Header() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary" aria-label="BibleLex Home">
             <Logo className="h-8 w-8 sm:h-9 sm:w-9 shrink-0" />
-            <span>BibleLex</span>
+            <span className="font-display">BibleLex</span>
           </Link>
 
           <nav className="hidden md:flex md:gap-1" role="navigation" aria-label="Main navigation">
@@ -76,9 +77,7 @@ export function Header() {
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"} aria-expanded={mobileMenuOpen}>
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
-          <Button variant="ghost" size="icon" className="hidden md:flex" aria-label="Cài đặt">
-            <Settings className="h-5 w-5" />
-          </Button>
+          <ThemeSwitcher />
         </div>
       </div>
 

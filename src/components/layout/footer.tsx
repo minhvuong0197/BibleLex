@@ -12,7 +12,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary" aria-label="Trang chủ BibleLex">
               <Logo className="h-6 w-6" />
-              <span>BibleLex</span>
+              <span className="font-display">BibleLex</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Công cụ tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ và Hy-lạp, cùng sự khảo cứu chuyên sâu.
