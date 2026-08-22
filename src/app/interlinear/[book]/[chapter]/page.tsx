@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
 import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
@@ -17,8 +18,6 @@ async function getInterlinearData(book: string, chapter: number) {
     where: { bookId: bibleBook.id, chapter },
     orderBy: { verse: 'asc' }
   })
-
-  if (verses.length === 0) return null
 
   const verseWords = await prisma.verseWord.findMany({
     where: {
@@ -149,6 +148,31 @@ export default async function InterlinearPage({ params }: PageProps) {
   
   if (!data) {
     notFound()
+  }
+
+  if (data.verses.length === 0) {
+    return (
+      <div className="container py-6 md:py-8">
+        <nav className="mb-6 text-sm" aria-label="Breadcrumb">
+          <ol className="flex items-center gap-2 text-muted-foreground">
+            <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a href="/interlinear" className="hover:text-foreground transition-colors">Kinh Thánh đối chiếu</a></li>
+            <li aria-hidden="true">/</li>
+            <li className="text-foreground font-medium" aria-current="page">{getBookViName(data.book.name)}</li>
+          </ol>
+        </nav>
+        <div className="mt-10 rounded-xl border border-dashed p-10 text-center">
+          <h2 className="text-xl font-semibold">Chưa có dữ liệu đối chiếu</h2>
+          <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+            Kinh Thánh đối chiếu cho {getBookViName(data.book.name)} chương {data.chapter} chưa được nhập vào cơ sở dữ liệu.
+          </p>
+          <Link href="/interlinear" className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
+            Quay lại danh sách sách
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (

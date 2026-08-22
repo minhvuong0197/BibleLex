@@ -44,55 +44,6 @@ export async function resolveBibleBook(
   )
 }
 
-export async function getAvailableBookKeys(prisma: any): Promise<{
-  keys: Set<string>
-  countByKey: Map<string, number>
-}> {
-  let verseBookIds: string[] = []
-  try {
-    const distinct = await prisma.verse.findMany({
-      distinct: ['bookId'],
-      select: { bookId: true },
-    })
-    verseBookIds = (distinct as Array<{ bookId: string }>).map((d) => d.bookId)
-  } catch {
-    // detection failed; fall back to showing all books as available
-  }
-  const hasVerse = new Set(verseBookIds)
-
-  const allBooks = await prisma.bibleBook.findMany({
-    select: { id: true, name: true, abbreviation: true },
-  })
-
-  const countById = new Map<string, number>()
-  try {
-    const grouped = await prisma.verse.groupBy({ by: ['bookId'], _count: true })
-    for (const g of grouped as Array<{ bookId: string; _count: { _all: number } }>) {
-      countById.set(g.bookId, g._count._all)
-    }
-  } catch {
-    // counts are best-effort
-  }
-
-  const keys = new Set<string>()
-  const countByKey = new Map<string, number>()
-  for (const b of allBooks as Array<{ id: string; name: string; abbreviation: string | null }>) {
-    // Nếu phát hiện được sách có dữ liệu, chỉ đưa那些 có dữ liệu;
-    // nếu detection hoàn toàn thất bại (verseBookIds rỗng), hiển thị tất cả.
-    if (verseBookIds.length > 0 && !hasVerse.has(b.id)) continue
-    const count = countById.get(b.id) ?? 0
-    const nameKey = normalizeBookName(b.name)
-    keys.add(nameKey)
-    countByKey.set(nameKey, count)
-    if (b.abbreviation) {
-      const abbrKey = normalizeBookName(b.abbreviation)
-      keys.add(abbrKey)
-      countByKey.set(abbrKey, count)
-    }
-  }
-  return { keys, countByKey }
-}
-
 export function parseStrongNumber(input: string): { lang: 'H' | 'G'; number: number } | null {
   const match = input.match(/^([HG])(\d+)$/i)
   if (!match) return null
