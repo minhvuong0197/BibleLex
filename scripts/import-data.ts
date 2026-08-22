@@ -206,7 +206,7 @@ async function importVerseWords() {
       }
     }
     for (const c of chunk(rows, 100)) {
-      await prisma.verseWord.createMany({ data: c })
+      await prisma.verseWord.createMany({ data: c, skipDuplicates: true })
     }
     total += rows.length
   }
@@ -234,7 +234,7 @@ async function importMorphology() {
       gender: (m.gender as any) || null,
     }))
   for (const c of chunk(rows, 100)) {
-    await prisma.morphology.createMany({ data: c })
+    await prisma.morphology.createMany({ data: c, skipDuplicates: true })
   }
   console.log('  ✓ done')
 }
@@ -261,7 +261,7 @@ async function importCrossReferences() {
     }
   }
   for (const c of chunk(rows, 100)) {
-    await prisma.crossReference.createMany({ data: c })
+    await prisma.crossReference.createMany({ data: c, skipDuplicates: true })
   }
   console.log(`  ✓ ${rows.length.toLocaleString()} cross-references`)
 }
@@ -302,7 +302,7 @@ async function importTopicalData() {
       if (refs.length >= 25) break
     }
     if (refs.length) {
-      await prisma.topicalReference.createMany({ data: refs })
+      await prisma.topicalReference.createMany({ data: refs, skipDuplicates: true })
       totalRefs += refs.length
     }
   }
