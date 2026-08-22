@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { unstable_cache } from 'next/cache'
 import { StrongsEntry } from '@/components/strongs/strongs-entry'
 import { prisma } from '@/lib/db'
 import { formatStrongNumber, parseStrongNumber, getLanguageLabel } from '@/lib/utils'
@@ -55,20 +56,25 @@ async function getStrongEntry(strongNumber: string) {
     })
   ])
 
-  const verseTexts = await Promise.all(
-    sampleVerses.map(async (vw) => {
-      const verse = await prisma.verse.findUnique({
-        where: {
-          bookId_chapter_verse: {
-            bookId: vw.book,
-            chapter: vw.chapter,
-            verse: vw.verse
-          }
-        }
-      })
-      return verse ? { ...vw, verseText: verse.text } : vw
+  let verseTexts = sampleVerses
+  if (sampleVerses.length > 0) {
+    const verses = await prisma.verse.findMany({
+      where: {
+        OR: sampleVerses.map((vw) => ({
+          bookId: vw.book,
+          chapter: vw.chapter,
+          verse: vw.verse,
+        })),
+      },
     })
-  )
+    const verseMap = new Map(
+      verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, v.text])
+    )
+    verseTexts = sampleVerses.map((vw) => ({
+      ...vw,
+      verseText: verseMap.get(`${vw.book}-${vw.chapter}-${vw.verse}`),
+    }))
+  }
 
   return {
     entry,
@@ -82,25 +88,30 @@ async function getStrongEntry(strongNumber: string) {
   }
 }
 
+const getCachedStrongEntry = unstable_cache(
+  getStrongEntry,
+  ['strongs-entry-v1'],
+  { tags: ['strongs'], revalidate: 86400 }
+)
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { strongNumber } = await params
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return { title: 'Không tìm thấy' }
   
   const formatted = formatStrongNumber(strongNumber)
-  const entry = await prisma.strongEntry.findUnique({
-    where: { strongNumber: formatted },
-    select: { transliteration: true, definition: true, language: true }
-  })
+  const data = await getCachedStrongEntry(strongNumber)
+  if (!data) return { title: `${formatted} - Không tìm thấy` }
   
-  if (!entry) return { title: `${formatted} - Không tìm thấy` }
-  
+  const entry = data.entry
+  const description = entry.definition?.substring(0, 150) ?? ''
+
   return {
     title: `${formatted} — ${entry.transliteration} | BibleLex`,
-    description: `${getLanguageLabel(entry.language)}: ${entry.definition.substring(0, 150)}...`,
+    description: `${getLanguageLabel(entry.language)}: ${description}...`,
     openGraph: {
       title: `${formatted} — ${entry.transliteration}`,
-      description: entry.definition.substring(0, 150),
+      description,
       type: 'article',
     }
   }
@@ -108,7 +119,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function StrongsPage({ params }: PageProps) {
   const { strongNumber } = await params
-  const data = await getStrongEntry(strongNumber)
+  const data = await getCachedStrongEntry(strongNumber)
   
   if (!data) {
     notFound()
