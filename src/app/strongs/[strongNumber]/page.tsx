@@ -9,7 +9,71 @@ interface PageProps {
   params: Promise<{ strongNumber: string }>
 }
 
-async function getStrongEntry(strongNumber: string) {
+type StrongEntryResult = {
+  entry: {
+    strongNumber: string
+    language: 'HEBREW' | 'GREEK'
+    transliteration: string
+    pronunciation?: string | null
+    etymology?: string | null
+    definition: string
+    kjvDef?: string | null
+    outlineBiblicalUsage?: string | null
+    thayersDef?: string | null
+    bdbDef?: string | null
+    lsjDef?: string | null
+    derivation?: string | null
+    tdk?: string | null
+    gkNumber?: string | null
+    morphology?: Array<{
+      parsings: string
+      count: number
+      tense?: string | null
+      voice?: string | null
+      mood?: string | null
+      case?: string | null
+      number?: string | null
+      person?: string | null
+      gender?: string | null
+    }>
+    crossRefs?: Array<{
+      type: string
+      note?: string | null
+      targetEntry: {
+        strongNumber: string
+        transliteration: string
+        definition: string
+        language: 'HEBREW' | 'GREEK'
+      }
+    }>
+    crossRefTargets?: Array<{
+      type: string
+      note?: string | null
+      sourceEntry: {
+        strongNumber: string
+        transliteration: string
+        definition: string
+        language: 'HEBREW' | 'GREEK'
+      }
+    }>
+  }
+  stats: {
+    totalVerses: number
+    books: string[]
+    firstOccurrence: { book: string; chapter: number; verse: number } | null
+    lastOccurrence: { book: string; chapter: number; verse: number } | null
+  }
+  sampleVerses: Array<{
+    book: string
+    chapter: number
+    verse: number
+    wordOrder: number
+    transliteration: string
+    verseText?: string
+  }>
+}
+
+async function getStrongEntry(strongNumber: string): Promise<StrongEntryResult | null> {
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return null
   
@@ -83,7 +147,7 @@ async function getStrongEntry(strongNumber: string) {
   if (!entry) {
     if (totalVerses === 0) return null
 
-    const language = parsed.lang === 'H' ? 'HEBREW' : 'GREEK'
+    const language: 'HEBREW' | 'GREEK' = parsed.lang === 'H' ? 'HEBREW' : 'GREEK'
     const placeholderEntry = {
       strongNumber: formatted,
       language,

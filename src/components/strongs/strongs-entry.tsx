@@ -174,7 +174,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
         </Card>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "definition" | "morphology" | "crossrefs" | "usage" | "ai")} className="w-full">
         <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 gap-1">
           <TabsTrigger value="definition" className="text-center leading-tight">Định nghĩa</TabsTrigger>
           <TabsTrigger value="morphology" className="text-center leading-tight">Hình thái</TabsTrigger>
