@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, Settings } from "lucide-react"
+import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, Settings, GitBranch } from "lucide-react"
 import { useState } from "react"
 
 const navigation = [
@@ -13,6 +13,7 @@ const navigation = [
   { name: "Kinh Thánh đối chiếu", href: "/interlinear", icon: BookOpen },
   { name: "Khảo cứu từ vựng", href: "/word-study", icon: Brain },
   { name: "Chủ đề", href: "/topics", icon: LinkIcon },
+  { name: "GitHub", href: "/github", icon: GitBranch },
 ]
 
 export function Header() {

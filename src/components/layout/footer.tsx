@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { BookOpen, GitBranch, MessageCircle } from "lucide-react"
 
+const GITHUB_USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "minhvuong0197"
+
 export function Footer() {
   return (
     <footer className="border-t bg-muted/30" role="contentinfo">
@@ -16,7 +18,7 @@ export function Footer() {
               Phần mềm tự do, mã nguồn mở, dành cho cộng đồng.
             </p>
             <div className="flex gap-4">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
+              <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
                 <GitBranch className="h-5 w-5" />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">

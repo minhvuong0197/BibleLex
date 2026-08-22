@@ -83,7 +83,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 async function importStrongs() {
   const data = readJSON('strongs.json') as StrongEntryInput[]
   console.log(`\n[1/5] Strong's entries (${data.length})`)
-  for (const c of chunk(data, 500)) {
+  for (const c of chunk(data, 100)) {
     await prisma.$transaction(
       c.map((e) =>
         prisma.strongEntry.upsert({
@@ -127,7 +127,7 @@ async function importBooks() {
       create: { name: b.name, abbreviation: b.abbreviation, testament: b.testament, bookOrder: b.bookOrder, chapters: b.chapters },
     })
 
-    for (const c of chunk(b.verses, 200)) {
+    for (const c of chunk(b.verses, 20)) {
       await prisma.$transaction(
         c.map((v) =>
           prisma.verse.upsert({
@@ -205,7 +205,7 @@ async function importVerseWords() {
         })
       }
     }
-    for (const c of chunk(rows, 500)) {
+    for (const c of chunk(rows, 100)) {
       await prisma.verseWord.createMany({ data: c })
     }
     total += rows.length
@@ -233,7 +233,7 @@ async function importMorphology() {
       person: (m.person as any) || null,
       gender: (m.gender as any) || null,
     }))
-  for (const c of chunk(rows, 500)) {
+  for (const c of chunk(rows, 100)) {
     await prisma.morphology.createMany({ data: c })
   }
   console.log('  ✓ done')
@@ -260,7 +260,7 @@ async function importCrossReferences() {
       rows.push({ sourceStrong: e.strongNumber, targetStrong: target, type: 'DERIVATIVE' })
     }
   }
-  for (const c of chunk(rows, 500)) {
+  for (const c of chunk(rows, 100)) {
     await prisma.crossReference.createMany({ data: c })
   }
   console.log(`  ✓ ${rows.length.toLocaleString()} cross-references`)
