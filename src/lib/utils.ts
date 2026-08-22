@@ -34,7 +34,10 @@ export async function resolveBibleBook(
       chapters: true,
     },
   })
-  const target = normalizeBookName(book)
+  let raw = book
+  try { raw = decodeURIComponent(book) } catch { /* keep raw */ }
+  raw = raw.trim()
+  const target = normalizeBookName(raw)
   return (
     books.find(
       (b: any) =>
@@ -97,7 +100,7 @@ export const BOOKS_NT = [
 ]
 
 export function getBookAbbreviation(book: string): string {
-  return BOOK_ABBREVIATIONS[book] || book.substring(0, 3)
+  return (BOOK_ABBREVIATIONS[book] || book.substring(0, 3)).replace(/\s+/g, '')
 }
 
 // Tên sách theo bản Kinh Thánh Truyền Thống Hiệu Đính 2010 (TTHĐ 2010 / RVV11)
