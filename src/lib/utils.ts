@@ -11,6 +11,10 @@ export function formatStrongNumber(num: string): string {
   return `${match[1].toUpperCase()}${match[2]}`
 }
 
+export function normalizeBookName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
 export async function resolveBibleBook(
   prisma: any,
   book: string
@@ -30,13 +34,47 @@ export async function resolveBibleBook(
       chapters: true,
     },
   })
-  const target = book.toLowerCase()
+  const target = normalizeBookName(book)
   return (
     books.find(
       (b: any) =>
-        b.abbreviation.toLowerCase() === target || b.name.toLowerCase() === target
+        normalizeBookName(b.abbreviation) === target ||
+        normalizeBookName(b.name) === target
     ) || null
   )
+}
+
+export async function getAvailableBookKeys(prisma: any): Promise<{
+  keys: Set<string>
+  countByKey: Map<string, number>
+}> {
+  const grouped = await prisma.verse.groupBy({ by: ['bookId'], _count: true })
+  const bookIds = (grouped as Array<{ bookId: string; _count: { _all: number } }>).map(
+    (g) => g.bookId
+  )
+  const bookRows = bookIds.length
+    ? await prisma.bibleBook.findMany({
+        where: { id: { in: bookIds } },
+        select: { id: true, name: true, abbreviation: true },
+      })
+    : []
+
+  const keys = new Set<string>()
+  const countByKey = new Map<string, number>()
+  for (const b of bookRows as Array<{ id: string; name: string; abbreviation: string | null }>) {
+    const count = (grouped as Array<{ bookId: string; _count: { _all: number } }>).find(
+      (g) => g.bookId === b.id
+    )?._count._all ?? 0
+    const nameKey = normalizeBookName(b.name)
+    keys.add(nameKey)
+    countByKey.set(nameKey, count)
+    if (b.abbreviation) {
+      const abbrKey = normalizeBookName(b.abbreviation)
+      keys.add(abbrKey)
+      countByKey.set(abbrKey, count)
+    }
+  }
+  return { keys, countByKey }
 }
 
 export function parseStrongNumber(input: string): { lang: 'H' | 'G'; number: number } | null {

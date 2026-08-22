@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ChevronRight, BookOpen, Globe, Type } from 'lucide-react'
-import { BOOKS_OT, BOOKS_NT, getBookAbbreviation, getTestament, getBookViName } from '@/lib/utils'
+import { BOOKS_OT, BOOKS_NT, getBookAbbreviation, getTestament, getBookViName, getAvailableBookKeys, normalizeBookName } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: "Kinh Thánh đối chiếu",
@@ -29,14 +29,13 @@ const testamentInfo = {
 }
 
 export default async function InterlinearIndexPage() {
-  const bookCounts = await Promise.all(
-    [...BOOKS_OT, ...BOOKS_NT].map(async (book) => {
-      const count = await prisma.verse.count({
-        where: { book: { name: book } }
-      })
-      return { book, count }
-    })
-  )
+  const { countByKey } = await getAvailableBookKeys(prisma)
+
+  const getCount = (book: string): number =>
+    countByKey.get(normalizeBookName(book)) ??
+    countByKey.get(normalizeBookName(getBookAbbreviation(book))) ??
+    0
+  const hasData = (book: string): boolean => getCount(book) > 0
 
   return (
     <div className="container py-8 md:py-12">
@@ -62,12 +61,10 @@ export default async function InterlinearIndexPage() {
         {(['OLD', 'NEW'] as const).map((testament) => {
           const info = testamentInfo[testament]
           const Icon = info.icon
-          const totalVerses = bookCounts
-            .filter(bc => info.books.includes(bc.book))
-            .reduce((sum, bc) => sum + bc.count, 0)
+          const totalVerses = info.books.reduce((sum, b) => sum + getCount(b), 0)
           
           return (
-            <Link key={testament} href={`/interlinear/${getBookAbbreviation(info.books[0])}/1`}>
+              <Link key={testament} href={`/interlinear/${getBookAbbreviation(info.books.find((b) => hasData(b)) ?? info.books[0])}/1`}>
               <Card className="h-full hover:shadow-lg transition-shadow border-l-4 border-primary group">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -109,31 +106,35 @@ export default async function InterlinearIndexPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {info.books.map((book) => {
-                  const bookData = bookCounts.find(bc => bc.book === book)
+                  const count = getCount(book)
+                  const available = count > 0
                   const abbreviation = getBookAbbreviation(book)
-                  return (
-                    <Link key={book} href={`/interlinear/${abbreviation}/1`} className="group">
-                      <Card className="h-full hover:shadow-md transition-shadow border-l-2 border-primary/50 group-hover:border-primary">
-                        <CardContent className="pt-4 pb-4 pr-4 pl-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className={cn("w-8 h-8 rounded flex items-center justify-center text-xs font-bold text-white flex-shrink-0", `bg-${info.color}-600`)}>
-                                {abbreviation}
-                              </span>
-                              <span className="font-medium text-sm group-hover:text-primary transition-colors truncate">
-                                {getBookViName(book)}
-                              </span>
-                            </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  const card = (
+                    <Card className={cn("h-full transition-shadow border-l-2", available ? "hover:shadow-md border-primary/50 group-hover:border-primary" : "border-muted opacity-60")}>
+                      <CardContent className="pt-4 pb-4 pr-4 pl-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className={cn("w-8 h-8 rounded flex items-center justify-center text-xs font-bold text-white flex-shrink-0", `bg-${info.color}-600`)}>
+                              {abbreviation}
+                            </span>
+                            <span className={cn("font-medium text-sm truncate", available && "group-hover:text-primary transition-colors")}>
+                              {getBookViName(book)}
+                            </span>
                           </div>
-                          {bookData && (
-                            <p className="mt-2 text-xs text-muted-foreground">
-                              {bookData.count} câu
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {available ? `${count} câu` : 'Chưa có dữ liệu'}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )
+                  return available ? (
+                    <Link key={book} href={`/interlinear/${abbreviation}/1`} className="group">
+                      {card}
                     </Link>
+                  ) : (
+                    <div key={book}>{card}</div>
                   )
                 })}
               </div>

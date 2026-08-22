@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ChevronRight, BookOpen, Hash, Globe } from 'lucide-react'
-import { BOOKS_OT, BOOKS_NT, getTestament, getBookAbbreviation, getBookViName } from '@/lib/utils'
+import { BOOKS_OT, BOOKS_NT, getTestament, getBookAbbreviation, getBookViName, getAvailableBookKeys, normalizeBookName } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: "Tra cứu Strongs",
@@ -26,10 +26,17 @@ const popularStrongNumbers = [
 ]
 
 export default async function StrongsIndexPage() {
-  const [hebrewCount, greekCount] = await Promise.all([
+  const [hebrewCount, greekCount, { countByKey }] = await Promise.all([
     prisma.strongEntry.count({ where: { language: 'HEBREW' } }),
     prisma.strongEntry.count({ where: { language: 'GREEK' } }),
+    getAvailableBookKeys(prisma),
   ])
+
+  const getCount = (book: string): number =>
+    countByKey.get(normalizeBookName(book)) ??
+    countByKey.get(normalizeBookName(getBookAbbreviation(book))) ??
+    0
+  const hasData = (book: string): boolean => getCount(book) > 0
 
   return (
     <div className="container py-8 md:py-12">
@@ -117,36 +124,44 @@ export default async function StrongsIndexPage() {
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <BookOpen className="h-6 w-6" /> Cựu Ước (Hê-bơ-rơ)
           </h2>
-          <BookList books={BOOKS_OT} testament="OLD" />
+          <BookList books={BOOKS_OT} testament="OLD" hasData={hasData} />
         </section>
         <section>
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <BookOpen className="h-6 w-6" /> Tân Ước (Hy-lạp)
           </h2>
-          <BookList books={BOOKS_NT} testament="NEW" />
+          <BookList books={BOOKS_NT} testament="NEW" hasData={hasData} />
         </section>
       </div>
     </div>
   )
 }
 
-function BookList({ books, testament }: { books: string[]; testament: 'OLD' | 'NEW' }) {
+function BookList({ books, testament, hasData }: { books: string[]; testament: 'OLD' | 'NEW'; hasData: (book: string) => boolean }) {
   return (
     <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {books.map((book) => (
-        <Link key={book} href={`/interlinear/${getBookAbbreviation(book)}/1`} className="group">
-          <Card className="hover:shadow-md transition-shadow h-full border-l-4 border-primary">
+      {books.map((book) => {
+        const available = hasData(book)
+        const card = (
+          <Card className={cn("transition-shadow h-full border-l-4", available ? "hover:shadow-md border-primary" : "border-muted opacity-60")}>
             <CardContent className="pt-3 pb-3 pr-3 pl-3">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-sm group-hover:text-primary transition-colors">
+                <span className={cn("font-medium text-sm", available && "group-hover:text-primary transition-colors")}>
                   {getBookViName(book)}
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </div>
             </CardContent>
           </Card>
-        </Link>
-      ))}
+        )
+        return available ? (
+          <Link key={book} href={`/interlinear/${getBookAbbreviation(book)}/1`} className="group">
+            {card}
+          </Link>
+        ) : (
+          <div key={book}>{card}</div>
+        )
+      })}
     </div>
   )
 }
