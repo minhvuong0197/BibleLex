@@ -124,7 +124,7 @@ export default async function InterlinearIndexPage() {
                           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">
-                          {available ? `${count} câu` : 'Chưa có dữ liệu'}
+                          {available ? (count > 0 ? `${count} câu` : 'có dữ liệu') : 'Chưa có dữ liệu'}
                         </p>
                       </CardContent>
                     </Card>
