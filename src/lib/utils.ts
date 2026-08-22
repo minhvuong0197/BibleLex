@@ -48,23 +48,25 @@ export async function getAvailableBookKeys(prisma: any): Promise<{
   keys: Set<string>
   countByKey: Map<string, number>
 }> {
-  const grouped = await prisma.verse.groupBy({ by: ['bookId'], _count: true })
-  const bookIds = (grouped as Array<{ bookId: string; _count: { _all: number } }>).map(
-    (g) => g.bookId
-  )
-  const bookRows = bookIds.length
-    ? await prisma.bibleBook.findMany({
-        where: { id: { in: bookIds } },
-        select: { id: true, name: true, abbreviation: true },
-      })
-    : []
+  const books = await prisma.bibleBook.findMany({
+    where: { verses: { some: {} } },
+    select: { id: true, name: true, abbreviation: true },
+  })
+
+  const countById = new Map<string, number>()
+  try {
+    const grouped = await prisma.verse.groupBy({ by: ['bookId'], _count: true })
+    for (const g of grouped as Array<{ bookId: string; _count: { _all: number } }>) {
+      countById.set(g.bookId, g._count._all)
+    }
+  } catch {
+    // counts are best-effort; links still work without them
+  }
 
   const keys = new Set<string>()
   const countByKey = new Map<string, number>()
-  for (const b of bookRows as Array<{ id: string; name: string; abbreviation: string | null }>) {
-    const count = (grouped as Array<{ bookId: string; _count: { _all: number } }>).find(
-      (g) => g.bookId === b.id
-    )?._count._all ?? 0
+  for (const b of books as Array<{ id: string; name: string; abbreviation: string | null }>) {
+    const count = countById.get(b.id) ?? 0
     const nameKey = normalizeBookName(b.name)
     keys.add(nameKey)
     countByKey.set(nameKey, count)
