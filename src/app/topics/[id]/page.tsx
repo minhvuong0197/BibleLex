@@ -25,16 +25,22 @@ async function getTopicData(id: string) {
   })
   const bookIdByName = new Map(bookRows.map((b) => [b.name, b.id]))
 
-  const refsWithText = await Promise.all(
-    topic.references.map(async (ref) => {
+  const lookups = topic.references
+    .map((ref) => {
       const bookId = bookIdByName.get(ref.book)
-      if (!bookId) return { ...ref, verseText: undefined }
-      const verse = await prisma.verse.findFirst({
-        where: { bookId, chapter: ref.chapter, verse: ref.verseStart }
-      })
-      return { ...ref, verseText: verse?.text }
+      return bookId ? { bookId, chapter: ref.chapter, verse: ref.verseStart } : null
     })
-  )
+    .filter((l): l is { bookId: string; chapter: number; verse: number } => l !== null)
+
+  const verses = lookups.length
+    ? await prisma.verse.findMany({ where: { OR: lookups } })
+    : []
+  const verseMap = new Map(verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, v.text]))
+  const refsWithText = topic.references.map((ref) => {
+    const bookId = bookIdByName.get(ref.book)
+    const key = bookId ? `${bookId}-${ref.chapter}-${ref.verseStart}` : ''
+    return { ...ref, verseText: (bookId && verseMap.get(key)) || null }
+  })
 
   const relatedTopics = await prisma.topicalEntry.findMany({
     where: {
@@ -75,7 +81,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TopicPage({ params }: PageProps) {
- try {
   const { id } = await params
   const data = await getTopicData(id)
   
@@ -109,7 +114,4 @@ export default async function TopicPage({ params }: PageProps) {
       />
     </div>
   )
- } catch (e: any) {
-   return <pre style={{whiteSpace:'pre-wrap',padding:20}}>{'DEBUG_ERROR: ' + JSON.stringify({msg:e?.message, stack:e?.stack}, null, 2)}</pre>
- }
 }

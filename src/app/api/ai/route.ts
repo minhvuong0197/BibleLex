@@ -161,14 +161,15 @@ async function loadData(formatted: string) {
     }),
   ])
 
-  const sampleVerses = await Promise.all(
-    verseWords.map(async (vw) => {
-      const verse = await prisma.verse.findUnique({
-        where: { bookId_chapter_verse: { bookId: vw.book, chapter: vw.chapter, verse: vw.verse } },
-      })
-      return { ...vw, verseText: verse?.text }
-    })
-  )
+  const lookups = verseWords.map((vw) => ({ bookId: vw.book, chapter: vw.chapter, verse: vw.verse }))
+  const verses = lookups.length
+    ? await prisma.verse.findMany({ where: { OR: lookups } })
+    : []
+  const verseMap = new Map(verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, v.text]))
+  const sampleVerses = verseWords.map((vw) => {
+    const text = verseMap.get(`${vw.book}-${vw.chapter}-${vw.verse}`)
+    return { ...vw, verseText: text ?? null }
+  })
 
   const stats = {
     totalVerses,

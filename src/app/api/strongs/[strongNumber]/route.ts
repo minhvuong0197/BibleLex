@@ -57,21 +57,16 @@ export async function GET(
       orderBy: [{ book: 'asc' }, { chapter: 'asc' }, { verse: 'asc' }]
     })
 
-    // Get verse texts
-    const verseTexts = await Promise.all(
-      verseWords.map(async (vw) => {
-        const verse = await prisma.verse.findUnique({
-          where: {
-            bookId_chapter_verse: {
-              bookId: vw.book,
-              chapter: vw.chapter,
-              verse: vw.verse
-            }
-          }
-        })
-        return verse ? { ...vw, verseText: verse.text } : vw
-      })
-    )
+    // Get verse texts (single batched query to avoid pool exhaustion)
+    const lookups = verseWords.map((vw) => ({ bookId: vw.book, chapter: vw.chapter, verse: vw.verse }))
+    const verses = lookups.length
+      ? await prisma.verse.findMany({ where: { OR: lookups } })
+      : []
+    const verseMap = new Map(verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, v.text]))
+    const verseTexts = verseWords.map((vw) => {
+      const text = verseMap.get(`${vw.book}-${vw.chapter}-${vw.verse}`)
+      return text ? { ...vw, verseText: text } : vw
+    })
 
     // Get stats
     const [totalVerses, books, firstOccurrence, lastOccurrence] = await Promise.all([
