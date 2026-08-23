@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic"
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
@@ -6,6 +5,11 @@ import { TopicsClient } from './topics-client'
 
 interface PageProps {
   params: Promise<{ id: string }>
+}
+
+export async function generateStaticParams() {
+  const topics = await prisma.topicalEntry.findMany({ select: { id: true } })
+  return topics.map((t) => ({ id: t.id }))
 }
 
 async function getTopicData(id: string) {

@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic"
 import { Metadata } from 'next'
 import { prisma } from '@/lib/db'
 import { StrongsSearch } from '@/components/strongs/strongs-search'
