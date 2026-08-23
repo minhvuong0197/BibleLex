@@ -1,12 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, GitBranch } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
+import { useClientPathname } from "@/components/layout/use-client-pathname"
 import { useState } from "react"
 
 const navigation = [
@@ -18,7 +18,7 @@ const navigation = [
 ]
 
 export function Header() {
-  const pathname = usePathname()
+  const pathname = useClientPathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
