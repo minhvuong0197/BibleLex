@@ -83,33 +83,18 @@ function chunk<T>(arr: T[], size: number): T[][] {
 async function importStrongs() {
   const data = readJSON('strongs.json') as StrongEntryInput[]
   console.log(`\n[1/5] Strong's entries (${data.length})`)
-  for (const c of chunk(data, 100)) {
-    await prisma.$transaction(
-      c.map((e) =>
-        prisma.strongEntry.upsert({
-          where: { strongNumber: e.strong.toUpperCase() },
-          update: {
-            language: e.lang === 'H' ? 'HEBREW' : 'GREEK',
-            transliteration: e.translit,
-            pronunciation: e.pronunciation ?? null,
-            etymology: e.derivation ?? null,
-            definition: e.definition,
-            kjvDef: e.kjv_def ?? null,
-            derivation: e.derivation ?? null,
-          },
-          create: {
-            strongNumber: e.strong.toUpperCase(),
-            language: e.lang === 'H' ? 'HEBREW' : 'GREEK',
-            transliteration: e.translit,
-            pronunciation: e.pronunciation ?? null,
-            etymology: e.derivation ?? null,
-            definition: e.definition,
-            kjvDef: e.kjv_def ?? null,
-            derivation: e.derivation ?? null,
-          },
-        })
-      )
-    )
+  const rows = data.map((e) => ({
+    strongNumber: e.strong.toUpperCase(),
+    language: e.lang === 'H' ? 'HEBREW' : 'GREEK',
+    transliteration: e.translit,
+    pronunciation: e.pronunciation ?? null,
+    etymology: e.derivation ?? null,
+    definition: e.definition,
+    kjvDef: e.kjv_def ?? null,
+    derivation: e.derivation ?? null,
+  }))
+  for (const c of chunk(rows, 5000)) {
+    await prisma.strongEntry.createMany({ data: c, skipDuplicates: true })
   }
   console.log('  ✓ done')
 }
@@ -127,16 +112,14 @@ async function importBooks() {
       create: { name: b.name, abbreviation: b.abbreviation, testament: b.testament, bookOrder: b.bookOrder, chapters: b.chapters },
     })
 
-    for (const c of chunk(b.verses, 20)) {
-      await prisma.$transaction(
-        c.map((v) =>
-          prisma.verse.upsert({
-            where: { bookId_chapter_verse: { bookId: book.id, chapter: v.chapter, verse: v.verse } },
-            update: { text: v.text },
-            create: { bookId: book.id, chapter: v.chapter, verse: v.verse, text: v.text },
-          })
-        )
-      )
+    const verseRows = b.verses.map((v) => ({
+      bookId: book.id,
+      chapter: v.chapter,
+      verse: v.verse,
+      text: v.text,
+    }))
+    for (const c of chunk(verseRows, 5000)) {
+      await prisma.verse.createMany({ data: c, skipDuplicates: true })
     }
   }
   console.log('  ✓ done')
@@ -205,7 +188,7 @@ async function importVerseWords() {
         })
       }
     }
-    for (const c of chunk(rows, 100)) {
+    for (const c of chunk(rows, 20000)) {
       await prisma.verseWord.createMany({ data: c, skipDuplicates: true })
     }
     total += rows.length
@@ -233,7 +216,7 @@ async function importMorphology() {
       person: (m.person as any) || null,
       gender: (m.gender as any) || null,
     }))
-  for (const c of chunk(rows, 100)) {
+  for (const c of chunk(rows, 20000)) {
     await prisma.morphology.createMany({ data: c, skipDuplicates: true })
   }
   console.log('  ✓ done')
@@ -260,7 +243,7 @@ async function importCrossReferences() {
       rows.push({ sourceStrong: e.strongNumber, targetStrong: target, type: 'DERIVATIVE' })
     }
   }
-  for (const c of chunk(rows, 100)) {
+  for (const c of chunk(rows, 10000)) {
     await prisma.crossReference.createMany({ data: c, skipDuplicates: true })
   }
   console.log(`  ✓ ${rows.length.toLocaleString()} cross-references`)
@@ -311,15 +294,19 @@ async function importTopicalData() {
 
 async function main() {
   console.log('BibleLex — importing data into the database')
-  console.log('Clearing previous data (idempotent import)...')
-  await prisma.crossReference.deleteMany()
-  await prisma.morphology.deleteMany()
-  await prisma.verseWord.deleteMany()
-  await prisma.verse.deleteMany()
-  await prisma.bibleBook.deleteMany()
-  await prisma.topicalReference.deleteMany()
-  await prisma.topicalEntry.deleteMany()
-  await prisma.strongEntry.deleteMany()
+  if (process.env.CLEAR_DATA === '1') {
+    console.log('Clearing previous data (CLEAR_DATA=1)...')
+    await prisma.crossReference.deleteMany()
+    await prisma.morphology.deleteMany()
+    await prisma.verseWord.deleteMany()
+    await prisma.verse.deleteMany()
+    await prisma.bibleBook.deleteMany()
+    await prisma.topicalReference.deleteMany()
+    await prisma.topicalEntry.deleteMany()
+    await prisma.strongEntry.deleteMany()
+  } else {
+    console.log('Resuming import (no clear) — existing rows are upserted / skipped.')
+  }
   await importStrongs()
   await importBooks()
   await importVerseWords()
