@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "Khảo cứu chuyên sâu từ vựng Hê-bơ-rơ/Hy-lạp: phân tích hình thái học, thống kê sự xuất hiện, từ đồng nghĩa/trái nghĩa, gốc từ và từ phái sinh.",
 }
 
+export const dynamic = "force-dynamic"
+
 const studyFeatures = [
   {
     name: "Phân tích hình thái học",

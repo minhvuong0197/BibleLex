@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "Khảo cứu Kinh Thánh theo chủ đề: chỉ mục chủ đề, tham chiếu chéo, sự song song các đoạn Kinh Thánh, và chuỗi tham chiếu. Tìm mọi câu liên quan đến một chủ đề.",
 }
 
+export const dynamic = "force-dynamic"
+
 const quickTopics = [
   "Tình yêu", "Đức tin", "Ơn cứu rỗi", "Đức Thánh Linh", "Sự tha thứ",
   "Hy vọng", "Vâng phục", "Cầu nguyện", "Sự sáng tạo", "Sự thánh khiết",

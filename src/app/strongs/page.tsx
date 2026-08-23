@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "Tra cứu định nghĩa từ vựng nguyên ngữ Hê-bơ-rơ và Hy-lạp trong Kinh Thánh theo số Strongs (G1234/H1234), gồm Thayer, BDB, LSJ, phân tích hình thái và tham chiếu chéo.",
 }
 
-export const revalidate = 86400
+export const dynamic = "force-dynamic"
 
 const popularStrongNumbers = [
   { number: 'G26', name: 'agapē', desc: 'Yêu thương, tình yêu thương' },
