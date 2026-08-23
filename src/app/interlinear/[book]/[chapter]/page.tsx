@@ -121,6 +121,8 @@ async function getInterlinearData(book: string, chapter: number) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  'use cache'
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { book, chapter } = await params
   const chapterNum = parseInt(chapter, 10)
   

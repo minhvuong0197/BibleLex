@@ -192,6 +192,8 @@ async function getStrongEntryCached(strongNumber: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  'use cache'
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { strongNumber } = await params
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return { title: 'Không tìm thấy' }
