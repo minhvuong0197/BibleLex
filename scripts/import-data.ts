@@ -211,35 +211,58 @@ async function importVerseWords() {
 
 async function importMorphology() {
   const data = readJSON('morphology.json') as MorphInput[]
-  if ((await prisma.morphology.count()) > 60000) {
-    console.log(`\n[4/5] Morphology — already populated (${await prisma.morphology.count()}), skip`)
+  const count = await prisma.morphology.count()
+  if (count > 60000) {
+    console.log(`\n[4/5] Morphology — already populated (${count}), skip`)
     return
+  }
+  if (count > 0) {
+    // no unique constraint -> clear partial run before re-importing to avoid dupes
+    console.log(`\n[4/5] Morphology — clearing partial (${count}) before re-import`)
+    await prisma.$executeRawUnsafe(`DELETE FROM morphologies`)
   }
   console.log(`\n[4/5] Morphology (${data.length})`)
   const existing = new Set(
     (await prisma.strongEntry.findMany({ select: { strongNumber: true } })).map((s) => s.strongNumber)
   )
-  const rows = data
-    .filter((m) => existing.has(m.strong))
-    .map((m) => ({
-      strongNumber: m.strong,
-      parsings: m.parsing,
-      count: m.count,
-      tense: (m.tense as any) || null,
-      voice: (m.voice as any) || null,
-      mood: (m.mood as any) || null,
-      case_: (m.case as any) || null,
-      number: (m.number as any) || null,
-      person: (m.person as any) || null,
-      gender: (m.gender as any) || null,
-    }))
-  for (const c of chunk(rows, 2000)) {
-    await prisma.morphology.createMany({ data: c, skipDuplicates: true })
+  const allowed = {
+    tense: new Set(['PRESENT', 'IMPERFECT', 'FUTURE', 'AORIST', 'PERFECT', 'PLUPERFECT', 'FUTURE_PERFECT']),
+    voice: new Set(['ACTIVE', 'MIDDLE', 'PASSIVE', 'MIDDLE_PASSIVE']),
+    mood: new Set(['INDICATIVE', 'SUBJUNCTIVE', 'OPTATIVE', 'IMPERATIVE', 'INFINITIVE', 'PARTICIPLE']),
+    case: new Set(['NOMINATIVE', 'GENITIVE', 'DATIVE', 'ACCUSATIVE', 'VOCATIVE', 'LOCATIVE', 'INSTRUMENTAL']),
+    number: new Set(['SINGULAR', 'PLURAL', 'DUAL']),
+    person: new Set(['FIRST', 'SECOND', 'THIRD']),
+    gender: new Set(['MASCULINE', 'FEMININE', 'NEUTER']),
+  }
+  const esc = (v: any) => (v == null ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`)
+  const enumVal = (v: any, set: Set<string>) =>
+    !v ? 'NULL' : set.has(String(v).toUpperCase()) ? `'${String(v).toUpperCase()}'` : 'NULL'
+  const rows = data.filter((m) => existing.has(m.strong))
+  let inserted = 0
+  for (const c of chunk(rows, 500)) {
+    const vals = c
+      .map(
+        (m) =>
+          `(gen_random_uuid(), ${esc(m.strong)}, ${esc((m.parsing ?? ' ').toString())}, ${m.count || 1}, ` +
+          `${enumVal(m.tense, allowed.tense)}, ${enumVal(m.voice, allowed.voice)}, ${enumVal(m.mood, allowed.mood)}, ` +
+          `${enumVal(m.case, allowed.case)}, ${enumVal(m.number, allowed.number)}, ${enumVal(m.person, allowed.person)}, ` +
+          `${enumVal(m.gender, allowed.gender)})`
+      )
+      .join(',')
+    const sql = `INSERT INTO morphologies (id, strong_number, parsings, count, tense, voice, mood, "case", number, person, gender) VALUES ${vals}`
+    await prisma.$executeRawUnsafe(sql)
+    inserted += c.length
+    process.stdout.write(`  +${c.length} (${inserted}/${rows.length})\n`)
   }
   console.log('  ✓ done')
 }
 
 async function importCrossReferences() {
+  const crCount = await prisma.crossReference.count()
+  if (crCount > 10000) {
+    console.log(`\n[5/5] Cross-references — already populated (${crCount}), skip`)
+    return
+  }
   console.log('\n[5/5] Cross-references (from derivation / etymology)')
   const entries = await prisma.strongEntry.findMany({
     where: { OR: [{ derivation: { not: null } }, { etymology: { not: null } }] },
@@ -267,6 +290,11 @@ async function importCrossReferences() {
 }
 
 async function importTopicalData() {
+  const trCount = await prisma.topicalReference.count()
+  if (trCount > 300) {
+    console.log(`\n[6/6] Topical references — already populated (${trCount}), skip`)
+    return
+  }
   console.log('\n[6/6] Topical entries (from Strong\'s word groups)')
   const topics: { topic: string; description: string; refs: string[] }[] = [
     { topic: 'Tình yêu (Love)', description: 'Tình yêu thần thánh và nhân loại trong Kinh Thánh', refs: ['G26', 'G5368', 'H157', 'H160'] },
