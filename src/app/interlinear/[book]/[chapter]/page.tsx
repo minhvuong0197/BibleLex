@@ -1,4 +1,10 @@
-export const revalidate = 86400
+export const dynamic = "force-dynamic";
+
+export async function headers() {
+  return {
+    "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+  };
+}
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -8,13 +14,6 @@ import { resolveBibleBook, getBookViName } from '@/lib/utils'
 
 interface PageProps {
   params: Promise<{ book: string; chapter: string }>
-}
-
-export async function generateStaticParams() {
-  const books = await prisma.bibleBook.findMany({
-    select: { abbreviation: true },
-  })
-  return books.map((b) => ({ book: b.abbreviation, chapter: "1" }))
 }
 
 async function getInterlinearData(book: string, chapter: number) {

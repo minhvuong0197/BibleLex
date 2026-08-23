@@ -1,4 +1,10 @@
-export const revalidate = 86400
+export const dynamic = "force-dynamic";
+
+export async function headers() {
+  return {
+    "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+  };
+}
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { unstable_cache } from 'next/cache'
