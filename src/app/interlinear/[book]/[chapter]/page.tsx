@@ -6,6 +6,8 @@ import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
 import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
 
+// Prerendered tĩnh cho 66 sách (chương 1) qua generateStaticParams; cần DATABASE_URL ở bước build.
+
 interface PageProps {
   params: Promise<{ book: string; chapter: string }>
 }
