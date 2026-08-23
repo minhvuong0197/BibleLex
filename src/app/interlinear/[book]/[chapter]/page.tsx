@@ -1,8 +1,4 @@
-export async function headers() {
-  return {
-    "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-  };
-}
+export const dynamic = "force-dynamic"
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -12,7 +8,6 @@ import { resolveBibleBook, getBookViName } from '@/lib/utils'
 
 interface PageProps {
   params: Promise<{ book: string; chapter: string }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 async function getInterlinearData(book: string, chapter: number) {
@@ -142,8 +137,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function InterlinearPage({ params, searchParams }: PageProps) {
-  await searchParams
+export default async function InterlinearPage({ params }: PageProps) {
   const { book, chapter } = await params
   const chapterNum = parseInt(chapter, 10)
   
