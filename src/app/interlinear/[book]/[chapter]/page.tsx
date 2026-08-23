@@ -100,7 +100,7 @@ async function getInterlinearData(book: string, chapter: number) {
           })()
         : null
     }))
-  })
+  }))
 
   return {
     book: {
