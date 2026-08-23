@@ -1,6 +1,6 @@
+export const revalidate = 86400
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { formatStrongNumber, parseStrongNumber, getLanguageLabel, getLanguageCode } from '@/lib/utils'
 import { WordStudyClient } from './word-study-client'
@@ -10,8 +10,6 @@ interface PageProps {
 }
 
 async function getWordStudyData(strongNumber: string) {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return null
   
@@ -96,8 +94,6 @@ async function getWordStudyData(strongNumber: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { strongNumber } = await params
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return { title: 'Không tìm thấy' }
@@ -122,8 +118,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function WordStudyPage({ params }: PageProps) {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { strongNumber } = await params
   const data = await getWordStudyData(strongNumber)
   

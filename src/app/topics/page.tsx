@@ -1,5 +1,5 @@
+export const revalidate = 86400
 import { Metadata } from 'next'
-import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,8 +19,6 @@ const quickTopics = [
 ]
 
 export default async function TopicsPage() {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const [totalTopics, totalRefs, topics] = await Promise.all([
     prisma.topicalEntry.count(),
     prisma.topicalReference.count(),

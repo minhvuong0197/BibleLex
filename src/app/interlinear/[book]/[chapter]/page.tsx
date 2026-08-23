@@ -1,6 +1,6 @@
+export const revalidate = 86400
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { cacheLife } from "next/cache"
 import Link from 'next/link'
 import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
 import { prisma } from '@/lib/db'
@@ -18,8 +18,6 @@ export async function generateStaticParams() {
 }
 
 async function getInterlinearData(book: string, chapter: number) {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const bibleBook = await resolveBibleBook(prisma, book)
 
   if (!bibleBook) return null
@@ -128,8 +126,6 @@ async function getInterlinearData(book: string, chapter: number) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { book, chapter } = await params
   const chapterNum = parseInt(chapter, 10)
   
@@ -149,8 +145,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function InterlinearPage({ params }: PageProps) {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { book, chapter } = await params
   const chapterNum = parseInt(chapter, 10)
   

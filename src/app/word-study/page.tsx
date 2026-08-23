@@ -1,5 +1,5 @@
+export const revalidate = 86400
 import { Metadata } from 'next'
-import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { StrongsSearch } from '@/components/strongs/strongs-search'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -40,8 +40,6 @@ const studyFeatures = [
 ]
 
 export default async function WordStudyPage() {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const [totalWords, totalVerses, topWords] = await Promise.all([
     prisma.strongEntry.count(),
     prisma.verseWord.count(),

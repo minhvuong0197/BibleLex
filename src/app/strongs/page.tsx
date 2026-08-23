@@ -1,5 +1,5 @@
+export const revalidate = 86400
 import { Metadata } from 'next'
-import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { StrongsSearch } from '@/components/strongs/strongs-search'
 import { Card, CardContent } from '@/components/ui/card'
@@ -27,8 +27,6 @@ const popularStrongNumbers = [
 ]
 
 export default async function StrongsIndexPage() {
-  'use cache'
-  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const [hebrewCount, greekCount] = await Promise.all([
     prisma.strongEntry.count({ where: { language: 'HEBREW' } }),
     prisma.strongEntry.count({ where: { language: 'GREEK' } }),
