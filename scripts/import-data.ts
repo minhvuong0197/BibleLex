@@ -82,6 +82,10 @@ function chunk<T>(arr: T[], size: number): T[][] {
 
 async function importStrongs() {
   const data = readJSON('strongs.json') as StrongEntryInput[]
+  if ((await prisma.strongEntry.count()) > 14000) {
+    console.log(`\n[1/5] Strong's entries — already populated (${await prisma.strongEntry.count()}), skip`)
+    return
+  }
   console.log(`\n[1/5] Strong's entries (${data.length})`)
   const rows = data.map((e) => ({
     strongNumber: e.strong.toUpperCase(),
@@ -103,6 +107,10 @@ async function importBooks() {
   const hebrew = readJSON('hebrew.json') as BookInput[]
   const greek = readJSON('greek.json') as BookInput[]
   const books = [...hebrew, ...greek]
+  if ((await prisma.verse.count()) > 30000) {
+    console.log(`\n[2/5] Books & verses — already populated (${await prisma.verse.count()} verses), skip`)
+    return
+  }
   console.log(`\n[2/5] Books & verses (${books.length} books)`)
 
   for (const b of books) {
@@ -118,7 +126,7 @@ async function importBooks() {
       verse: v.verse,
       text: v.text,
     }))
-    for (const c of chunk(verseRows, 5000)) {
+    for (const c of chunk(verseRows, 2000)) {
       await prisma.verse.createMany({ data: c, skipDuplicates: true })
     }
   }
@@ -129,6 +137,11 @@ async function importVerseWords() {
   const hebrew = readJSON('hebrew.json') as BookInput[]
   const greek = readJSON('greek.json') as BookInput[]
   const books = [...hebrew, ...greek]
+
+  if ((await prisma.verseWord.count()) > 400000) {
+    console.log(`\n[3/5] Verse words — already populated (${await prisma.verseWord.count()}), skip`)
+    return
+  }
 
   // All strong numbers actually referenced by the text must exist as rows so
   // the (optional) foreign key resolves. Create lightweight stubs for any
@@ -188,7 +201,7 @@ async function importVerseWords() {
         })
       }
     }
-    for (const c of chunk(rows, 20000)) {
+    for (const c of chunk(rows, 5000)) {
       await prisma.verseWord.createMany({ data: c, skipDuplicates: true })
     }
     total += rows.length
@@ -198,6 +211,10 @@ async function importVerseWords() {
 
 async function importMorphology() {
   const data = readJSON('morphology.json') as MorphInput[]
+  if ((await prisma.morphology.count()) > 60000) {
+    console.log(`\n[4/5] Morphology — already populated (${await prisma.morphology.count()}), skip`)
+    return
+  }
   console.log(`\n[4/5] Morphology (${data.length})`)
   const existing = new Set(
     (await prisma.strongEntry.findMany({ select: { strongNumber: true } })).map((s) => s.strongNumber)
@@ -216,7 +233,7 @@ async function importMorphology() {
       person: (m.person as any) || null,
       gender: (m.gender as any) || null,
     }))
-  for (const c of chunk(rows, 20000)) {
+  for (const c of chunk(rows, 2000)) {
     await prisma.morphology.createMany({ data: c, skipDuplicates: true })
   }
   console.log('  ✓ done')
@@ -243,7 +260,7 @@ async function importCrossReferences() {
       rows.push({ sourceStrong: e.strongNumber, targetStrong: target, type: 'DERIVATIVE' })
     }
   }
-  for (const c of chunk(rows, 10000)) {
+  for (const c of chunk(rows, 2000)) {
     await prisma.crossReference.createMany({ data: c, skipDuplicates: true })
   }
   console.log(`  ✓ ${rows.length.toLocaleString()} cross-references`)

@@ -294,8 +294,8 @@ async function buildGreek(greekLemmaMap) {
       if (tk.length < 7) continue
       const ref = tk[0]
       if (!/^\d{6}$/.test(ref)) continue
-      const chapter = parseInt(ref.slice(0, 2), 10)
-      const verse = parseInt(ref.slice(2, 4), 10)
+      const chapter = parseInt(ref.slice(2, 4), 10)
+      const verse = parseInt(ref.slice(4, 6), 10)
       const word = tk[4] // punctuation-stripped Greek word
       const lemma = tk[6]
       const parsing = tk[2]
