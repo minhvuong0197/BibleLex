@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
@@ -17,11 +18,13 @@ export async function generateStaticParams() {
 }
 
 async function getInterlinearData(book: string, chapter: number) {
-  const bibleBook = await resolveBibleBook(prisma, book)
+  return unstable_cache(
+    async () => {
+      const bibleBook = await resolveBibleBook(prisma, book)
 
-  if (!bibleBook) return null
+      if (!bibleBook) return null
 
-  const [verses, prevChapter, nextChapter] = await Promise.all([
+      const [verses, prevChapter, nextChapter] = await Promise.all([
     prisma.verse.findMany({
       where: { bookId: bibleBook.id, chapter },
       orderBy: { verse: 'asc' }
@@ -122,6 +125,10 @@ async function getInterlinearData(book: string, chapter: number) {
       nextChapter: nextChapter?.chapter ?? null
     }
   }
+    },
+    ['interlinear-data', book, chapter],
+    { revalidate: 604800 }
+  )()
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
