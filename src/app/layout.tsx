@@ -12,7 +12,7 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import "./globals.css"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 86400
 
 const inter = Inter({
   variable: "--font-inter",
