@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic"
 import Link from "next/link"
 import { Logo } from "@/components/layout/logo"
 import { BookOpen, Search, Brain, Link as LinkIcon, GitBranch, Star, ArrowRight, CheckCircle, Globe, Database } from "lucide-react"
