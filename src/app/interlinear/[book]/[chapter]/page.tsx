@@ -9,15 +9,27 @@ interface PageProps {
   params: Promise<{ book: string; chapter: string }>
 }
 
+export const revalidate = 86400
+
 async function getInterlinearData(book: string, chapter: number) {
   const bibleBook = await resolveBibleBook(prisma, book)
 
   if (!bibleBook) return null
 
-  const verses = await prisma.verse.findMany({
-    where: { bookId: bibleBook.id, chapter },
-    orderBy: { verse: 'asc' }
-  })
+  const [verses, prevChapter, nextChapter] = await Promise.all([
+    prisma.verse.findMany({
+      where: { bookId: bibleBook.id, chapter },
+      orderBy: { verse: 'asc' }
+    }),
+    prisma.verse.findFirst({
+      where: { bookId: bibleBook.id, chapter: chapter - 1 },
+      select: { chapter: true }
+    }),
+    prisma.verse.findFirst({
+      where: { bookId: bibleBook.id, chapter: chapter + 1 },
+      select: { chapter: true }
+    })
+  ])
 
   const verseWords = await prisma.verseWord.findMany({
     where: {
@@ -37,6 +49,7 @@ async function getInterlinearData(book: string, chapter: number) {
   const morphRows = strongNumbers.length
     ? await prisma.morphology.findMany({
         where: { strongNumber: { in: strongNumbers } },
+        distinct: ['strongNumber'],
         orderBy: { count: 'desc' }
       })
     : []
@@ -87,18 +100,7 @@ async function getInterlinearData(book: string, chapter: number) {
           })()
         : null
     }))
-  }))
-
-  const [prevChapter, nextChapter] = await Promise.all([
-    prisma.verse.findFirst({
-      where: { bookId: bibleBook.id, chapter: chapter - 1 },
-      select: { chapter: true }
-    }),
-    prisma.verse.findFirst({
-      where: { bookId: bibleBook.id, chapter: chapter + 1 },
-      select: { chapter: true }
-    })
-  ])
+  })
 
   return {
     book: {
