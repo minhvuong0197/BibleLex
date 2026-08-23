@@ -10,7 +10,7 @@ interface PageProps {
 
 async function getTopicData(id: string) {
   'use cache'
-  cacheLife('days')
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const topic = await prisma.topicalEntry.findUnique({
     where: { id },
     include: {
@@ -84,6 +84,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TopicPage({ params }: PageProps) {
+  'use cache'
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { id } = await params
   const data = await getTopicData(id)
   

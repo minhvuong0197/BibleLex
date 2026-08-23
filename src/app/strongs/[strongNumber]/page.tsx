@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache, cacheLife } from 'next/cache'
 import { StrongsEntry } from '@/components/strongs/strongs-entry'
 import { prisma } from '@/lib/db'
 import { formatStrongNumber, parseStrongNumber, getLanguageLabel } from '@/lib/utils'
@@ -215,6 +215,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function StrongsPage({ params }: PageProps) {
+  'use cache'
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { strongNumber } = await params
   const data = await getStrongEntryCached(strongNumber)
   

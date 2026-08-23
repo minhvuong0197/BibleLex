@@ -11,7 +11,7 @@ interface PageProps {
 
 async function getWordStudyData(strongNumber: string) {
   'use cache'
-  cacheLife('days')
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return null
   
@@ -120,6 +120,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function WordStudyPage({ params }: PageProps) {
+  'use cache'
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { strongNumber } = await params
   const data = await getWordStudyData(strongNumber)
   

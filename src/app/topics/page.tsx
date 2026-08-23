@@ -20,7 +20,7 @@ const quickTopics = [
 
 export default async function TopicsPage() {
   'use cache'
-  cacheLife('days')
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const [totalTopics, totalRefs, topics] = await Promise.all([
     prisma.topicalEntry.count(),
     prisma.topicalReference.count(),

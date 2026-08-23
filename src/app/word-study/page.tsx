@@ -41,7 +41,7 @@ const studyFeatures = [
 
 export default async function WordStudyPage() {
   'use cache'
-  cacheLife('days')
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const [totalWords, totalVerses, topWords] = await Promise.all([
     prisma.strongEntry.count(),
     prisma.verseWord.count(),

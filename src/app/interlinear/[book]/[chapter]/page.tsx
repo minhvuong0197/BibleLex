@@ -12,7 +12,7 @@ interface PageProps {
 
 async function getInterlinearData(book: string, chapter: number) {
   'use cache'
-  cacheLife('days')
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const bibleBook = await resolveBibleBook(prisma, book)
 
   if (!bibleBook) return null
@@ -140,6 +140,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function InterlinearPage({ params }: PageProps) {
+  'use cache'
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const { book, chapter } = await params
   const chapterNum = parseInt(chapter, 10)
   

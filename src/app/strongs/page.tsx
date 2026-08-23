@@ -28,7 +28,7 @@ const popularStrongNumbers = [
 
 export default async function StrongsIndexPage() {
   'use cache'
-  cacheLife('days')
+  cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
   const [hebrewCount, greekCount] = await Promise.all([
     prisma.strongEntry.count({ where: { language: 'HEBREW' } }),
     prisma.strongEntry.count({ where: { language: 'GREEK' } }),
