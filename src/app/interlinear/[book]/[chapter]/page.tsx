@@ -10,6 +10,13 @@ interface PageProps {
   params: Promise<{ book: string; chapter: string }>
 }
 
+export async function generateStaticParams() {
+  const books = await prisma.bibleBook.findMany({
+    select: { abbreviation: true },
+  })
+  return books.map((b) => ({ book: b.abbreviation, chapter: "1" }))
+}
+
 async function getInterlinearData(book: string, chapter: number) {
   'use cache'
   cacheLife({ stale: 86400, revalidate: 604800, expire: 31536000 })
