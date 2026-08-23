@@ -68,7 +68,7 @@ export function resolveAiConfig(modelOverride?: string): AiConfig {
   const baseUrl = process.env.AI_BASE_URL || preset?.baseUrl || 'https://api.openai.com/v1'
   const model = modelOverride || process.env.AI_MODEL || preset?.defaultModel || 'gemini-2.0-flash'
   const providerLabel = preset?.label || (process.env.AI_BASE_URL ? 'Tùy chỉnh' : 'Mặc định')
-  const models = preset?.models?.length ? preset.models : [model]
+  const models = Array.from(new Set(preset?.models?.length ? preset.models : [model]))
   return {
     providerKey: preset ? providerKey : 'custom',
     providerLabel,

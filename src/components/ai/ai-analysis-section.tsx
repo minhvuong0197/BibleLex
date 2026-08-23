@@ -87,7 +87,7 @@ export function AiAnalysisSection({ strongNumber, language, transliteration }: A
         if (cancelled) return
         if (meta && !meta.error) {
           setProviderLabel(meta.providerLabel || '')
-          setModelOptions(meta.models || [])
+          setModelOptions(Array.from(new Set(meta.models || [])))
           setModel(meta.model || '')
           setApiConfigured(Boolean(meta.apiConfigured))
         }
@@ -147,7 +147,7 @@ export function AiAnalysisSection({ strongNumber, language, transliteration }: A
         />
         {modelOptions.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {modelOptions.map((m) => (
+            {modelOptions.filter((m) => m !== model).map((m) => (
               <button
                 key={m}
                 type="button"
