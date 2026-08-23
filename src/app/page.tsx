@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Logo } from "@/components/layout/logo"
 import { BookOpen, Search, Brain, Link as LinkIcon, GitBranch, Star, ArrowRight, CheckCircle, Globe, Database } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -51,8 +52,8 @@ export default function Home() {
         <div className="container px-4">
           <div className="mx-auto max-w-4xl text-center">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <BookOpen className="h-10 w-10 text-primary" aria-hidden="true" />
-              <span className="text-3xl font-bold text-primary">BibleLex</span>
+              <Logo className="h-12 w-12 text-primary sm:h-14 sm:w-14" aria-hidden="true" />
+              <span className="font-display text-4xl font-bold text-primary sm:text-5xl">BibleLex</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Khảo cứu Kinh Thánh <br />

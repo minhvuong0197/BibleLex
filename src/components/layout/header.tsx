@@ -4,7 +4,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, GitBranch } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
@@ -21,14 +20,6 @@ const navigation = [
 export function Header() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
-    }
-  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -59,20 +50,6 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex flex-1 max-w-sm mx-2 sm:mx-8 justify-center">
-          <form onSubmit={handleSearch} className="relative w-full" role="search">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-            <Input
-              type="search"
-              placeholder="Tra cứu Strongs"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4"
-              aria-label="Tìm kiếm từ vựng, Kinh Thánh, chủ đề"
-            />
-          </form>
-        </div>
-
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"} aria-expanded={mobileMenuOpen}>
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -83,17 +60,6 @@ export function Header() {
 
       {mobileMenuOpen && (
         <div className="md:hidden border-t px-4 py-4 space-y-2">
-          <form onSubmit={handleSearch} className="relative" role="search">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-            <Input
-              type="search"
-              placeholder="Tìm kiếm..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-              aria-label="Tìm kiếm"
-            />
-          </form>
           <nav className="space-y-1" role="navigation" aria-label="Mobile navigation">
             {navigation.map((item) => (
               <Link
