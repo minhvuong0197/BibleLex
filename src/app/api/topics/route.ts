@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
   try {
-    const { searchParams } = new URL(request.url)
     const topicId = searchParams.get('id')
     const q = searchParams.get('q')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)

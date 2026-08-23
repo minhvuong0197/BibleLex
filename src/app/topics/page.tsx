@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,14 +13,14 @@ export const metadata: Metadata = {
   description: "Khảo cứu Kinh Thánh theo chủ đề: chỉ mục chủ đề, tham chiếu chéo, sự song song các đoạn Kinh Thánh, và chuỗi tham chiếu. Tìm mọi câu liên quan đến một chủ đề.",
 }
 
-export const dynamic = "force-dynamic"
-
 const quickTopics = [
   "Tình yêu", "Đức tin", "Ơn cứu rỗi", "Đức Thánh Linh", "Sự tha thứ",
   "Hy vọng", "Vâng phục", "Cầu nguyện", "Sự sáng tạo", "Sự thánh khiết",
 ]
 
 export default async function TopicsPage() {
+  'use cache'
+  cacheLife('days')
   const [totalTopics, totalRefs, topics] = await Promise.all([
     prisma.topicalEntry.count(),
     prisma.topicalReference.count(),

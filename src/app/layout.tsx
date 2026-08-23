@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next"
+import { Suspense } from "react"
 import {
   Geist_Mono,
   Inter,
@@ -11,8 +12,6 @@ import { Providers } from "@/components/providers"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import "./globals.css"
-
-export const revalidate = 86400
 
 const inter = Inter({
   variable: "--font-inter",
@@ -102,7 +101,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Providers>
-          <Header />
+          <Suspense fallback={null}>
+            <Header />
+          </Suspense>
           <main className="flex-1">{children}</main>
           <Footer />
         </Providers>

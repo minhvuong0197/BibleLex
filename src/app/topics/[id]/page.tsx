@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { TopicsClient } from './topics-client'
 
@@ -8,6 +9,8 @@ interface PageProps {
 }
 
 async function getTopicData(id: string) {
+  'use cache'
+  cacheLife('days')
   const topic = await prisma.topicalEntry.findUnique({
     where: { id },
     include: {

@@ -3,8 +3,8 @@ import { prisma } from '@/lib/db'
 import { parseStrongNumber, formatStrongNumber, getBookViName, BOOK_VI } from '@/lib/utils'
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
   try {
-    const { searchParams } = new URL(request.url)
     const q = searchParams.get('q')?.trim()
     const type = searchParams.get('type') || 'all'
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)

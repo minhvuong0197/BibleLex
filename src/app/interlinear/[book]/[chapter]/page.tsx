@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { cacheLife } from "next/cache"
 import Link from 'next/link'
 import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
 import { prisma } from '@/lib/db'
@@ -9,9 +10,9 @@ interface PageProps {
   params: Promise<{ book: string; chapter: string }>
 }
 
-export const revalidate = 86400
-
 async function getInterlinearData(book: string, chapter: number) {
+  'use cache'
+  cacheLife('days')
   const bibleBook = await resolveBibleBook(prisma, book)
 
   if (!bibleBook) return null

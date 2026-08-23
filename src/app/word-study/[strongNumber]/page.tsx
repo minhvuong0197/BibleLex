@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { formatStrongNumber, parseStrongNumber, getLanguageLabel, getLanguageCode } from '@/lib/utils'
 import { WordStudyClient } from './word-study-client'
@@ -9,6 +10,8 @@ interface PageProps {
 }
 
 async function getWordStudyData(strongNumber: string) {
+  'use cache'
+  cacheLife('days')
   const parsed = parseStrongNumber(strongNumber)
   if (!parsed) return null
   

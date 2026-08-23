@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { StrongsSearch } from '@/components/strongs/strongs-search'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,8 +12,6 @@ export const metadata: Metadata = {
   title: "Tra cứu Strongs",
   description: "Tra cứu định nghĩa từ vựng nguyên ngữ Hê-bơ-rơ và Hy-lạp trong Kinh Thánh theo số Strongs (G1234/H1234), gồm Thayer, BDB, LSJ, phân tích hình thái và tham chiếu chéo.",
 }
-
-export const dynamic = "force-dynamic"
 
 const popularStrongNumbers = [
   { number: 'G26', name: 'agapē', desc: 'Yêu thương, tình yêu thương' },
@@ -28,6 +27,8 @@ const popularStrongNumbers = [
 ]
 
 export default async function StrongsIndexPage() {
+  'use cache'
+  cacheLife('days')
   const [hebrewCount, greekCount] = await Promise.all([
     prisma.strongEntry.count({ where: { language: 'HEBREW' } }),
     prisma.strongEntry.count({ where: { language: 'GREEK' } }),

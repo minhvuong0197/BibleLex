@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { cacheLife } from "next/cache"
 import { prisma } from '@/lib/db'
 import { StrongsSearch } from '@/components/strongs/strongs-search'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,8 +11,6 @@ export const metadata: Metadata = {
   title: "Khảo cứu từ vựng",
   description: "Khảo cứu chuyên sâu từ vựng Hê-bơ-rơ/Hy-lạp: phân tích hình thái học, thống kê sự xuất hiện, từ đồng nghĩa/trái nghĩa, gốc từ và từ phái sinh.",
 }
-
-export const dynamic = "force-dynamic"
 
 const studyFeatures = [
   {
@@ -41,6 +40,8 @@ const studyFeatures = [
 ]
 
 export default async function WordStudyPage() {
+  'use cache'
+  cacheLife('days')
   const [totalWords, totalVerses, topWords] = await Promise.all([
     prisma.strongEntry.count(),
     prisma.verseWord.count(),

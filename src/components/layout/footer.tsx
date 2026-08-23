@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { GitBranch } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
+import { CopyrightYear } from "@/components/layout/copyright-year"
 
 const GITHUB_USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "minhvuong0197"
 
@@ -63,7 +64,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} BibleLex. Phát hành dưới giấy phép MIT.</p>
+          <p>© <CopyrightYear /> BibleLex. Phát hành dưới giấy phép MIT.</p>
         </div>
       </div>
     </footer>

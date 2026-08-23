@@ -199,8 +199,8 @@ async function loadData(formatted: string) {
 }
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
   try {
-    const { searchParams } = new URL(request.url)
     const q = searchParams.get('strongNumber')?.trim()
 
     if (!q) {
