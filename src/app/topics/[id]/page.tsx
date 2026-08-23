@@ -1,10 +1,4 @@
-export const dynamic = "force-dynamic";
-
-export async function headers() {
-  return {
-    "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-  };
-}
+export const revalidate = 86400
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
