@@ -75,6 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TopicPage({ params }: PageProps) {
+ try {
   const { id } = await params
   const data = await getTopicData(id)
   
@@ -108,4 +109,7 @@ export default async function TopicPage({ params }: PageProps) {
       />
     </div>
   )
+ } catch (e: any) {
+   return <pre style={{whiteSpace:'pre-wrap',padding:20}}>{'DEBUG_ERROR: ' + JSON.stringify({msg:e?.message, stack:e?.stack}, null, 2)}</pre>
+ }
 }
