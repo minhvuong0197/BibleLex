@@ -12,7 +12,9 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-0.5 text-xl font-bold text-primary" aria-label="Trang chủ LOGOS LEX">
-              <Logo className="h-6 w-6" />
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
+                <Logo className="h-4 w-4 text-white" />
+              </span>
               <span>LOGOS LEX</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
