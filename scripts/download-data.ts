@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Script to download and prepare BibleLex data from public domain sources
+ * Script to download and prepare SCRIPTLEX data from public domain sources
  * 
  * Sources:
  * - Strong's Concordance: https://github.com/openscriptures/strongs
@@ -52,7 +52,7 @@ async function main() {
     mkdirSync(DATA_DIR, { recursive: true })
   }
 
-  console.log('Downloading BibleLex data sources...\n')
+  console.log('Downloading SCRIPTLEX data sources...\n')
 
   await Promise.all([
     downloadFile(SOURCES.strongs.url, 'strongs.json'),

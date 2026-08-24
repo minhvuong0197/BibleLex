@@ -58,28 +58,28 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://biblelex.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scriptlex.app"),
   title: {
-    default: "LOGOSLEX — Tra cứu chỉ mục Strongs và khảo cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ, Hy-lạp",
-    template: "%s | LOGOSLEX",
+    default: "SCRIPTLEX — Tra cứu chỉ mục Strongs và khảo cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ, Hy-lạp",
+    template: "%s | SCRIPTLEX",
   },
   description: "Công cụ tra cứu chỉ mục Strongs, bản đối chiếu Kinh Thánh nguyên ngữ Hê-bơ-rơ (Cựu Ước) và Hy-lạp (Tân Ước), cùng sự khảo cứu từ vựng và chủ đề. Phần mềm tự do, mã nguồn mở.",
   keywords: ["Strongs", "Hê-bơ-rơ", "Hy-lạp", "Kinh Thánh", "Cựu Ước", "Tân Ước", "bản đối chiếu", "chỉ mục Strongs", "Thayer", "BDB"],
-  authors: [{ name: "LOGOSLEX Contributors" }],
-  creator: "LOGOSLEX",
-  publisher: "LOGOSLEX",
+  authors: [{ name: "SCRIPTLEX Contributors" }],
+  creator: "SCRIPTLEX",
+  publisher: "SCRIPTLEX",
   robots: "index, follow",
   openGraph: {
     type: "website",
     locale: "vi_VN",
-    siteName: "LOGOSLEX",
-    title: "LOGOSLEX — Tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ, Hy-lạp",
+    siteName: "SCRIPTLEX",
+    title: "SCRIPTLEX — Tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ, Hy-lạp",
     description: "Khảo cứu Kinh Thánh với từ điển Strongs, Thayer, BDB, LSJ",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "LOGOSLEX",
+    title: "SCRIPTLEX",
     description: "Tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ, Hy-lạp và khảo cứu từ vựng",
   },
   verification: {

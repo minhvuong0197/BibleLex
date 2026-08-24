@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Import BibleLex data into the database.
+ * Import SCRIPTLEX data into the database.
  *
  * Consumes the JSON files produced by `scripts/prepare-data.mjs`:
  *   data/strongs.json      Strong's Hebrew + Greek dictionary entries
@@ -338,7 +338,7 @@ async function importTopicalData() {
 }
 
 async function main() {
-  console.log('BibleLex — importing data into the database')
+  console.log('SCRIPTLEX — importing data into the database')
   if (process.env.CLEAR_DATA === '1') {
     console.log('Clearing previous data (CLEAR_DATA=1)...')
     await prisma.crossReference.deleteMany()

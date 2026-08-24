@@ -413,7 +413,7 @@ function buildMorphology(books) {
 /* ------------------------------------------------------------------ */
 
 async function main() {
-  console.log('BibleLex — preparing data from public-domain sources')
+  console.log('SCRIPTLEX — preparing data from public-domain sources')
   const { greekLemmaMap } = await buildStrongs()
   const hebrew = await buildHebrew()
   const greek = await buildGreek(greekLemmaMap)

@@ -11,11 +11,11 @@ export function Footer() {
       <div className="container px-4 py-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-1 text-xl font-bold text-[#00A6FF]" aria-label="Trang chủ LOGOSLEX">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]/15">
-                <Logo className="h-7 w-7 text-[#00A6FF]" />
+            <Link href="/" className="flex items-center gap-1 text-xl font-bold text-[#00A6FF]" aria-label="Trang chủ SCRIPTLEX">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]">
+                <Logo className="h-7 w-7 text-white" />
               </span>
-              <span>LOGOSLEX</span>
+              <span>SCRIPTLEX</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Công cụ tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ và Hy-lạp, cùng sự khảo cứu chuyên sâu.
@@ -57,7 +57,7 @@ export function Footer() {
             <div className="space-y-4">
               <h3 className="font-semibold">Ủng hộ dự án</h3>
               <p className="text-sm text-muted-foreground">
-                LOGOSLEX là một sáng kiến phần mềm nguồn mở. Mọi đóng góp về mã nguồn, dữ liệu hay tài chính đều giúp dự án ngày một vững mạnh.
+                SCRIPTLEX là một sáng kiến phần mềm nguồn mở. Mọi đóng góp về mã nguồn, dữ liệu hay tài chính đều giúp dự án ngày một vững mạnh.
               </p>
               <p className="text-sm text-muted-foreground">
                 ❤️ Dành trọn cho công cuộc khảo cứu Kinh Thánh.
@@ -66,7 +66,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© <CopyrightYear /> LOGOSLEX. Phát hành dưới giấy phép MIT.</p>
+          <p>© <CopyrightYear /> SCRIPTLEX. Phát hành dưới giấy phép MIT.</p>
         </div>
       </div>
     </footer>
