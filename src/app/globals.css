@@ -24,6 +24,7 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-serif: var(--font-lora), Georgia, Cambria, "Times New Roman", Times, serif;
   --font-display: var(--font-playfair), "UTM", "CMG Sans", Georgia, "Times New Roman", serif;
+  --font-brand: var(--font-montserrat), "UTM Avo", "Segoe UI", system-ui, sans-serif;
   --font-hebrew: var(--font-noto-hebrew), "SBL Hebrew", "Ezra SIL", "Noto Sans Hebrew", sans-serif;
   --font-greek: var(--font-noto-greek), "SBL Greek", "Gentium Plus", "Noto Sans Greek", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -37,7 +38,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 210 100% 52%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -49,7 +50,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 210 100% 52%;
     --radius: 0.5rem;
   }
 
@@ -60,7 +61,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 210 100% 60%;
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -72,7 +73,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 210 100% 60%;
   }
 
   .academic {

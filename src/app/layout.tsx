@@ -7,6 +7,7 @@ import {
   Playfair_Display,
   Noto_Sans_Hebrew,
   Gentium_Plus,
+  Montserrat,
 } from "next/font/google"
 import { Providers } from "@/components/providers"
 import { Header } from "@/components/layout/header"
@@ -47,6 +48,13 @@ const gentiumGreek = Gentium_Plus({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+})
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  display: "swap",
 })
 
 export const metadata: Metadata = {
@@ -95,7 +103,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="vi" className={`${inter.variable} ${lora.variable} ${playfair.variable} ${notoHebrew.variable} ${gentiumGreek.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+      <html lang="vi" className={`${inter.variable} ${lora.variable} ${playfair.variable} ${notoHebrew.variable} ${gentiumGreek.variable} ${geistMono.variable} ${montserrat.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
