@@ -51,11 +51,11 @@ export default function Home() {
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="container px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="flex items-center justify-center gap-0.5 mb-6">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#00A6FF]/15">
-                <Logo className="h-10 w-10 text-[#00A6FF]" aria-hidden="true" />
+            <div className="mb-6 flex items-center justify-center gap-1">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]/15">
+                <Logo className="h-11 w-11 text-[#00A6FF]" aria-hidden="true" />
               </span>
-              <span className="text-3xl font-bold text-[#00A6FF]">LOGOS LEX</span>
+              <span className="text-4xl font-bold tracking-tight text-[#00A6FF]">LOGOS LEX</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Khảo cứu Kinh Thánh <br />
