@@ -11,9 +11,9 @@ export function Footer() {
       <div className="container px-4 py-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-0.5 text-xl font-bold" aria-label="Trang chủ LOGOS">
+            <Link href="/" className="flex items-center gap-0.5 text-xl font-bold" aria-label="Trang chủ LOGOS LEX">
               <Logo className="h-6 w-6" />
-              <span className="font-brand font-extrabold uppercase tracking-[0.15em] text-primary dark:text-white">LOGOS</span>
+              <span className="font-brand font-extrabold uppercase tracking-[0.12em] text-primary dark:text-white">LOGOS LEX</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Công cụ tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ và Hy-lạp, cùng sự khảo cứu chuyên sâu.
@@ -55,7 +55,7 @@ export function Footer() {
             <div className="space-y-4">
               <h3 className="font-semibold">Ủng hộ dự án</h3>
               <p className="text-sm text-muted-foreground">
-                Logos là một sáng kiến phần mềm nguồn mở. Mọi đóng góp về mã nguồn, dữ liệu hay tài chính đều giúp dự án ngày một vững mạnh.
+                Logos Lex là một sáng kiến phần mềm nguồn mở. Mọi đóng góp về mã nguồn, dữ liệu hay tài chính đều giúp dự án ngày một vững mạnh.
               </p>
               <p className="text-sm text-muted-foreground">
                 ❤️ Dành trọn cho công cuộc khảo cứu Kinh Thánh.
@@ -64,7 +64,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© <CopyrightYear /> Logos. Phát hành dưới giấy phép MIT.</p>
+          <p>© <CopyrightYear /> Logos Lex. Phát hành dưới giấy phép MIT.</p>
         </div>
       </div>
     </footer>

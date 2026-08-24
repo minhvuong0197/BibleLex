@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"
 export const metadata: Metadata = {
   title: "GitHub",
   description:
-    "Hồ sơ GitHub của tác giả Logos — danh sách các dự án mã nguồn mở.",
+    "Hồ sơ GitHub của tác giả Logos Lex — danh sách các dự án mã nguồn mở.",
 }
 
 function formatDate(iso: string) {
@@ -81,7 +81,7 @@ export default async function GitHubPage() {
           GitHub
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Hồ sơ và các dự án mã nguồn mở của tác giả Logos.
+          Hồ sơ và các dự án mã nguồn mở của tác giả Logos Lex.
         </p>
       </div>
 
