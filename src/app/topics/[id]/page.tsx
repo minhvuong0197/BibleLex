@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!topic) return { title: 'Không tìm thấy' }
   
   return {
-    title: `${topic.topic} — Chủ đề Kinh Thánh | BibleLex`,
+    title: `${topic.topic} — Chủ đề Kinh Thánh | LOGOS LEX`,
     description: topic.description || `Khảo cứu chủ đề ${topic.topic} với các câu Kinh Thánh liên quan.`,
     openGraph: {
       title: `${topic.topic} — Chủ đề Kinh Thánh`,

@@ -3,7 +3,7 @@ export function Logo({ className }: { className?: string }) {
     <svg
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
+      stroke="#0A68FF"
       strokeWidth={1.7}
       strokeLinecap="round"
       strokeLinejoin="round"
