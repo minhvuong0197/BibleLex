@@ -2,14 +2,13 @@
 
 import { useTheme } from "next-themes"
 import { useEffect, useRef, useState } from "react"
-import { Sun, Moon, BookOpen, Monitor, Check } from "lucide-react"
+import { Sun, Moon, BookOpen, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const options = [
   { value: "light", label: "Sáng", icon: Sun },
   { value: "dark", label: "Tối", icon: Moon },
   { value: "academic", label: "Học thuật", icon: BookOpen },
-  { value: "system", label: "Hệ thống", icon: Monitor },
 ] as const
 
 export function ThemeSwitcher() {
