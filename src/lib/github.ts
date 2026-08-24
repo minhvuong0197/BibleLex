@@ -29,7 +29,7 @@ const USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "minhvuong0197"
 async function ghFetch(path: string): Promise<any> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
-    "User-Agent": "LOGOS LEX",
+    "User-Agent": "LOGOSLEX",
   }
   if (process.env.GITHUB_TOKEN) {
     headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`
