@@ -25,11 +25,11 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-0.5 text-2xl font-bold text-[#00A6FF]" aria-label="LOGOS LEX Home">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#00A6FF]/15">
-              <Logo className="h-7 w-7 text-[#00A6FF]" />
+          <Link href="/" className="flex items-center gap-1 text-2xl font-bold text-[#00A6FF]" aria-label="LOGOSLEX Home">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]/15">
+              <Logo className="h-8 w-8 text-[#00A6FF]" />
             </span>
-            <span>LOGOS LEX</span>
+            <span>LOGOSLEX</span>
           </Link>
 
           <nav className="hidden md:flex md:gap-1" role="navigation" aria-label="Main navigation">

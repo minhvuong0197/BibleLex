@@ -107,7 +107,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!entry) return { title: `${formatted} - Không tìm thấy` }
   
   return {
-    title: `${formatted} — Khảo cứu từ vựng: ${entry.transliteration} | LOGOS LEX`,
+    title: `${formatted} — Khảo cứu từ vựng: ${entry.transliteration} | LOGOSLEX`,
     description: `Khảo cứu chuyên sâu ${getLanguageLabel(entry.language)}: ${entry.definition.substring(0, 150)}...`,
     openGraph: {
       title: `${formatted} — Khảo cứu từ vựng: ${entry.transliteration}`,

@@ -55,7 +55,7 @@ export default function Home() {
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]/15">
                 <Logo className="h-11 w-11 text-[#00A6FF]" aria-hidden="true" />
               </span>
-              <span className="text-4xl font-bold tracking-tight text-[#00A6FF]">LOGOS LEX</span>
+              <span className="text-4xl font-bold tracking-tight text-[#00A6FF]">LOGOSLEX</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Khảo cứu Kinh Thánh <br />
@@ -177,7 +177,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Nguồn dữ liệu uy tín</h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              LOGOS LEX tổng hợp từ các từ điển và cơ sở dữ liệu học thuật công cộng
+              LOGOSLEX tổng hợp từ các từ điển và cơ sở dữ liệu học thuật công cộng
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -209,7 +209,7 @@ export default function Home() {
           </h2>
           <div className="mb-8 max-w-2xl mx-auto space-y-4">
             <p className="text-lg text-muted-foreground">
-              LOGOS LEX là dự án phần mềm miễn phí dành cho việc tra cứu và nghiên cứu Kinh Thánh. Mục tiêu của chúng tôi là cung cấp một công cụ tra cứu mã Strongs tiện lợi, trực quan và chính xác cho người dùng Việt Nam.
+              LOGOSLEX là dự án phần mềm miễn phí dành cho việc tra cứu và nghiên cứu Kinh Thánh. Mục tiêu của chúng tôi là cung cấp một công cụ tra cứu mã Strongs tiện lợi, trực quan và chính xác cho người dùng Việt Nam.
             </p>
             <p className="text-lg text-muted-foreground">
               Dự án phát triển dựa trên sự chung tay của cộng đồng. Nếu bạn là người yêu mến Lời Chúa và muốn đồng hành cùng chúng tôi, xin hãy đóng góp mã nguồn, dữ liệu hoặc tài chính để dự án ngày một phát triển vững bền. Mọi đóng góp của bạn đều góp phần làm cho công cụ này trở nên hữu ích hơn cho tất cả mọi người.
