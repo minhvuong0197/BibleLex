@@ -13,7 +13,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-0.5 text-xl font-bold" aria-label="Trang chủ LOGOS LEX">
               <Logo className="h-6 w-6" />
-              <span className="font-brand font-extrabold uppercase tracking-[0.12em] text-primary dark:text-white">LOGOS LEX</span>
+              <span className="font-brand font-light uppercase tracking-tight text-primary dark:text-white">LOGOS LEX</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Công cụ tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ và Hy-lạp, cùng sự khảo cứu chuyên sâu.

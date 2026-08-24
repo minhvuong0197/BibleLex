@@ -27,7 +27,7 @@ export function Header() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-0.5 text-2xl font-bold" aria-label="LOGOS LEX Home">
             <Logo className="h-8 w-8 sm:h-9 sm:w-9 shrink-0" />
-            <span className="font-brand font-extrabold uppercase tracking-[0.12em] text-primary dark:text-white">LOGOS LEX</span>
+            <span className="font-brand font-light uppercase tracking-tight text-primary dark:text-white">LOGOS LEX</span>
           </Link>
 
           <nav className="hidden md:flex md:gap-1" role="navigation" aria-label="Main navigation">

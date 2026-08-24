@@ -53,7 +53,7 @@ export default function Home() {
           <div className="mx-auto max-w-4xl text-center">
             <div className="flex items-center justify-center gap-0.5 mb-6">
               <Logo className="h-12 w-12 sm:h-14 sm:w-14" aria-hidden="true" />
-              <span className="font-brand text-4xl font-extrabold uppercase tracking-[0.12em] text-primary dark:text-white sm:text-5xl">LOGOS LEX</span>
+              <span className="font-brand text-4xl font-light uppercase tracking-tight text-primary dark:text-white sm:text-5xl">LOGOS LEX</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Khảo cứu Kinh Thánh <br />

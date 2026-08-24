@@ -6,14 +6,15 @@ export function Logo({ className }: { className?: string }) {
       fill="none"
       aria-hidden="true"
     >
-      {/* Bìa Kinh Thánh (xanh biển sáng tươi, hardcode) */}
+      {/* Thập tự giá */}
+      <rect x="11.2" y="1.8" width="1.6" height="8.7" rx="0.5" fill="#0A68FF" />
+      <rect x="8.6" y="4.4" width="6.8" height="1.6" rx="0.5" fill="#0A68FF" />
+      {/* Cuốn Kinh Thánh (sách mở) */}
       <path
-        d="M5 3.3c-1.1 0-2 .9-2 2v13.4c0 1.1.9 2 2 2h14.4c.6 0 1-.5 1-1V4.3c0-.6-.4-1-1-1H5Z"
+        transform="translate(2.4, 6) scale(0.8)"
         fill="#0A68FF"
+        d="M12 7c-.9-1.2-2.5-2-4.5-2-2.3 0-4 1-4 2.5v11C3.5 18 5.2 19 7.5 19c2 0 3.6-.8 4.5-2 .9 1.2 2.5 2 4.5 2 2.3 0 4-1 4-2.5v-11C19.5 6 17.8 5 15.5 5c-2 0-3.6.8-4.5 2z"
       />
-      {/* Thập tự giá (cross) */}
-      <rect x="11.1" y="5.6" width="1.8" height="12.8" rx="0.6" fill="#ffffff" />
-      <rect x="7.4" y="9.4" width="9.2" height="1.8" rx="0.6" fill="#ffffff" />
     </svg>
   )
 }
