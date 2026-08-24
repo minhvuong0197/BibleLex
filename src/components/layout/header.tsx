@@ -26,8 +26,8 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-0.5 text-2xl font-bold text-primary" aria-label="LOGOS LEX Home">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary">
-              <Logo className="h-5 w-5 text-white" />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+              <Logo className="h-7 w-7 text-primary" />
             </span>
             <span>LOGOS LEX</span>
           </Link>

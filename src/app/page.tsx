@@ -52,8 +52,8 @@ export default function Home() {
         <div className="container px-4">
           <div className="mx-auto max-w-4xl text-center">
             <div className="flex items-center justify-center gap-0.5 mb-6">
-              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary">
-                <Logo className="h-9 w-9 text-white" aria-hidden="true" />
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/15">
+                <Logo className="h-10 w-10 text-primary" aria-hidden="true" />
               </span>
               <span className="text-3xl font-bold text-primary">LOGOS LEX</span>
             </div>

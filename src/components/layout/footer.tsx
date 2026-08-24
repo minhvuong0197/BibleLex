@@ -12,8 +12,8 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-0.5 text-xl font-bold text-primary" aria-label="Trang chủ LOGOS LEX">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
-                <Logo className="h-4 w-4 text-white" />
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+                <Logo className="h-6 w-6 text-primary" />
               </span>
               <span>LOGOS LEX</span>
             </Link>
