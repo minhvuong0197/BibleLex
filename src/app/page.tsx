@@ -51,7 +51,7 @@ export default function Home() {
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="container px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex items-center justify-center gap-0.5 mb-6">
               <Logo className="h-10 w-10" aria-hidden="true" />
               <span className="text-3xl font-bold text-primary">LOGOS LEX</span>
             </div>
