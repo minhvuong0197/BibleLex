@@ -24,7 +24,7 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-serif: var(--font-lora), Georgia, Cambria, "Times New Roman", Times, serif;
   --font-display: var(--font-playfair), "UTM", "CMG Sans", Georgia, "Times New Roman", serif;
-  --font-brand: "UTM Avo", "UTM Bryant", var(--font-montserrat), "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --font-brand: var(--font-montserrat), "UTM Avo", "Segoe UI", system-ui, sans-serif;
   --font-hebrew: var(--font-noto-hebrew), "SBL Hebrew", "Ezra SIL", "Noto Sans Hebrew", sans-serif;
   --font-greek: var(--font-noto-greek), "SBL Greek", "Gentium Plus", "Noto Sans Greek", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

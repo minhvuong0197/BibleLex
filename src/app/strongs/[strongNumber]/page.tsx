@@ -205,7 +205,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = entry.definition?.substring(0, 150) ?? ''
 
   return {
-    title: `${formatted} — ${entry.transliteration} | Logos Lex`,
+    title: `${formatted} — ${entry.transliteration} | BibleLex`,
     description: `${getLanguageLabel(entry.language)}: ${description}...`,
     openGraph: {
       title: `${formatted} — ${entry.transliteration}`,
