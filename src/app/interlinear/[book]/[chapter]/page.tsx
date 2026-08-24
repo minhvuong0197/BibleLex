@@ -143,7 +143,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!bibleBook) return { title: 'Không tìm thấy' }
   
   return {
-    title: `${bibleBook.name} ${chapterNum} - Kinh Thánh đối chiếu | Bible Lexicon`,
+    title: `${bibleBook.name} ${chapterNum} - Kinh Thánh đối chiếu | Logos`,
     description: `Kinh Thánh đối chiếu ${bibleBook.name} chương ${chapterNum} với phân tích từ vựng nguyên ngữ Hê-bơ-rơ/Hy-lạp.`,
     openGraph: {
       title: `${bibleBook.name} ${chapterNum} - Kinh Thánh đối chiếu`,
