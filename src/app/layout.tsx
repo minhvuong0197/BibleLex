@@ -58,7 +58,9 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scriptlex.app"),
+  metadataBase: new URL(
+    (process.env.NEXT_PUBLIC_SITE_URL || "https://scriptlex.app").replace(/^([^:]+:\/\/)?/i, "https://")
+  ),
   title: {
     default: "SCRIPTLEX — Tra cứu chỉ mục Strongs và khảo cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ, Hy-lạp",
     template: "%s | SCRIPTLEX",
