@@ -51,7 +51,7 @@ export default function Home() {
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="container px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="flex items-center justify-center gap-1.5 mb-6">
+            <div className="flex items-center justify-center gap-1 mb-6">
               <Logo className="h-12 w-12 text-primary sm:h-14 sm:w-14" aria-hidden="true" />
               <span className="font-brand text-4xl font-extrabold tracking-tight text-primary dark:text-white sm:text-5xl">BibleLex</span>
             </div>

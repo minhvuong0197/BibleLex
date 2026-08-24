@@ -11,7 +11,7 @@ export function Footer() {
       <div className="container px-4 py-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-1.5 text-xl font-bold" aria-label="Trang chủ BibleLex">
+            <Link href="/" className="flex items-center gap-1 text-xl font-bold" aria-label="Trang chủ BibleLex">
               <Logo className="h-6 w-6 text-primary" />
               <span className="font-brand font-extrabold tracking-tight text-primary dark:text-white">BibleLex</span>
             </Link>
