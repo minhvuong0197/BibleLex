@@ -72,6 +72,7 @@ interface StrongsEntryProps {
     wordOrder: number
     transliteration: string
     verseText?: string
+    vietnameseText?: string | null
   }>
 }
 
@@ -337,6 +338,9 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
                           </p>
                           {sv.verseText && (
                             <p className="text-sm text-muted-foreground line-clamp-2">{sv.verseText}</p>
+                          )}
+                          {sv.vietnameseText && (
+                            <p className="text-sm text-foreground/80 line-clamp-2 border-r-2 border-primary/40 pr-3 text-right">{sv.vietnameseText}</p>
                           )}
                         </div>
                       </div>

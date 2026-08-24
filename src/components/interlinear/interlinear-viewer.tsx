@@ -39,6 +39,7 @@ interface InterlinearVerse {
   chapter: number
   verse: number
   text: string
+  vietnameseText?: string | null
   words: InterlinearWord[]
 }
 
@@ -71,6 +72,7 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
   const [showTransliteration, setShowTransliteration] = useState(true)
   const [showParsing, setShowParsing] = useState(true)
   const [showEnglish, setShowEnglish] = useState(true)
+  const [showVietnamese, setShowVietnamese] = useState(true)
   const [selectedWord, setSelectedWord] = useState<InterlinearWord | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -122,6 +124,9 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
           <Button variant="outline" size="sm" onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish} className={showEnglish ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">En</span> Tiếng Anh
           </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese} className={showVietnamese ? 'bg-accent' : ''}>
+            <span className="mr-1" aria-hidden="true">Vi</span> Tiếng Việt
+          </Button>
         </div>
       </div>
 
@@ -135,6 +140,7 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
               showTransliteration={showTransliteration}
               showParsing={showParsing}
               showEnglish={showEnglish}
+              showVietnamese={showVietnamese}
               onWordClick={setSelectedWord}
               onCopy={copyToClipboard}
               copied={copied}
@@ -160,6 +166,7 @@ function InterlinearVerseComponent({
   showTransliteration,
   showParsing,
   showEnglish,
+  showVietnamese,
   onWordClick,
   onCopy,
   copied
@@ -169,6 +176,7 @@ function InterlinearVerseComponent({
   showTransliteration: boolean
   showParsing: boolean
   showEnglish: boolean
+  showVietnamese: boolean
   onWordClick: (word: InterlinearWord) => void
   onCopy: (text: string, label: string) => Promise<void>
   copied: string | null
@@ -184,6 +192,11 @@ function InterlinearVerseComponent({
           <p className={cn("text-base leading-relaxed", isHebrew ? "hebrew-font text-right" : "greek-font")}>
             {verse.text}
           </p>
+          {showVietnamese && verse.vietnameseText && (
+            <p className="mt-1 text-sm leading-relaxed text-foreground/80 border-r-2 border-primary/40 pr-3 text-right" dir="ltr">
+              {verse.vietnameseText}
+            </p>
+          )}
         </div>
       </div>
 

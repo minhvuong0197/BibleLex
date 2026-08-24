@@ -62,10 +62,12 @@ export async function GET(
     const verses = lookups.length
       ? await prisma.verse.findMany({ where: { OR: lookups } })
       : []
-    const verseMap = new Map(verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, v.text]))
+    const verseMap = new Map(
+      verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, { text: v.text, vietnameseText: v.vietnameseText }])
+    )
     const verseTexts = verseWords.map((vw) => {
-      const text = verseMap.get(`${vw.book}-${vw.chapter}-${vw.verse}`)
-      return text ? { ...vw, verseText: text } : vw
+      const m = verseMap.get(`${vw.book}-${vw.chapter}-${vw.verse}`)
+      return m ? { ...vw, verseText: m.text, vietnameseText: m.vietnameseText } : vw
     })
 
     // Get stats

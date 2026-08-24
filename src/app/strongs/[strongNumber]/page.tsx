@@ -132,9 +132,13 @@ async function getStrongEntry(strongNumber: string): Promise<StrongEntryResult |
     const verseMap = new Map(
       verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, v.text])
     )
+    const viMap = new Map(
+      verses.map((v) => [`${v.bookId}-${v.chapter}-${v.verse}`, v.vietnameseText])
+    )
     verseTexts = sampleVerses.map((vw) => ({
       ...vw,
       verseText: verseMap.get(`${vw.book}-${vw.chapter}-${vw.verse}`),
+      vietnameseText: viMap.get(`${vw.book}-${vw.chapter}-${vw.verse}`),
     }))
   }
 

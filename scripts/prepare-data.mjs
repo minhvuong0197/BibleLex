@@ -412,12 +412,82 @@ function buildMorphology(books) {
 
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/*  Vietnamese Bible (Kinh Thánh 1934 — public domain)                 */
+/* ------------------------------------------------------------------ */
+
+const VI_BOOK_ALIASES = {
+  gen: 'Genesis', exod: 'Exodus', lev: 'Leviticus', num: 'Numbers', deut: 'Deuteronomy',
+  josh: 'Joshua', judg: 'Judges', ruth: 'Ruth', '1sam': '1 Samuel', '2sam': '2 Samuel',
+  '1kgs': '1 Kings', '2kgs': '2 Kings', '1chr': '1 Chronicles', '2chr': '2 Chronicles',
+  ezra: 'Ezra', neh: 'Nehemiah', esth: 'Esther', job: 'Job', ps: 'Psalms', psa: 'Psalms',
+  prov: 'Proverbs', eccl: 'Ecclesiastes', song: 'Song of Solomon', isa: 'Isaiah',
+  jer: 'Jeremiah', lam: 'Lamentations', ezek: 'Ezekiel', dan: 'Daniel', hos: 'Hosea',
+  joel: 'Joel', amos: 'Amos', obad: 'Obadiah', jonah: 'Jonah', mic: 'Micah',
+  nah: 'Nahum', hab: 'Habakkuk', zeph: 'Zephaniah', hag: 'Haggai', zech: 'Zechariah',
+  mal: 'Malachi',
+  matt: 'Matthew', mar: 'Mark', mark: 'Mark', luk: 'Luke', joh: 'John', john: 'John',
+  act: 'Acts', rom: 'Romans', '1cor': '1 Corinthians', '2cor': '2 Corinthians',
+  gal: 'Galatians', eph: 'Ephesians', phil: 'Philippians', col: 'Colossians',
+  '1th': '1 Thessalonians', '2th': '2 Thessalonians', '1tim': '1 Timothy',
+  '2tim': '2 Timothy', tit: 'Titus', phlm: 'Philemon', heb: 'Hebrews', jas: 'James',
+  '1pet': '1 Peter', '2pet': '2 Peter', '1joh': '1 John', '2joh': '2 John',
+  '3joh': '3 John', jude: 'Jude', rev: 'Revelation',
+}
+
+const normName = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+async function buildVietnamese() {
+  console.log('\n[5/5] Vietnamese Bible (Kinh Thánh 1934 — public domain)')
+  const url = 'https://raw.githubusercontent.com/midvash/bible-data/main/versions/vi/vi1934/vi1934.json'
+  let json
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    json = await res.json()
+  } catch (e) {
+    console.warn(`  ! Không tải được bản Việt (${e.message}). Bỏ qua bước này.`)
+    writeFileSync(join(DATA, 'vietnamese.json'), JSON.stringify([]))
+    return
+  }
+
+  const myBooks = [...WLC_BOOKS, ...GNT_BOOKS].map((b) => ({
+    name: b.name,
+    norm: normName(b.name),
+  }))
+  const resolveName = (raw) => {
+    const n = normName(raw)
+    if (VI_BOOK_ALIASES[n]) return VI_BOOK_ALIASES[n]
+    const hit = myBooks.find((m) => m.norm === n)
+    return hit ? hit.name : null
+  }
+
+  const books = json?.books || (Array.isArray(json) ? json : [])
+  const out = []
+  for (const b of books) {
+    const raw = b.book || b.name
+    const myName = resolveName(raw)
+    if (!myName) continue
+    const chapters = b.chapters || []
+    chapters.forEach((versesArr, ci) => {
+      const chapter = ci + 1
+      ;(versesArr || []).forEach((text, vi) => {
+        if (!text) return
+        out.push({ book: myName, chapter, verse: vi + 1, text: String(text).trim() })
+      })
+    })
+  }
+  writeFileSync(join(DATA, 'vietnamese.json'), JSON.stringify(out))
+  console.log(`  ✓ ${out.length} câu tiếng Việt (${myBooks.length} sách khớp)`)
+}
+
 async function main() {
   console.log('SCRIPTLEX — preparing data from public-domain sources')
   const { greekLemmaMap } = await buildStrongs()
   const hebrew = await buildHebrew()
   const greek = await buildGreek(greekLemmaMap)
   buildMorphology([...hebrew, ...greek])
+  await buildVietnamese()
   console.log('\n✓ All data prepared in ./data')
   console.log('  Next: npm run import:data')
 }

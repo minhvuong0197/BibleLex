@@ -112,6 +112,7 @@ model Verse {
   chapter   Int
   verse     Int
   text      String
+  vietnameseText String? @map("vietnamese_text")
   createdAt DateTime @default(now()) @map("created_at")
 
   book      BibleBook @relation(fields: [bookId], references: [id])

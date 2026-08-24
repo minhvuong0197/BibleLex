@@ -337,6 +337,38 @@ async function importTopicalData() {
   console.log(`  ✓ ${topics.length} topics, ${totalRefs} references`)
 }
 
+async function importVietnamese() {
+  const viPath = join(DATA_DIR, 'vietnamese.json')
+  if (!existsSync(viPath)) {
+    console.log('\n[7/7] Vietnamese — không có file vietnamese.json, bỏ qua')
+    return
+  }
+  const data = readJSON('vietnamese.json') as { book: string; chapter: number; verse: number; text: string }[]
+  if (!data.length) {
+    console.log('\n[7/7] Vietnamese — rỗng, bỏ qua')
+    return
+  }
+  console.log(`\n[7/7] Vietnamese (${data.length} câu)`)
+  const books = await prisma.bibleBook.findMany({ select: { id: true, name: true } })
+  const bookId = new Map(books.map((b) => [b.name, b.id]))
+  let updated = 0
+  for (const c of chunk(data, 1000)) {
+    const ops = c
+      .filter((r) => bookId.has(r.book))
+      .map((r) =>
+        prisma.verse.updateMany({
+          where: { bookId: bookId.get(r.book)!, chapter: r.chapter, verse: r.verse },
+          data: { vietnameseText: r.text },
+        })
+      )
+    if (ops.length) {
+      await prisma.$transaction(ops)
+      updated += ops.length
+    }
+  }
+  console.log(`  ✓ ${updated.toLocaleString()} câu được gắn bản dịch tiếng Việt`)
+}
+
 async function main() {
   console.log('SCRIPTLEX — importing data into the database')
   if (process.env.CLEAR_DATA === '1') {
@@ -358,6 +390,7 @@ async function main() {
   await importMorphology()
   await importCrossReferences()
   await importTopicalData()
+  await importVietnamese()
 
   const stats = await Promise.all([
     prisma.strongEntry.count(),
