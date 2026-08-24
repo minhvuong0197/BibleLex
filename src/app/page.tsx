@@ -51,9 +51,9 @@ export default function Home() {
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="container px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="flex items-center justify-center gap-1 mb-6">
-              <Logo className="h-12 w-12 text-primary sm:h-14 sm:w-14" aria-hidden="true" />
-              <span className="font-brand text-4xl font-extrabold tracking-tight text-primary dark:text-white sm:text-5xl">BibleLex</span>
+            <div className="flex items-center justify-center gap-0.5 mb-6">
+              <Logo className="h-12 w-12 sm:h-14 sm:w-14" aria-hidden="true" />
+              <span className="font-brand text-4xl font-extrabold uppercase tracking-[0.12em] text-primary dark:text-white sm:text-5xl">BIBLE LEXICON</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Khảo cứu Kinh Thánh <br />
@@ -175,7 +175,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Nguồn dữ liệu uy tín</h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              BibleLex tổng hợp từ các từ điển và cơ sở dữ liệu học thuật công cộng
+              Bible Lexicon tổng hợp từ các từ điển và cơ sở dữ liệu học thuật công cộng
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -207,7 +207,7 @@ export default function Home() {
           </h2>
           <div className="mb-8 max-w-2xl mx-auto space-y-4">
             <p className="text-lg text-muted-foreground">
-              BibleLex là dự án phần mềm miễn phí dành cho việc tra cứu và nghiên cứu Kinh Thánh. Mục tiêu của chúng tôi là cung cấp một công cụ tra cứu mã Strongs tiện lợi, trực quan và chính xác cho người dùng Việt Nam.
+              Bible Lexicon là dự án phần mềm miễn phí dành cho việc tra cứu và nghiên cứu Kinh Thánh. Mục tiêu của chúng tôi là cung cấp một công cụ tra cứu mã Strongs tiện lợi, trực quan và chính xác cho người dùng Việt Nam.
             </p>
             <p className="text-lg text-muted-foreground">
               Dự án phát triển dựa trên sự chung tay của cộng đồng. Nếu bạn là người yêu mến Lời Chúa và muốn đồng hành cùng chúng tôi, xin hãy đóng góp mã nguồn, dữ liệu hoặc tài chính để dự án ngày một phát triển vững bền. Mọi đóng góp của bạn đều góp phần làm cho công cụ này trở nên hữu ích hơn cho tất cả mọi người.
