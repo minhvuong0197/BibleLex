@@ -117,16 +117,16 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration} className={showTransliteration ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration} className={showTransliteration ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">ἀ/א</span> Phiên âm
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing} className={showParsing ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing} className={showParsing ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">𝔓</span> Phân tích
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish} className={showEnglish ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish} className={showEnglish ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">En</span> Tiếng Anh
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese} className={showVietnamese ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese} className={showVietnamese ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">Vi</span> Tiếng Việt
           </Button>
         </div>
@@ -318,18 +318,18 @@ function WordDetailPanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="word-detail-title">
-      <div className="bg-background w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 flex items-center justify-between p-4 border-b bg-background">
+      <div className="bg-primary text-primary-foreground w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl border border-primary-foreground/20" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-primary-foreground/20 bg-primary">
             <div className="flex items-center gap-3 min-w-0">
-            <span className={cn("text-3xl sm:text-4xl font-bold break-words", isHebrew ? "text-green-600 hebrew-font" : "text-blue-600 greek-font")}>
+            <span className={cn("text-3xl sm:text-4xl font-bold break-words", isHebrew ? "text-emerald-300 hebrew-font" : "text-sky-300 greek-font")}>
               {word.hebrewGreek}
             </span>
             <div className="min-w-0">
               <h3 id="word-detail-title" className="font-semibold break-words">{word.transliteration}</h3>
-              <p className="text-sm text-muted-foreground">{entry.strongNumber} · {isHebrew ? 'Hê-bơ-rơ' : 'Hy-lạp'}</p>
+              <p className="text-sm text-primary-foreground/80">{entry.strongNumber} · {isHebrew ? 'Hê-bơ-rơ' : 'Hy-lạp'}</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Đóng">
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Đóng" className="text-primary-foreground hover:bg-primary-foreground/10">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </Button>
         </div>
@@ -337,19 +337,19 @@ function WordDetailPanel({
         <div className="p-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Số Strongs</label>
+              <label className="text-xs text-primary-foreground/80 block mb-1">Số Strongs</label>
               <div className="flex items-center gap-2">
-                <code className="font-mono text-lg px-2 py-1 bg-muted rounded">{entry.strongNumber}</code>
-                <Button variant="outline" size="sm" onClick={() => onCopy(entry.strongNumber, 'Số Strongs')}>
+                <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded">{entry.strongNumber}</code>
+                <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => onCopy(entry.strongNumber, 'Số Strongs')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Phiên âm</label>
+              <label className="text-xs text-primary-foreground/80 block mb-1">Phiên âm</label>
               <div className="flex items-center gap-2">
-                <code className="font-mono text-lg px-2 py-1 bg-muted rounded flex-1">{word.transliteration}</code>
-                <Button variant="outline" size="sm" onClick={() => onCopy(word.transliteration, 'Phiên âm')}>
+                <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded flex-1">{word.transliteration}</code>
+                <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => onCopy(word.transliteration, 'Phiên âm')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -358,10 +358,10 @@ function WordDetailPanel({
 
           {word.parsing && (
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Phân tích</label>
+              <label className="text-xs text-primary-foreground/80 block mb-1">Phân tích</label>
               <div className="flex items-center gap-2">
-                <code className="font-mono text-lg px-2 py-1 bg-muted rounded flex-1">{word.parsing}</code>
-                <Button variant="outline" size="sm" onClick={() => onCopy(word.parsing!, 'Parsing')}>
+                <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded flex-1">{word.parsing}</code>
+                <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => onCopy(word.parsing!, 'Parsing')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -370,40 +370,40 @@ function WordDetailPanel({
 
           {word.morphology && (
             <div className="sm:col-span-2">
-              <label className="text-xs text-muted-foreground block mb-2">Chi tiết hình thái</label>
+              <label className="text-xs text-primary-foreground/80 block mb-2">Chi tiết hình thái</label>
               <div className="grid gap-2 sm:grid-cols-4">
-                {word.morphology.tense && <Badge variant="outline">Thì: {word.morphology.tense}</Badge>}
-                {word.morphology.voice && <Badge variant="outline">Thể: {word.morphology.voice}</Badge>}
-                {word.morphology.mood && <Badge variant="outline">Cách: {word.morphology.mood}</Badge>}
-                {word.morphology.case && <Badge variant="outline">Cách thức: {word.morphology.case}</Badge>}
-                {word.morphology.number && <Badge variant="outline">Số: {word.morphology.number}</Badge>}
-                {word.morphology.person && <Badge variant="outline">Ngôi: {word.morphology.person}</Badge>}
-                {word.morphology.gender && <Badge variant="outline">Giống: {word.morphology.gender}</Badge>}
+                {word.morphology.tense && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">Thì: {word.morphology.tense}</Badge>}
+                {word.morphology.voice && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">Thể: {word.morphology.voice}</Badge>}
+                {word.morphology.mood && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">Cách: {word.morphology.mood}</Badge>}
+                {word.morphology.case && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">Cách thức: {word.morphology.case}</Badge>}
+                {word.morphology.number && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">Số: {word.morphology.number}</Badge>}
+                {word.morphology.person && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">Ngôi: {word.morphology.person}</Badge>}
+                {word.morphology.gender && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">Giống: {word.morphology.gender}</Badge>}
               </div>
             </div>
           )}
 
           <div className="sm:col-span-2">
-            <label className="text-xs text-muted-foreground block mb-2">Định nghĩa</label>
-            <p className="prose prose-sm max-w-none whitespace-pre-wrap">{entry.definition}</p>
+            <label className="text-xs text-primary-foreground/80 block mb-2">Định nghĩa</label>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap text-primary-foreground">{entry.definition}</p>
           </div>
 
           {word.strongEntry?.vietnameseDef && (
             <div className="sm:col-span-2">
-              <label className="text-xs text-muted-foreground block mb-2">Nghĩa tiếng Việt</label>
-              <p className="prose prose-sm max-w-none whitespace-pre-wrap">{word.strongEntry.vietnameseDef}</p>
+              <label className="text-xs text-primary-foreground/80 block mb-2">Nghĩa tiếng Việt</label>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap text-primary-foreground">{word.strongEntry.vietnameseDef}</p>
             </div>
           )}
 
            <div className="sm:col-span-2 flex flex-wrap gap-2">
              <Link href={`/strongs/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
-               <Button className="w-full">Xem chi tiết Strongs</Button>
+                <Button className="w-full bg-primary-foreground text-primary hover:bg-primary-foreground/90">Xem chi tiết Strongs</Button>
              </Link>
              <Link href={`/word-study/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
-               <Button variant="outline" className="w-full">Khảo cứu từ vựng</Button>
+               <Button variant="outline" className="w-full border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10">Khảo cứu từ vựng</Button>
              </Link>
              <Link href={`/genealogy/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
-               <Button variant="outline" className="w-full">Xem phả hệ từ vựng</Button>
+               <Button variant="outline" className="w-full border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10">Xem phả hệ từ vựng</Button>
              </Link>
            </div>
         </div>
