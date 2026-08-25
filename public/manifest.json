@@ -1,6 +1,6 @@
 {
-  "name": "SCRIPTLEX — Tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ, Hy-lạp",
-  "short_name": "SCRIPTLEX",
+  "name": "Scriptlex",
+  "short_name": "Scriptlex",
   "description": "Công cụ tra cứu Strongs, bản đối chiếu Kinh Thánh nguyên ngữ Hê-bơ-rơ & Hy-lạp.",
   "start_url": "/",
   "scope": "/",
