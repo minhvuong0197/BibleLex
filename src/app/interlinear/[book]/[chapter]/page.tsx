@@ -132,7 +132,7 @@ async function getInterlinearData(book: string, chapter: number) {
   }
     },
     ['interlinear-data', book, chapter],
-    { revalidate: 604800 }
+    { revalidate: 300 }
   )()
 }
 
