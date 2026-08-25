@@ -117,16 +117,16 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration} className={showTransliteration ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration} className={showTransliteration ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">ἀ/א</span> Phiên âm
           </Button>
-          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing} className={showParsing ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing} className={showParsing ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">𝔓</span> Phân tích
           </Button>
-          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish} className={showEnglish ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish} className={showEnglish ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">En</span> Tiếng Anh
           </Button>
-          <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese} className={showVietnamese ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese} className={showVietnamese ? 'bg-accent' : ''}>
             <span className="mr-1" aria-hidden="true">Vi</span> Tiếng Việt
           </Button>
         </div>
@@ -340,7 +340,7 @@ function WordDetailPanel({
               <label className="text-xs text-primary-foreground/80 block mb-1">Số Strongs</label>
               <div className="flex items-center gap-2">
                 <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded">{entry.strongNumber}</code>
-                <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => onCopy(entry.strongNumber, 'Số Strongs')}>
+                <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => onCopy(entry.strongNumber, 'Số Strongs')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -349,7 +349,7 @@ function WordDetailPanel({
               <label className="text-xs text-primary-foreground/80 block mb-1">Phiên âm</label>
               <div className="flex items-center gap-2">
                 <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded flex-1">{word.transliteration}</code>
-                <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => onCopy(word.transliteration, 'Phiên âm')}>
+                <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => onCopy(word.transliteration, 'Phiên âm')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -361,7 +361,7 @@ function WordDetailPanel({
               <label className="text-xs text-primary-foreground/80 block mb-1">Phân tích</label>
               <div className="flex items-center gap-2">
                 <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded flex-1">{word.parsing}</code>
-                <Button variant="outline" size="sm" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => onCopy(word.parsing!, 'Parsing')}>
+                <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => onCopy(word.parsing!, 'Parsing')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -397,13 +397,13 @@ function WordDetailPanel({
 
            <div className="sm:col-span-2 flex flex-wrap gap-2">
              <Link href={`/strongs/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
-                <Button className="w-full bg-primary-foreground text-primary hover:bg-primary-foreground/90">Xem chi tiết Strongs</Button>
+                <Button className="w-full bg-primary-foreground text-primary font-semibold hover:bg-primary-foreground/90">Xem chi tiết Strongs</Button>
              </Link>
              <Link href={`/word-study/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
-               <Button variant="outline" className="w-full border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10">Khảo cứu từ vựng</Button>
+               <Button variant="outline" className="w-full bg-primary-foreground text-primary font-semibold border border-primary-foreground/60 hover:bg-primary-foreground/90">Khảo cứu từ vựng</Button>
              </Link>
              <Link href={`/genealogy/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
-               <Button variant="outline" className="w-full border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10">Xem phả hệ từ vựng</Button>
+               <Button variant="outline" className="w-full bg-primary-foreground text-primary font-semibold border border-primary-foreground/60 hover:bg-primary-foreground/90">Xem phả hệ từ vựng</Button>
              </Link>
            </div>
         </div>
