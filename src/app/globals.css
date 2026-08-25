@@ -39,70 +39,70 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 217 100% 52%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 217 100% 52%;
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(222.2 84% 4.9%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(222.2 84% 4.9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222.2 84% 4.9%);
+    --primary: hsl(217 100% 52%);
+    --primary-foreground: hsl(210 40% 98%);
+    --secondary: hsl(210 40% 96.1%);
+    --secondary-foreground: hsl(222.2 47.4% 11.2%);
+    --muted: hsl(210 40% 96.1%);
+    --muted-foreground: hsl(215.4 16.3% 46.9%);
+    --accent: hsl(210 40% 96.1%);
+    --accent-foreground: hsl(222.2 47.4% 11.2%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --destructive-foreground: hsl(210 40% 98%);
+    --border: hsl(214.3 31.8% 91.4%);
+    --input: hsl(214.3 31.8% 91.4%);
+    --ring: hsl(217 100% 52%);
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 100% 58%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 217 100% 58%;
+    --background: hsl(222.2 84% 4.9%);
+    --foreground: hsl(210 40% 98%);
+    --card: hsl(222.2 84% 4.9%);
+    --card-foreground: hsl(210 40% 98%);
+    --popover: hsl(222.2 84% 4.9%);
+    --popover-foreground: hsl(210 40% 98%);
+    --primary: hsl(217 100% 58%);
+    --primary-foreground: hsl(222.2 47.4% 11.2%);
+    --secondary: hsl(217.2 32.6% 17.5%);
+    --secondary-foreground: hsl(210 40% 98%);
+    --muted: hsl(217.2 32.6% 17.5%);
+    --muted-foreground: hsl(215 20.2% 65.1%);
+    --accent: hsl(217.2 32.6% 17.5%);
+    --accent-foreground: hsl(210 40% 98%);
+    --destructive: hsl(0 62.8% 30.6%);
+    --destructive-foreground: hsl(210 40% 98%);
+    --border: hsl(217.2 32.6% 17.5%);
+    --input: hsl(217.2 32.6% 17.5%);
+    --ring: hsl(217 100% 58%);
   }
 
   .academic {
-    --background: 40 36% 88%;
-    --foreground: 24 40% 15%;
-    --card: 40 34% 93%;
-    --card-foreground: 24 40% 15%;
-    --popover: 40 34% 93%;
-    --popover-foreground: 24 40% 15%;
-    --primary: 2 58% 36%;
-    --primary-foreground: 40 36% 96%;
-    --secondary: 35 30% 80%;
-    --secondary-foreground: 24 40% 20%;
-    --muted: 35 28% 83%;
-    --muted-foreground: 26 22% 35%;
-    --accent: 35 32% 78%;
-    --accent-foreground: 24 40% 20%;
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 40 36% 96%;
-    --border: 33 28% 72%;
-    --input: 33 28% 72%;
-    --ring: 2 58% 36%;
+    --background: hsl(40 36% 88%);
+    --foreground: hsl(24 40% 15%);
+    --card: hsl(40 34% 93%);
+    --card-foreground: hsl(24 40% 15%);
+    --popover: hsl(40 34% 93%);
+    --popover-foreground: hsl(24 40% 15%);
+    --primary: hsl(2 58% 36%);
+    --primary-foreground: hsl(40 36% 96%);
+    --secondary: hsl(35 30% 80%);
+    --secondary-foreground: hsl(24 40% 20%);
+    --muted: hsl(35 28% 83%);
+    --muted-foreground: hsl(26 22% 35%);
+    --accent: hsl(35 32% 78%);
+    --accent-foreground: hsl(24 40% 20%);
+    --destructive: hsl(0 62% 40%);
+    --destructive-foreground: hsl(40 36% 96%);
+    --border: hsl(33 28% 72%);
+    --input: hsl(33 28% 72%);
+    --ring: hsl(2 58% 36%);
     --font-sans: var(--font-serif), Georgia, "Times New Roman", Times, serif;
   }
 }
