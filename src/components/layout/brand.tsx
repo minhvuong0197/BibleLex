@@ -19,12 +19,12 @@ export function Brand({
     <Link
       href="/"
       className={cn("flex items-center gap-1 text-blue-600", className)}
-      aria-label="SCRIPTLEX — Trang chủ"
+      aria-label="Scriptlex — Trang chủ"
     >
         <span className={cn("flex shrink-0 items-center justify-center bg-blue-600", s.box, s.radius)}>
         <Logo className={cn(s.icon, "text-white")} aria-hidden="true" />
       </span>
-      <span className={cn("font-bold tracking-tight", s.text)}>SCRIPTLEX</span>
+      <span className={cn("font-bold tracking-tight", s.text)}>Scriptlex</span>
     </Link>
   )
 }

@@ -2,8 +2,8 @@ import Link from "next/link"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Nguồn dữ liệu & Giấy phép · SCRIPTLEX",
-  description: "Danh mục các nguồn dữ liệu Kinh Thánh nguyên ngữ và giấy phép tương ứng được sử dụng trong SCRIPTLEX.",
+  title: "Nguồn dữ liệu & Giấy phép · Scriptlex",
+  description: "Danh mục các nguồn dữ liệu Kinh Thánh nguyên ngữ và giấy phép tương ứng được sử dụng trong Scriptlex.",
 }
 
 const SOURCES = [
@@ -53,7 +53,7 @@ export default function AttributionPage() {
       </Link>
       <h1 className="mt-4 text-3xl font-bold">Nguồn dữ liệu &amp; Giấy phép</h1>
       <p className="mt-3 text-muted-foreground">
-        SCRIPTLEX tổng hợp các nguồn Kinh Thánh nguyên ngữ thuộc phạm vi công cộng (public domain) và
+        Scriptlex tổng hợp các nguồn Kinh Thánh nguyên ngữ thuộc phạm vi công cộng (public domain) và
         một số nguồn giấy phép mở. Chúng tôi ghi nhận công lao của các tổ chức và dự án bên dưới.
       </p>
 
@@ -93,7 +93,7 @@ export default function AttributionPage() {
 
       <div className="mt-8 rounded-lg border bg-card p-5 text-sm text-muted-foreground">
         <p>
-          Phần mềm SCRIPTLEX phát hành dưới giấy phép <strong>MIT</strong>. Các nội dung lexicon và
+          Phần mềm Scriptlex phát hành dưới giấy phép <strong>MIT</strong>. Các nội dung lexicon và
           bản văn Kinh Thánh thuộc sở hữu của các chủ sở hữu tương ứng theo giấy phép nêu trên. Nếu bạn
           có yêu cầu điều chỉnh ghi nhận nguồn, vui lòng liên hệ qua dự án.
         </p>

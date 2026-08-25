@@ -57,7 +57,7 @@ export function Footer() {
             <div className="space-y-4">
               <h3 className="font-semibold">Ủng hộ dự án</h3>
               <p className="text-sm text-muted-foreground">
-                SCRIPTLEX là một sáng kiến phần mềm nguồn mở. Mọi đóng góp về mã nguồn, dữ liệu hay tài chính đều giúp dự án ngày một vững mạnh.
+                Scriptlex là một sáng kiến phần mềm nguồn mở. Mọi đóng góp về mã nguồn, dữ liệu hay tài chính đều giúp dự án ngày một vững mạnh.
               </p>
               <p className="text-sm text-muted-foreground">
                 ❤️ Dành trọn cho công cuộc khảo cứu Kinh Thánh.
@@ -66,7 +66,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© <CopyrightYear /> SCRIPTLEX. Phát hành dưới giấy phép MIT.</p>
+          <p>© <CopyrightYear /> Scriptlex. Phát hành dưới giấy phép MIT.</p>
         </div>
       </div>
     </footer>

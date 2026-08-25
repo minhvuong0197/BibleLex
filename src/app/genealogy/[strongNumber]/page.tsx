@@ -162,7 +162,7 @@ export async function generateMetadata({
   params: Promise<{ strongNumber: string }>
 }): Promise<Metadata> {
   const { strongNumber } = await params
-  return { title: `Phả hệ từ vựng ${strongNumber.toUpperCase()} · SCRIPTLEX` }
+  return { title: `Phả hệ từ vựng ${strongNumber.toUpperCase()} · Scriptlex` }
 }
 
 export default async function GenealogyPage({
