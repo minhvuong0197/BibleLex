@@ -71,6 +71,7 @@ export const metadata: Metadata = {
   creator: "SCRIPTLEX",
   publisher: "SCRIPTLEX",
   robots: "index, follow",
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "vi_VN",
