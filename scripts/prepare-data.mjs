@@ -85,6 +85,7 @@ async function buildStrongs() {
       pronunciation: v.pron || null,
       derivation: v.derivation || null,
       definition: v.strongs_def || '',
+      bdbDef: v.strongs_def || '',
       kjv_def: v.kjv_def || null,
     })
   }
@@ -97,6 +98,7 @@ async function buildStrongs() {
       pronunciation: null,
       derivation: v.derivation || null,
       definition: v.strongs_def || '',
+      thayersDef: v.strongs_def || '',
       kjv_def: v.kjv_def || null,
     })
   }
@@ -158,6 +160,60 @@ const WLC_BOOKS = [
   { osis: 'Zech', name: 'Zechariah', abbr: 'Zech', order: 38 },
   { osis: 'Mal', name: 'Malachi', abbr: 'Mal', order: 39 },
 ]
+
+function stripHtml(s) {
+  return String(s)
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/?[a-zA-Z][^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#?[\w]+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+const LSJ_URLS = [
+  'https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/TFLSJ%20%200-5624%20-%20Translators%20Formatted%20full%20LSJ%20Bible%20lexicon%20-%20STEPBible.org%20CC%20BY.txt',
+  'https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/TFLSJ%20extra%20-%20Translators%20Formatted%20full%20LSJ%20Bible%20lexicon%20-%20STEPBible.org%20CC%20BY.txt',
+]
+
+async function buildLsj() {
+  console.log('\n[1b/4] LSJ (Liddell-Scott-Jones) lexicon — public domain (STEPBible)')
+  const lsjMap = new Map()
+  for (let i = 0; i < LSJ_URLS.length; i++) {
+    const txt = await fetchText(LSJ_URLS[i], join(RAW, `tflsj-${i}.txt`))
+    const lines = txt.split(/\r?\n/)
+    let colIdx = -1
+    for (const line of lines) {
+      if (colIdx < 0) {
+        if (line.includes('eStrong') && line.includes('LSJ Meaning')) {
+          const hdr = line.split('\t')
+          colIdx = hdr.findIndex((h) => /LSJ Meaning/i.test(h))
+        }
+        continue
+      }
+      if (!line.trim()) continue
+      const parts = line.split('\t')
+      const key = parts[0]
+      if (!/^G\d/i.test(key)) continue
+      const num = parseInt(key.replace(/[^0-9]/g, ''), 10)
+      if (!num) continue
+      const def = parts.slice(colIdx).join(' ')
+      const clean = stripHtml(def)
+      if (clean) lsjMap.set('G' + num, clean)
+    }
+  }
+  const path = join(DATA, 'strongs.json')
+  const strongs = JSON.parse(readFileSync(path, 'utf-8'))
+  let n = 0
+  for (const e of strongs) {
+    if (e.lang === 'G' && lsjMap.has(e.strong)) {
+      e.lsjDef = lsjMap.get(e.strong)
+      n++
+    }
+  }
+  writeFileSync(path, JSON.stringify(strongs))
+  console.log(`  ✓ ${n} mục tiếng Hy Lạp được gắn định nghĩa LSJ`)
+}
 
 function hebrewStrongFromLemma(lemma) {
   const m = lemma.match(/(\d{1,4})/)
@@ -485,6 +541,7 @@ async function buildVietnamese() {
 async function main() {
   console.log('SCRIPTLEX — preparing data from public-domain sources')
   const { greekLemmaMap } = await buildStrongs()
+  await buildLsj()
   const hebrew = await buildHebrew()
   const greek = await buildGreek(greekLemmaMap)
   buildMorphology([...hebrew, ...greek])

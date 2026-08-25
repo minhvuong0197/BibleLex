@@ -27,6 +27,9 @@ interface StrongEntryInput {
   pronunciation?: string | null
   derivation?: string | null
   definition: string
+  bdbDef?: string
+  thayersDef?: string
+  lsjDef?: string
   kjv_def?: string | null
 }
 
@@ -95,6 +98,9 @@ async function importStrongs() {
     pronunciation: e.pronunciation ?? null,
     etymology: e.derivation ?? null,
     definition: e.definition,
+    bdbDef: e.bdbDef || null,
+    thayersDef: e.thayersDef || null,
+    lsjDef: e.lsjDef || null,
     kjvDef: e.kjv_def ?? null,
     derivation: e.derivation ?? null,
   }))
@@ -102,6 +108,48 @@ async function importStrongs() {
     await prisma.strongEntry.createMany({ data: c, skipDuplicates: true })
   }
   console.log('  ✓ done')
+}
+
+async function importStrongsRich() {
+  const data = readJSON('strongs.json') as StrongEntryInput[]
+  const rich = data.filter((e) => e.bdbDef || e.thayersDef || e.lsjDef)
+  if (!rich.length) return
+  console.log(`\n[1b/5] Strong's rich definitions (${rich.length} entries)`)
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+  let updated = 0
+  const chunks = chunk(rich, 100)
+  for (let i = 0; i < chunks.length; i++) {
+    const ops = chunks[i].map((e) =>
+      prisma.strongEntry.updateMany({
+        where: { strongNumber: e.strong.toUpperCase() },
+        data: {
+          bdbDef: e.bdbDef || null,
+          thayersDef: e.thayersDef || null,
+          lsjDef: e.lsjDef || null,
+        },
+      }),
+    )
+    let done = false
+    for (let attempt = 1; attempt <= 4 && !done; attempt++) {
+      try {
+        const sub = 20
+        for (let s = 0; s < ops.length; s += sub) {
+          await Promise.all(ops.slice(s, s + sub))
+        }
+        done = true
+      } catch (err) {
+        if (attempt < 4) {
+          console.warn(`  ! chunk ${i + 1}/${chunks.length} lỗi lần ${attempt}, thử lại...`)
+          await sleep(800)
+        } else {
+          console.error(`  ✗ chunk ${i + 1} lỗi: ${(err as Error).message}`)
+        }
+      }
+    }
+    if (done) updated += ops.length
+    if ((i + 1) % 25 === 0) console.log(`  … ${i + 1}/${chunks.length} chunk (${updated})`)
+  }
+  console.log(`  ✓ ${updated.toLocaleString()} rich defs updated`)
 }
 
 async function importBooks() {
@@ -413,6 +461,7 @@ async function main() {
     console.log('Resuming import (no clear) — existing rows are upserted / skipped.')
   }
   await importStrongs()
+  await importStrongsRich()
   await importBooks()
   await importVerseWords()
   await importMorphology()
