@@ -20,31 +20,65 @@ const TYPE_LABELS: Record<string, string> = {
 type CR = { sourceStrong: string; targetStrong: string; type: string }
 type TNode = { strong: string; type: string; children: TNode[] }
 
-function bfs(
+type Adj = { out: Map<string, CR[]>; inc: Map<string, CR[]> }
+let _adjCache: (Adj & { ts: number }) | null = null
+
+async function getAdjacency(): Promise<Adj> {
+  const now = Date.now()
+  if (_adjCache && now - _adjCache.ts < 10 * 60 * 1000) {
+    const { ts, ...rest } = _adjCache
+    return rest
+  }
+  const crs = await prisma.crossReference.findMany({
+    select: { sourceStrong: true, targetStrong: true, type: true },
+  })
+  const out = new Map<string, CR[]>()
+  const inc = new Map<string, CR[]>()
+  for (const c of crs) {
+    if (!out.has(c.sourceStrong)) out.set(c.sourceStrong, [])
+    out.get(c.sourceStrong)!.push(c)
+    if (!inc.has(c.targetStrong)) inc.set(c.targetStrong, [])
+    inc.get(c.targetStrong)!.push(c)
+  }
+  _adjCache = { out, inc, ts: now }
+  return { out, inc }
+}
+
+function bfsMaps(
   start: string,
-  adj: Map<string, CR[]>,
-  getNeighbor: (l: CR) => string,
+  out: Map<string, CR[]>,
+  inc: Map<string, CR[]>,
+  dir: 'up' | 'down',
   types: string[],
   maxDepth: number,
-) {
+): { strong: string; type: string; from: string }[][] {
   const layers: { strong: string; type: string; from: string }[][] = []
   const visited = new Set([start])
-  let current = [{ strong: start, type: '', from: '' }]
+  let frontier = [start]
   for (let d = 0; d < maxDepth; d++) {
     const next: { strong: string; type: string; from: string }[] = []
-    for (const node of current) {
-      const links = adj.get(node.strong) || []
+    const layerSeen = new Set<string>()
+    for (const node of frontier) {
+      const links = (dir === 'up' ? out.get(node) : inc.get(node)) || []
       for (const l of links) {
         if (!types.includes(l.type)) continue
-        const nxt = getNeighbor(l)
-        if (visited.has(nxt)) continue
-        visited.add(nxt)
-        next.push({ strong: nxt, type: l.type, from: node.strong })
+        let neighbor: string
+        if (dir === 'up') {
+          if (l.sourceStrong !== node) continue
+          neighbor = l.targetStrong
+        } else {
+          if (l.targetStrong !== node) continue
+          neighbor = l.sourceStrong
+        }
+        if (visited.has(neighbor) || layerSeen.has(neighbor)) continue
+        layerSeen.add(neighbor)
+        visited.add(neighbor)
+        next.push({ strong: neighbor, type: l.type, from: node })
       }
     }
     if (!next.length) break
     layers.push(next)
-    current = next
+    frontier = next.map((n) => n.strong)
   }
   return layers
 }
@@ -109,35 +143,19 @@ export default async function GenealogyPage({
   const { strongNumber: raw } = await params
   const strongNumber = raw.toUpperCase()
 
-  const crs = await prisma.crossReference.findMany({
-    select: { sourceStrong: true, targetStrong: true, type: true },
-  })
-  const outgoing = new Map<string, CR[]>()
-  const incoming = new Map<string, CR[]>()
-  for (const c of crs) {
-    if (!outgoing.has(c.sourceStrong)) outgoing.set(c.sourceStrong, [])
-    outgoing.get(c.sourceStrong)!.push(c)
-    if (!incoming.has(c.targetStrong)) incoming.set(c.targetStrong, [])
-    incoming.get(c.targetStrong)!.push(c)
-  }
-
-  const upTree = toTree(bfs(strongNumber, outgoing, (l) => l.targetStrong, ['DERIVATIVE', 'ROOT'], 3))
-  const downTree = toTree(bfs(strongNumber, incoming, (l) => l.sourceStrong, ['DERIVATIVE', 'ROOT'], 3))
-
   const sideTypes = ['COMPOUND', 'SYNONYM', 'RELATED', 'CITATION', 'ALLUSION']
-  const outSide = (outgoing.get(strongNumber) || []).filter((c) => sideTypes.includes(c.type))
-  const inSide = (incoming.get(strongNumber) || []).filter((c) => sideTypes.includes(c.type))
+  const { out, inc } = await getAdjacency()
+  const upLayers = bfsMaps(strongNumber, out, inc, 'up', ['DERIVATIVE', 'ROOT'], 3)
+  const downLayers = bfsMaps(strongNumber, out, inc, 'down', ['DERIVATIVE', 'ROOT'], 3)
+  const sideLinks = [...(out.get(strongNumber) || []), ...(inc.get(strongNumber) || [])]
+  const upTree = toTree(upLayers)
+  const downTree = toTree(downLayers)
+  const outSide = sideLinks.filter((c) => c.sourceStrong === strongNumber && sideTypes.includes(c.type))
+  const inSide = sideLinks.filter((c) => c.targetStrong === strongNumber && sideTypes.includes(c.type))
 
   const set = new Set<string>([strongNumber])
-  const collect = (nodes: TNode[]) => {
-    for (const n of nodes) {
-      set.add(n.strong)
-      collect(n.children)
-    }
-  }
-  collect(upTree)
-  collect(downTree)
-  for (const c of [...outSide, ...inSide]) {
+  for (const l of [...upLayers, ...downLayers].flat()) set.add(l.strong)
+  for (const c of sideLinks) {
     set.add(c.targetStrong)
     set.add(c.sourceStrong)
   }
