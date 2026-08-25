@@ -191,7 +191,7 @@ function InterlinearVerseComponent({
           {getBookViName(verse.book)} {verse.chapter}:{verse.verse}
         </span>
         <div className="flex-1 min-w-0">
-          <p className={cn("text-base leading-relaxed", isHebrew ? "hebrew-font text-right" : "greek-font")}>
+          <p className={cn("text-lg sm:text-xl leading-relaxed font-medium text-foreground", isHebrew ? "hebrew-font text-right" : "greek-font")}>
             {verse.text}
           </p>
           {showVietnamese && verse.vietnameseText && (
@@ -262,7 +262,7 @@ function WordToken({
           : `${word.hebrewGreek} (${word.transliteration})`
       }
     >
-      <span className={cn("font-medium select-none", isHebrew ? "text-lg hebrew-font" : "text-base greek-font")}>
+      <span className={cn("font-semibold select-none text-foreground", isHebrew ? "text-2xl hebrew-font" : "text-xl greek-font")}>
         {word.hebrewGreek}
       </span>
       
@@ -321,7 +321,7 @@ function WordDetailPanel({
       <div className="bg-background w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur">
           <div className="flex items-center gap-3">
-            <span className={cn("text-3xl font-bold", isHebrew ? "text-green-600 hebrew-font" : "text-blue-600 greek-font")}>
+            <span className={cn("text-4xl font-bold", isHebrew ? "text-green-600 hebrew-font" : "text-blue-600 greek-font")}>
               {word.hebrewGreek}
             </span>
             <div>

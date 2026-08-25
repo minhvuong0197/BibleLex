@@ -39,7 +39,7 @@ const notoHebrew = Noto_Sans_Hebrew({
 })
 
 const gentiumGreek = Gentium_Plus({
-  variable: "--font-greek",
+  variable: "--font-noto-greek",
   subsets: ["greek"],
   weight: ["400", "700"],
   display: "swap",
