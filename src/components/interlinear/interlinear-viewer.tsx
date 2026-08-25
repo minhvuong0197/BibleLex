@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChevronLeft, ChevronRight, Search, BookOpen, Eye, EyeOff, Copy } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface InterlinearWord {
   wordOrder: number
@@ -254,6 +255,11 @@ function WordToken({
         "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       )}
       aria-label={`Chữ ${word.hebrewGreek}, số Strongs ${word.strongNumber}`}
+      title={
+        word.strongEntry
+          ? `${word.hebrewGreek} (${word.transliteration}) · ${word.strongEntry.definition}`
+          : `${word.hebrewGreek} (${word.transliteration})`
+      }
     >
       <span className={cn("font-medium select-none", isHebrew ? "text-lg hebrew-font" : "text-base greek-font")}>
         {word.hebrewGreek}
@@ -378,14 +384,17 @@ function WordDetailPanel({
             <p className="prose prose-sm max-w-none whitespace-pre-wrap">{entry.definition}</p>
           </div>
 
-          <div className="sm:col-span-2 flex gap-2">
-            <Button onClick={() => { onClose(); window.location.href = `/strongs/${entry.strongNumber}` }} className="flex-1">
-              Xem chi tiết Strongs
-            </Button>
-            <Button variant="outline" onClick={() => { onClose(); window.location.href = `/word-study/${entry.strongNumber}` }} className="flex-1">
-              Khảo cứu từ vựng
-            </Button>
-          </div>
+           <div className="sm:col-span-2 flex flex-wrap gap-2">
+             <Link href={`/strongs/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
+               <Button className="w-full">Xem chi tiết Strongs</Button>
+             </Link>
+             <Link href={`/word-study/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
+               <Button variant="outline" className="w-full">Khảo cứu từ vựng</Button>
+             </Link>
+             <Link href={`/genealogy/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">
+               <Button variant="outline" className="w-full">Xem phả hệ từ vựng</Button>
+             </Link>
+           </div>
         </div>
       </div>
     </div>

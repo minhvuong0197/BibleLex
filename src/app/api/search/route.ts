@@ -35,14 +35,17 @@ export async function GET(request: NextRequest) {
         }
       } else {
         // Search by transliteration or definition
+        const strongWhere: any = {
+          OR: [
+            { transliteration: { contains: q, mode: 'insensitive' } },
+            { definition: { contains: q, mode: 'insensitive' } },
+            { kjvDef: { contains: q, mode: 'insensitive' } }
+          ]
+        }
+        const lang = searchParams.get('lang')
+        if (lang === 'HEBREW' || lang === 'GREEK') strongWhere.language = lang
         const entries = await prisma.strongEntry.findMany({
-          where: {
-            OR: [
-              { transliteration: { contains: q } },
-              { definition: { contains: q } },
-              { kjvDef: { contains: q } }
-            ]
-          },
+          where: strongWhere,
           take: limit,
           orderBy: { strongNumber: 'asc' }
         })
@@ -97,16 +100,37 @@ export async function GET(request: NextRequest) {
             })
           }
         }
+      } else {
+        const verses = await prisma.verse.findMany({
+          where: {
+            OR: [
+              { text: { contains: q, mode: 'insensitive' } },
+              { vietnameseText: { contains: q, mode: 'insensitive' } }
+            ]
+          },
+          take: limit,
+          orderBy: [{ bookId: 'asc' }, { chapter: 'asc' }, { verse: 'asc' }],
+          include: { book: true }
+        })
+        for (const verse of verses) {
+          results.push({
+            type: 'verse',
+            id: `${verse.book?.abbreviation} ${verse.chapter}:${verse.verse}`,
+            title: `${getBookViName(verse.book?.name || '')} ${verse.chapter}:${verse.verse}`,
+            snippet: (verse.vietnameseText || verse.text).substring(0, 200),
+            data: verse
+          })
+        }
       }
     }
 
     // Topic search
     if (type === 'all' || type === 'topic') {
-      const topics = await prisma.topicalEntry.findMany({
+        const topics = await prisma.topicalEntry.findMany({
         where: {
           OR: [
-            { topic: { contains: q } },
-            { description: { contains: q } }
+            { topic: { contains: q, mode: 'insensitive' } },
+            { description: { contains: q, mode: 'insensitive' } }
           ]
         },
         take: limit,

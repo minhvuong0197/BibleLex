@@ -31,21 +31,43 @@ function SearchContent() {
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(searchParams.get('q') || '')
   const [type, setType] = useState(searchParams.get('type') || 'all')
+  const [lang, setLang] = useState(searchParams.get('lang') || 'all')
   const [results, setResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([])
+  const [showSuggest, setShowSuggest] = useState(false)
 
   useEffect(() => {
     const q = searchParams.get('q')
     const t = searchParams.get('type') || 'all'
+    const l = searchParams.get('lang') || 'all'
     if (q) {
       setQuery(q)
       setType(t)
-      performSearch(q, t)
+      setLang(l)
+      performSearch(q, t, l)
     }
   }, [searchParams])
 
-  const performSearch = async (q: string, t: string) => {
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setSuggestions([])
+      return
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}&type=strong&limit=8`)
+        const data = await res.json()
+        setSuggestions((data.results || []).filter((r: SearchResult) => r.type === 'strong'))
+      } catch {
+        setSuggestions([])
+      }
+    }, 250)
+    return () => clearTimeout(handle)
+  }, [query])
+
+  const performSearch = async (q: string, t: string, l = lang) => {
     if (!q.trim()) {
       setResults([])
       return
@@ -54,6 +76,7 @@ function SearchContent() {
     setError(null)
     try {
       const params = new URLSearchParams({ q: q.trim(), type: t })
+      if (l !== 'all') params.set('lang', l)
       const res = await fetch(`/api/search?${params}`)
       if (!res.ok) throw new Error('Search failed')
       const data = await res.json()
@@ -77,6 +100,13 @@ function SearchContent() {
   const handleTypeChange = (newType: string) => {
     setType(newType)
     const params = new URLSearchParams({ q: query.trim(), type: newType })
+    if (lang !== 'all') params.set('lang', lang)
+    router.push(`/search?${params}`)
+  }
+
+  const handleLangChange = (newLang: string) => {
+    setLang(newLang)
+    const params = new URLSearchParams({ q: query.trim(), type, lang: newLang })
     router.push(`/search?${params}`)
   }
 
@@ -106,13 +136,14 @@ function SearchContent() {
       <Card className="mb-8">
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="relative">
+            <div className="relative" onBlur={() => setTimeout(() => setShowSuggest(false), 150)}>
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Ví dụ: G26, John 3:16, yêu thương, đức tin..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setShowSuggest(true)}
                 className="pl-10 pr-12 text-lg"
                 disabled={isLoading}
               />
@@ -123,6 +154,23 @@ function SearchContent() {
               )}
               {isLoading && (
                 <Loader2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-primary animate-spin" />
+              )}
+              {showSuggest && suggestions.length > 0 && (
+                <ul className="absolute z-20 mt-1 w-full rounded-md border bg-background shadow-lg max-h-72 overflow-auto">
+                  {suggestions.map((s) => (
+                    <li key={s.id}>
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => { setShowSuggest(false); setSuggestions([]); router.push(`/strongs/${s.id}`) }}
+                      >
+                        <span className={cn("rounded px-2 py-0.5 font-mono text-xs", s.data?.language === 'HEBREW' ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300")}>{s.id}</span>
+                        <span className="truncate">{s.title.replace(/^[^—]*—\s*/, '')}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
 
@@ -144,6 +192,25 @@ function SearchContent() {
                 </Button>
               ))}
             </div>
+
+            {(type === 'all' || type === 'strong') && (
+              <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Ngôn ngữ">
+                <span className="text-xs text-muted-foreground">Ngôn ngữ:</span>
+                {[['all', 'Tất cả'], ['HEBREW', 'Hê-bơ-rơ'], ['GREEK', 'Hy-lạp']].map(([l, label]) => (
+                  <Button
+                    key={l}
+                    type="button"
+                    variant={lang === l ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleLangChange(l)}
+                    role="radio"
+                    aria-checked={lang === l}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>

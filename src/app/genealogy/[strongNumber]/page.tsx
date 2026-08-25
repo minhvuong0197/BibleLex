@@ -17,6 +17,20 @@ const TYPE_LABELS: Record<string, string> = {
   ALLUSION: 'Ngụ ý',
 }
 
+const TYPE_COLORS: Record<string, string> = {
+  DERIVATIVE: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  ROOT: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+  SYNONYM: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+  RELATED: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300',
+  COMPOUND: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+  CITATION: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+  ALLUSION: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+}
+
+function typeColor(type: string) {
+  return TYPE_COLORS[type] || 'bg-muted text-muted-foreground'
+}
+
 type CR = { sourceStrong: string; targetStrong: string; type: string }
 type TNode = { strong: string; type: string; children: TNode[] }
 
@@ -103,21 +117,37 @@ function toTree(layers: { strong: string; type: string; from: string }[][]) {
 function TreeList({ nodes, byNum }: { nodes: TNode[]; byNum: Map<string, any> }) {
   if (!nodes.length) return <p className="text-sm text-muted-foreground">Không có.</p>
   return (
-    <ul className="space-y-1.5">
+    <ul className="space-y-2">
       {nodes.map((n) => {
         const e = byNum.get(n.strong)
         return (
           <li key={n.strong}>
-            <div className="flex items-center gap-2">
-              <span className="inline-block rounded border border-border px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
+            <div className="flex items-start gap-2">
+              <span className={`mt-0.5 inline-block rounded px-1.5 py-0.5 text-[10px] uppercase font-medium ${typeColor(n.type)}`}>
                 {TYPE_LABELS[n.type] || n.type}
               </span>
-              <Link href={`/genealogy/${n.strong}`} className="font-mono text-sm hover:text-primary transition-colors">
-                {n.strong} — {e?.transliteration || '—'}
-              </Link>
+              <div className="min-w-0">
+                <Link
+                  href={`/genealogy/${n.strong}`}
+                  className="font-mono text-sm hover:text-primary transition-colors"
+                  title={e?.definition || undefined}
+                >
+                  {n.strong} — {e?.transliteration || '—'}
+                </Link>
+                {e?.definition && (
+                  <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{e.definition}</p>
+                )}
+              </div>
             </div>
             {n.children.length > 0 && (
-              <div className="ml-4 mt-1.5 border-l border-border pl-3">{TreeList({ nodes: n.children, byNum })}</div>
+              <details open className="ml-4 mt-1 border-l border-border pl-3">
+                <summary className="mt-1 cursor-pointer select-none text-xs text-muted-foreground hover:text-foreground">
+                  ▼ {n.children.length} từ liên quan
+                </summary>
+                <div className="mt-1.5">
+                  <TreeList nodes={n.children} byNum={byNum} />
+                </div>
+              </details>
             )}
           </li>
         )
@@ -203,6 +233,19 @@ export default async function GenealogyPage({
         </section>
       </div>
 
+      <section className="mt-8">
+        <h2 className="mb-2 text-sm font-medium text-muted-foreground">Chú thích quan hệ</h2>
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+          {['ROOT', 'DERIVATIVE', 'SYNONYM', 'RELATED', 'COMPOUND', 'CITATION', 'ALLUSION'].map((t) => (
+            <span key={t} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] uppercase font-medium ${typeColor(t)}`}>
+                {TYPE_LABELS[t] || t}
+              </span>
+            </span>
+          ))}
+        </div>
+      </section>
+
       {(outSide.length > 0 || inSide.length > 0) && (
         <section className="mt-8">
           <h2 className="mb-3 text-lg font-semibold">↔ Từ ghép / Đồng nghĩa / Liên quan / Trích dẫn</h2>
@@ -214,9 +257,12 @@ export default async function GenealogyPage({
                 <Link
                   key={i}
                   href={`/genealogy/${other}`}
+                  title={e?.definition || undefined}
                   className="inline-flex items-center gap-2 rounded border border-border px-2 py-1 text-sm hover:border-primary hover:text-primary transition-colors"
                 >
-                  <span className="text-[10px] uppercase text-muted-foreground">{TYPE_LABELS[c.type] || c.type}</span>
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] uppercase font-medium ${typeColor(c.type)}`}>
+                    {TYPE_LABELS[c.type] || c.type}
+                  </span>
                   <span className="font-mono">{other}</span>
                   <span className="text-muted-foreground">{e?.transliteration}</span>
                 </Link>
