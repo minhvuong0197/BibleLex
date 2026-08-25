@@ -56,7 +56,7 @@ export default function Home() {
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Khảo cứu Kinh Thánh <br />
-              <span className="text-primary">nguyên ngữ Hê-bơ-rơ & Hy-lạp</span>
+              <span className="text-foreground">nguyên ngữ Hê-bơ-rơ & Hy-lạp</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Công cụ tra cứu Strongs, bản đối chiếu Kinh Thánh, từ điển Thayer/BDB/LSJ,
