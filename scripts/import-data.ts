@@ -11,6 +11,7 @@
  * Run with: npx tsx scripts/import-data.ts
  */
 
+import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
@@ -351,20 +352,47 @@ async function importVietnamese() {
   console.log(`\n[7/7] Vietnamese (${data.length} câu)`)
   const books = await prisma.bibleBook.findMany({ select: { id: true, name: true } })
   const bookId = new Map(books.map((b) => [b.name, b.id]))
+  const doneRows = await prisma.verse.findMany({
+    where: { vietnameseText: { not: null } },
+    select: { bookId: true, chapter: true, verse: true },
+  })
+  const doneSet = new Set(doneRows.map((r) => `${r.bookId}:${r.chapter}:${r.verse}`))
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
   let updated = 0
-  for (const c of chunk(data, 1000)) {
+  const chunks = chunk(data, 100)
+  for (let i = 0; i < chunks.length; i++) {
+    const c = chunks[i]
     const ops = c
-      .filter((r) => bookId.has(r.book))
-      .map((r) =>
-        prisma.verse.updateMany({
-          where: { bookId: bookId.get(r.book)!, chapter: r.chapter, verse: r.verse },
-          data: { vietnameseText: r.text },
-        })
-      )
-    if (ops.length) {
-      await prisma.$transaction(ops)
-      updated += ops.length
+      .filter((r) => bookId.has(r.book) && !doneSet.has(`${bookId.get(r.book)}:${r.chapter}:${r.verse}`))
+      .map((r) => ({ bookId: bookId.get(r.book)!, chapter: r.chapter, verse: r.verse, text: r.text }))
+    if (!ops.length) continue
+    let done = false
+    for (let attempt = 1; attempt <= 4 && !done; attempt++) {
+      try {
+        const sub = 20
+        for (let s = 0; s < ops.length; s += sub) {
+          const batch = ops.slice(s, s + sub)
+          await Promise.all(
+            batch.map((o) =>
+              prisma.verse.updateMany({
+                where: { bookId: o.bookId, chapter: o.chapter, verse: o.verse },
+                data: { vietnameseText: o.text },
+              }),
+            ),
+          )
+        }
+        done = true
+      } catch (e) {
+        if (attempt < 4) {
+          console.warn(`  ! chunk ${i + 1}/${chunks.length} lỗi lần ${attempt}, thử lại...`)
+          await sleep(800)
+        } else {
+          console.error(`  ✗ chunk ${i + 1} thất bại: ${(e as Error).message}`)
+        }
+      }
     }
+    if (done) updated += ops.length
+    if ((i + 1) % 25 === 0) console.log(`  … ${i + 1}/${chunks.length} chunk (${updated} câu)`)
   }
   console.log(`  ✓ ${updated.toLocaleString()} câu được gắn bản dịch tiếng Việt`)
 }

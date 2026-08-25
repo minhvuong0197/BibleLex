@@ -469,13 +469,14 @@ async function buildVietnamese() {
     const myName = resolveName(raw)
     if (!myName) continue
     const chapters = b.chapters || []
-    chapters.forEach((versesArr, ci) => {
-      const chapter = ci + 1
-      ;(versesArr || []).forEach((text, vi) => {
-        if (!text) return
-        out.push({ book: myName, chapter, verse: vi + 1, text: String(text).trim() })
-      })
-    })
+    for (const c of chapters) {
+      const chapter = c.chapter
+      const versesArr = c.verses || []
+      for (const v of versesArr) {
+        if (!v || !v.text) continue
+        out.push({ book: myName, chapter, verse: v.number, text: String(v.text).trim() })
+      }
+    }
   }
   writeFileSync(join(DATA, 'vietnamese.json'), JSON.stringify(out))
   console.log(`  ✓ ${out.length} câu tiếng Việt (${myBooks.length} sách khớp)`)
