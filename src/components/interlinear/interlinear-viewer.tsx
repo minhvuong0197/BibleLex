@@ -133,7 +133,7 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
       </div>
 
       <ScrollArea className="h-[calc(100vh-300px)] min-h-[500px] rounded-lg border">
-        <div className="p-4 space-y-6" role="list" aria-label="Các câu Kinh Thánh đối chiếu">
+          <div className="p-3 sm:p-4 space-y-6" role="list" aria-label="Các câu Kinh Thánh đối chiếu">
           {verses.map((verse) => (
             <InterlinearVerseComponent
               key={`${verse.book}-${verse.chapter}-${verse.verse}`}
@@ -187,11 +187,11 @@ function InterlinearVerseComponent({
   return (
     <article className="space-y-3" role="listitem">
       <div className="flex items-start gap-4">
-        <span className="flex-shrink-0 w-20 text-right text-sm text-muted-foreground font-mono select-none">
+          <span className="flex-shrink-0 w-16 sm:w-20 text-right text-sm text-muted-foreground font-mono select-none">
           {getBookViName(verse.book)} {verse.chapter}:{verse.verse}
         </span>
         <div className="flex-1 min-w-0">
-          <p className={cn("text-lg sm:text-xl leading-relaxed font-medium text-foreground", isHebrew ? "hebrew-font text-right" : "greek-font")}>
+          <p className={cn("text-lg sm:text-xl leading-relaxed font-medium text-foreground break-words", isHebrew ? "hebrew-font text-right" : "greek-font")}>
             {verse.text}
           </p>
           {showVietnamese && verse.vietnameseText && (
@@ -202,7 +202,7 @@ function InterlinearVerseComponent({
         </div>
       </div>
 
-      <div className="ml-20 space-y-2">
+        <div className="ml-0 sm:ml-20 flex flex-wrap gap-1.5 sm:gap-2">
         {verse.words.map((word, idx) => (
           <WordToken
             key={idx}
@@ -251,7 +251,7 @@ function WordToken({
       type="button"
       onClick={() => onClick(word)}
       className={cn(
-        "inline-flex items-start gap-2 px-2 py-1 rounded transition-all cursor-pointer",
+        "inline-flex items-start gap-2 px-2 py-1 rounded transition-all cursor-pointer max-w-full",
         "hover:bg-accent hover:shadow-md relative z-10",
         "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       )}
@@ -262,11 +262,11 @@ function WordToken({
           : `${word.hebrewGreek} (${word.transliteration})`
       }
     >
-      <span className={cn("font-semibold select-none text-foreground", isHebrew ? "text-2xl hebrew-font" : "text-xl greek-font")}>
+      <span className={cn("font-semibold select-none text-foreground break-words", isHebrew ? "text-2xl hebrew-font" : "text-xl greek-font")}>
         {word.hebrewGreek}
       </span>
       
-      <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 break-words">
         {showTransliteration && (
           <span className="text-xs font-mono text-muted-foreground select-all">
             {word.transliteration}
@@ -320,12 +320,12 @@ function WordDetailPanel({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="word-detail-title">
       <div className="bg-background w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <span className={cn("text-4xl font-bold", isHebrew ? "text-green-600 hebrew-font" : "text-blue-600 greek-font")}>
+            <div className="flex items-center gap-3 min-w-0">
+            <span className={cn("text-3xl sm:text-4xl font-bold break-words", isHebrew ? "text-green-600 hebrew-font" : "text-blue-600 greek-font")}>
               {word.hebrewGreek}
             </span>
-            <div>
-              <h3 id="word-detail-title" className="font-semibold">{word.transliteration}</h3>
+            <div className="min-w-0">
+              <h3 id="word-detail-title" className="font-semibold break-words">{word.transliteration}</h3>
               <p className="text-sm text-muted-foreground">{entry.strongNumber} · {isHebrew ? 'Hê-bơ-rơ' : 'Hy-lạp'}</p>
             </div>
           </div>
