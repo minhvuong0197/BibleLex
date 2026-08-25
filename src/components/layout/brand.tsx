@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils"
 import { Logo } from "@/components/layout/logo"
 
 const SIZES = {
-  lg: { box: "h-12 w-12", icon: "h-11 w-11", text: "text-4xl", radius: "rounded-2xl" },
-  sm: { box: "h-9 w-9", icon: "h-8 w-8", text: "text-2xl", radius: "rounded-xl" },
+  lg: { box: "h-12 w-12", icon: "h-11 w-11", text: "text-4xl" },
+  sm: { box: "h-9 w-9", icon: "h-8 w-8", text: "text-2xl" },
 } as const
 
 export function Brand({
@@ -21,7 +21,7 @@ export function Brand({
       className={cn("flex items-center gap-1 text-[#00A6FF]", className)}
       aria-label="SCRIPTLEX — Trang chủ"
     >
-      <span className={cn("flex shrink-0 items-center justify-center bg-[#00A6FF]", s.box, s.radius)}>
+      <span className={cn("flex shrink-0 items-center justify-center rounded-md bg-[#00A6FF]", s.box)}>
         <Logo className={cn(s.icon, "text-white")} aria-hidden="true" />
       </span>
       <span className={cn("font-bold tracking-tight", s.text)}>SCRIPTLEX</span>
