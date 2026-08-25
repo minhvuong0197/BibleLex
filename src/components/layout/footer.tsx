@@ -46,11 +46,16 @@ export function Footer() {
           <nav aria-label="Nguồn dữ liệu">
             <h3 className="font-semibold mb-4">Nguồn dữ liệu</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Strong's Exhaustive Concordance</li>
-              <li>Thayer's Greek Lexicon</li>
-              <li>Brown-Driver-Briggs Hebrew Lexicon</li>
-              <li>Liddell-Scott-Jones Greek Lexicon</li>
-              <li>Cơ sở dữ liệu hình thái học (OpenText, ETCBC)</li>
+              <li>
+                <Link href="/attribution" className="hover:text-foreground transition-colors">
+                  Chi tiết giấy phép &amp; nguồn →
+                </Link>
+              </li>
+              <li>Strong&apos;s (OpenScriptures) — PD</li>
+              <li>WLC (Hebrew) / SBLGNT (Greek) — PD</li>
+              <li>BDB &amp; Thayer (lexicon) — PD</li>
+              <li>LSJ (STEPBible) — CC BY 4.0</li>
+              <li>Kinh Thánh 1934 (Việt) — PD</li>
             </ul>
           </nav>
 

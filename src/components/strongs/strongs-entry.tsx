@@ -87,6 +87,30 @@ const TYPE_LABELS: Record<string, string> = {
   ALLUSION: 'Ngụ ý',
 }
 
+// Nhãn khi xem ở trang từ NGUỒN (hiển thị từ ĐÍCH): target là gốc/thành phần của từ này
+const FORWARD_LABELS: Record<string, string> = {
+  RELATED: 'Liên quan',
+  SYNONYM: 'Đồng nghĩa',
+  ANTONYM: 'Trái nghĩa',
+  ROOT: 'Gốc từ',
+  DERIVATIVE: 'Gốc từ',
+  COMPOUND: 'Thành phần',
+  CITATION: 'Xem / Tham khảo',
+  ALLUSION: 'Ngụ ý',
+}
+
+// Nhãn khi xem ở trang từ ĐÍCH (hiển thị từ NGUỒN): source là từ phái sinh/từ ghép của từ này
+const REVERSE_LABELS: Record<string, string> = {
+  RELATED: 'Liên quan',
+  SYNONYM: 'Đồng nghĩa',
+  ANTONYM: 'Trái nghĩa',
+  ROOT: 'Có gốc từ',
+  DERIVATIVE: 'Từ phái sinh',
+  COMPOUND: 'Từ ghép',
+  CITATION: 'Trích dẫn bởi',
+  ALLUSION: 'Được ngụ ý',
+}
+
 const MORPH_LABELS: Record<string, string> = {
   tense: 'Thì',
   voice: 'Thể',
@@ -292,6 +316,17 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
         </TabsContent>
 
         <TabsContent value="crossrefs" className="space-y-6">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              Quan hệ từ vựng suy từ trường từ nguyên (derivation / etymology).
+            </p>
+            <Link
+              href={`/genealogy/${entry.strongNumber}`}
+              className="inline-flex items-center gap-1 whitespace-nowrap rounded border border-border px-2 py-1 text-xs hover:border-primary hover:text-primary transition-colors"
+            >
+              Xem phả hệ từ vựng →
+            </Link>
+          </div>
           {(entry.crossRefs && entry.crossRefs.length > 0) || (entry.crossRefTargets && entry.crossRefTargets.length > 0) ? (
             <>
               {entry.crossRefs && entry.crossRefs.length > 0 && (
@@ -379,13 +414,14 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
 
 function CrossRefCard({ ref, isReverse }: { ref: any; isReverse: boolean }) {
   const target = isReverse ? ref.sourceEntry : ref.targetEntry
+  const labelMap = isReverse ? REVERSE_LABELS : FORWARD_LABELS
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-4 pb-4 pr-4 pl-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Badge variant="outline" className="text-xs whitespace-nowrap">
-              {TYPE_LABELS[ref.type] || ref.type}
+              {labelMap[ref.type] || ref.type}
             </Badge>
             <div>
               <Link href={`/strongs/${target.strongNumber}`} className="font-mono font-medium hover:text-primary transition-colors">
