@@ -2,17 +2,29 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/layout/logo"
 
-export function Brand({ className }: { className?: string }) {
+const SIZES = {
+  lg: { box: "h-12 w-12", icon: "h-11 w-11", text: "text-4xl" },
+  sm: { box: "h-9 w-9", icon: "h-8 w-8", text: "text-2xl" },
+} as const
+
+export function Brand({
+  size = "lg",
+  className,
+}: {
+  size?: keyof typeof SIZES
+  className?: string
+}) {
+  const s = SIZES[size]
   return (
     <Link
       href="/"
       className={cn("flex items-center gap-1 text-[#00A6FF]", className)}
       aria-label="SCRIPTLEX — Trang chủ"
     >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]">
-        <Logo className="h-11 w-11 text-white" aria-hidden="true" />
+      <span className={cn("flex shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]", s.box)}>
+        <Logo className={cn(s.icon, "text-white")} aria-hidden="true" />
       </span>
-      <span className="text-4xl font-bold tracking-tight">SCRIPTLEX</span>
+      <span className={cn("font-bold tracking-tight", s.text)}>SCRIPTLEX</span>
     </Link>
   )
 }

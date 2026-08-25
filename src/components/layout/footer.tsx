@@ -11,7 +11,7 @@ export function Footer() {
       <div className="container px-4 py-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <Brand />
+            <Brand size="sm" />
             <p className="text-sm text-muted-foreground max-w-xs">
               Công cụ tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ và Hy-lạp, cùng sự khảo cứu chuyên sâu.
               Phần mềm tự do, mã nguồn mở, dành cho cộng đồng.
