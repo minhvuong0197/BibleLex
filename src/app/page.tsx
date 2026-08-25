@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Logo } from "@/components/layout/logo"
+import { Brand } from "@/components/layout/brand"
 import { BookOpen, Search, Brain, Link as LinkIcon, GitBranch, Star, ArrowRight, CheckCircle, Globe, Database } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -51,11 +51,8 @@ export default function Home() {
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="container px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="mb-6 flex items-center justify-center gap-1">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]">
-                <Logo className="h-11 w-11 text-white" aria-hidden="true" />
-              </span>
-              <span className="text-4xl font-bold tracking-tight text-[#00A6FF]">SCRIPTLEX</span>
+            <div className="mb-6 flex items-center justify-center">
+              <Brand />
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Khảo cứu Kinh Thánh <br />

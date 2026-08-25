@@ -4,7 +4,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, GitBranch } from "lucide-react"
-import { Logo } from "@/components/layout/logo"
+import { Brand } from "@/components/layout/brand"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useClientPathname } from "@/components/layout/use-client-pathname"
 import { useState } from "react"
@@ -25,12 +25,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-1 text-2xl font-bold text-[#00A6FF]" aria-label="SCRIPTLEX Home">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]">
-              <Logo className="h-8 w-8 text-white" />
-            </span>
-            <span>SCRIPTLEX</span>
-          </Link>
+          <Brand />
 
           <nav className="hidden md:flex md:gap-1" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => (

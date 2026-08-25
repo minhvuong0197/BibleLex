@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { GitBranch } from "lucide-react"
-import { Logo } from "@/components/layout/logo"
+import { Brand } from "@/components/layout/brand"
 import { CopyrightYear } from "@/components/layout/copyright-year"
 
 const GITHUB_USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "minhvuong0197"
@@ -11,12 +11,7 @@ export function Footer() {
       <div className="container px-4 py-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-1 text-xl font-bold text-[#00A6FF]" aria-label="Trang chủ SCRIPTLEX">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-[#00A6FF]">
-                <Logo className="h-7 w-7 text-white" />
-              </span>
-              <span>SCRIPTLEX</span>
-            </Link>
+            <Brand />
             <p className="text-sm text-muted-foreground max-w-xs">
               Công cụ tra cứu Kinh Thánh nguyên ngữ Hê-bơ-rơ và Hy-lạp, cùng sự khảo cứu chuyên sâu.
               Phần mềm tự do, mã nguồn mở, dành cho cộng đồng.
