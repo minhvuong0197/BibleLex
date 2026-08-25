@@ -107,12 +107,25 @@ async function buildStrongs() {
 
   // Build a Greek lemma -> strongNumber map for interlinear linking.
   const greekLemmaMap = new Map()
+  const greekLemmaMapCollapsed = new Map()
+  const collapsedCollision = new Set()
   for (const [k, v] of Object.entries(greekDict)) {
     if (!v.lemma) continue
-    const key = normalizeGreek(v.lemma)
-    if (key && !greekLemmaMap.has(key)) greekLemmaMap.set(key, k.toUpperCase())
+    const normKey = normalizeGreek(v.lemma)
+    if (normKey && !greekLemmaMap.has(normKey)) greekLemmaMap.set(normKey, k.toUpperCase())
+    // Fallback for lemmas whose dictionary form diverges from the SBLGNT
+    // lemma only by the β/υ transliteration used for Hebrew proper names
+    // (e.g. dictionary "Δαβίδ" vs SBLGNT "Δαυίδ" → G1138 = David).
+    const cKey = normKey.replace(/[βυ]/g, 'B')
+    if (cKey) {
+      if (greekLemmaMapCollapsed.has(cKey) && greekLemmaMapCollapsed.get(cKey) !== k.toUpperCase()) {
+        collapsedCollision.add(cKey)
+      } else {
+        greekLemmaMapCollapsed.set(cKey, k.toUpperCase())
+      }
+    }
   }
-  return { strongs, greekLemmaMap }
+  return { strongs, greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision }
 }
 
 /* ------------------------------------------------------------------ */
@@ -329,12 +342,30 @@ const GNT_BOOKS = [
   { file: '87-Re', name: 'Revelation', abbr: 'Rev', order: 66 },
 ]
 
-async function buildGreek(greekLemmaMap) {
+async function buildGreek(greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision) {
   console.log('\n[3/4] Greek New Testament (SBLGNT)')
   const books = []
   let totalVerses = 0
   let totalWords = 0
   let linked = 0
+
+  // Resolve a Greek lemma/word to a Strong number, with a β/υ-transliteration
+  // fallback for Hebrew proper names (e.g. David: SBLGNT "Δαυίδ" vs dict "Δαβίδ").
+  const collapsed = (s) => {
+    const c = normalizeGreek(s).replace(/[βυ]/g, 'B')
+    return collapsedCollision.has(c) ? undefined : greekLemmaMapCollapsed.get(c)
+  }
+  const resolve = (lemma, word) => {
+    const nLemma = lemma ? normalizeGreek(lemma) : null
+    const nWord = normalizeGreek(word)
+    return (
+      (nLemma && greekLemmaMap.get(nLemma)) ||
+      greekLemmaMap.get(nWord) ||
+      (nLemma && collapsed(lemma)) ||
+      collapsed(word) ||
+      null
+    )
+  }
 
   for (const b of GNT_BOOKS) {
     const txt = await fetchText(
@@ -356,8 +387,7 @@ async function buildGreek(greekLemmaMap) {
       const lemma = tk[6]
       const parsing = tk[2]
       if (!word || !/[α-ωΑ-Ω]/.test(word)) continue
-      const strong =
-        lemma ? greekLemmaMap.get(normalizeGreek(lemma)) || greekLemmaMap.get(normalizeGreek(word)) || null : null
+      const strong = lemma ? resolve(lemma, word) : resolve(word, word)
       if (strong) linked++
       const key = `${chapter}.${verse}`
       if (!verseMap.has(key)) verseMap.set(key, { chapter, verse, words: [] })
@@ -540,10 +570,10 @@ async function buildVietnamese() {
 
 async function main() {
   console.log('SCRIPTLEX — preparing data from public-domain sources')
-  const { greekLemmaMap } = await buildStrongs()
+  const { greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision } = await buildStrongs()
   await buildLsj()
   const hebrew = await buildHebrew()
-  const greek = await buildGreek(greekLemmaMap)
+  const greek = await buildGreek(greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision)
   buildMorphology([...hebrew, ...greek])
   await buildVietnamese()
   console.log('\n✓ All data prepared in ./data')
