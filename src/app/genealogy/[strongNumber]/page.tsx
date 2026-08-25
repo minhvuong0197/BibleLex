@@ -20,7 +20,13 @@ const TYPE_LABELS: Record<string, string> = {
 type CR = { sourceStrong: string; targetStrong: string; type: string }
 type TNode = { strong: string; type: string; children: TNode[] }
 
-function bfs(start: string, adj: Map<string, CR[]>, types: string[], maxDepth: number) {
+function bfs(
+  start: string,
+  adj: Map<string, CR[]>,
+  getNeighbor: (l: CR) => string,
+  types: string[],
+  maxDepth: number,
+) {
   const layers: { strong: string; type: string; from: string }[][] = []
   const visited = new Set([start])
   let current = [{ strong: start, type: '', from: '' }]
@@ -30,9 +36,10 @@ function bfs(start: string, adj: Map<string, CR[]>, types: string[], maxDepth: n
       const links = adj.get(node.strong) || []
       for (const l of links) {
         if (!types.includes(l.type)) continue
-        if (visited.has(l.targetStrong)) continue
-        visited.add(l.targetStrong)
-        next.push({ strong: l.targetStrong, type: l.type, from: node.strong })
+        const nxt = getNeighbor(l)
+        if (visited.has(nxt)) continue
+        visited.add(nxt)
+        next.push({ strong: nxt, type: l.type, from: node.strong })
       }
     }
     if (!next.length) break
@@ -114,8 +121,8 @@ export default async function GenealogyPage({
     incoming.get(c.targetStrong)!.push(c)
   }
 
-  const upTree = toTree(bfs(strongNumber, outgoing, ['DERIVATIVE', 'ROOT'], 3))
-  const downTree = toTree(bfs(strongNumber, incoming, ['DERIVATIVE', 'ROOT'], 3))
+  const upTree = toTree(bfs(strongNumber, outgoing, (l) => l.targetStrong, ['DERIVATIVE', 'ROOT'], 3))
+  const downTree = toTree(bfs(strongNumber, incoming, (l) => l.sourceStrong, ['DERIVATIVE', 'ROOT'], 3))
 
   const sideTypes = ['COMPOUND', 'SYNONYM', 'RELATED', 'CITATION', 'ALLUSION']
   const outSide = (outgoing.get(strongNumber) || []).filter((c) => sideTypes.includes(c.type))
