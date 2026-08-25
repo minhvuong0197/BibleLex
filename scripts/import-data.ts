@@ -306,12 +306,20 @@ async function importMorphology() {
   console.log('  ✓ done')
 }
 
+function classifyType(text: string, target: string): string {
+  const idx = text.indexOf(target)
+  if (idx < 0) return 'DERIVATIVE'
+  const before = text.slice(Math.max(0, idx - 50), idx).toLowerCase()
+  const after = text.slice(idx + target.length, idx + target.length + 20).toLowerCase()
+  const ctx = `${before} ${after}`
+  if (/(same as|equivalent|identical|i\. ?e\.|viz\.)/.test(before)) return 'SYNONYM'
+  if (/compound/.test(ctx)) return 'COMPOUND'
+  if (/(correspond|cognate|aram)/.test(ctx)) return 'RELATED'
+  if (/(see|compare|cf\.?|refer|allud)/.test(ctx)) return 'CITATION'
+  return 'DERIVATIVE'
+}
+
 async function importCrossReferences() {
-  const crCount = await prisma.crossReference.count()
-  if (crCount > 10000) {
-    console.log(`\n[5/5] Cross-references — already populated (${crCount}), skip`)
-    return
-  }
   console.log('\n[5/5] Cross-references (from derivation / etymology)')
   const entries = await prisma.strongEntry.findMany({
     where: { OR: [{ derivation: { not: null } }, { etymology: { not: null } }] },
@@ -328,14 +336,17 @@ async function importCrossReferences() {
     for (const r of refs) {
       const target = r.toUpperCase()
       if (target === e.strongNumber || seen.has(target) || !existing.has(target)) continue
+      const num = parseInt(target.slice(1), 10)
+      if ((target[0] === 'G' && num > 5624) || (target[0] === 'H' && num > 8674)) continue
       seen.add(target)
-      rows.push({ sourceStrong: e.strongNumber, targetStrong: target, type: 'DERIVATIVE' })
+      rows.push({ sourceStrong: e.strongNumber, targetStrong: target, type: classifyType(text, target) })
     }
   }
+  await prisma.crossReference.deleteMany({})
   for (const c of chunk(rows, 2000)) {
     await prisma.crossReference.createMany({ data: c, skipDuplicates: true })
   }
-  console.log(`  ✓ ${rows.length.toLocaleString()} cross-references`)
+  console.log(`  ✓ ${rows.length.toLocaleString()} cross-references (rebuilt)`)
 }
 
 async function importTopicalData() {
