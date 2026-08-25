@@ -319,7 +319,7 @@ function WordDetailPanel({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="word-detail-title">
       <div className="bg-background w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur">
+        <div className="sticky top-0 flex items-center justify-between p-4 border-b bg-background">
             <div className="flex items-center gap-3 min-w-0">
             <span className={cn("text-3xl sm:text-4xl font-bold break-words", isHebrew ? "text-green-600 hebrew-font" : "text-blue-600 greek-font")}>
               {word.hebrewGreek}
