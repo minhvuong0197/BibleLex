@@ -8,7 +8,9 @@ const AI_BASE_URL =
   process.env.AI_BASE_URL ||
   (AI_PROVIDER === 'gemini'
     ? 'https://generativelanguage.googleapis.com/v1beta/openai'
-    : 'https://api.openai.com/v1')
+    : AI_PROVIDER === 'groq'
+      ? 'https://api.groq.com/openai/v1'
+      : 'https://api.openai.com/v1')
 const AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini'
 const AI_API_KEY = process.env.AI_API_KEY || ''
 
@@ -23,24 +25,33 @@ Trả về DUY NHẤT nội dung tiếng Việt. Không tiêu đề, không Mark
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 async function translate(text: string): Promise<string> {
+  const body: any = {
+    model: AI_MODEL,
+    messages: [
+      { role: 'system', content: SYSTEM },
+      { role: 'user', content: text },
+    ],
+    temperature: 0.3,
+  }
+  // Tắt chế độ "thinking" cho các model sinh chuỗi suy luận (vd. qwen3, gpt-oss)
+  if (AI_MODEL.includes('qwen') || AI_MODEL.includes('gpt-oss')) {
+    body.reasoning_effort = 'none'
+  }
   const res = await fetch(`${AI_BASE_URL.replace(/\/+$/, '')}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AI_API_KEY}` },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [
-        { role: 'system', content: SYSTEM },
-        { role: 'user', content: text },
-      ],
-      temperature: 0.3,
-    }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     const err = await res.text().catch(() => '')
+    if (res.status === 429) throw new Error('429:' + err.slice(0, 120))
     throw new Error(`AI ${res.status}: ${err.slice(0, 200)}`)
   }
   const data = await res.json()
-  return (data?.choices?.[0]?.message?.content || '').trim()
+  let out = (data?.choices?.[0]?.message?.content || '').trim()
+  // Lọc bỏ chuỗi suy luận rò rỉ (phòng hờ)
+  out = out.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<think>[\s\S]*/gi, '').trim()
+  return out
 }
 
 let done = 0
@@ -52,13 +63,17 @@ async function processOne(
   const source = (entry.kjvDef && entry.kjvDef.trim()) || (entry.definition && entry.definition.trim())
   if (!source) return
   let vi = ''
-  for (let attempt = 0; attempt < 2; attempt++) {
+  let attempts = 0
+  while (attempts < 6) {
+    attempts++
     try {
       vi = await translate(source)
       break
     } catch (e) {
-      console.error(`  [${entry.strongNumber}] lỗi: ${(e as Error).message}`)
-      await sleep(1500)
+      const msg = (e as Error).message
+      const isRate = msg.startsWith('429')
+      console.error(`  [${entry.strongNumber}] lỗi (lần ${attempts}): ${isRate ? 'rate-limit, chờ 60s' : msg.slice(0, 80)}`)
+      await sleep(isRate ? 60000 : 2000)
     }
   }
   if (!vi) return
@@ -68,7 +83,7 @@ async function processOne(
   })
   done++
   if (done % 25 === 0) console.log(`  ✓ ${done}/${total} (${entry.strongNumber})`)
-  await sleep(200)
+  await sleep(2100)
 }
 
 async function main() {
