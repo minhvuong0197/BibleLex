@@ -44,7 +44,7 @@ export function StrongsSearch({ defaultValue }: StrongsSearchProps) {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto rounded-md border-2 border-[#00A6FF]/40">
       <CardContent className="pt-6">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold">Tra cứu Strongs</h2>
