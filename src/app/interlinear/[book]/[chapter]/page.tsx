@@ -94,6 +94,7 @@ async function getInterlinearData(book: string, chapter: number) {
         strongNumber: w.strongEntry.strongNumber,
         transliteration: w.strongEntry.transliteration,
         definition: w.strongEntry.definition,
+        vietnameseDef: w.strongEntry.vietnameseDef,
         language: w.strongEntry.language
       } : null,
       morphology: w.strongNumber && morphByStrong.has(w.strongNumber)

@@ -21,6 +21,7 @@ interface InterlinearWord {
     strongNumber: string
     transliteration: string
     definition: string
+    vietnameseDef?: string | null
     language: 'HEBREW' | 'GREEK'
   } | null
   morphology?: {
@@ -292,6 +293,9 @@ function WordToken({
         {showEnglish && word.english && (
           <span className="text-xs text-muted-foreground italic select-all">{word.english}</span>
         )}
+        {word.strongEntry?.vietnameseDef && (
+          <span className="line-clamp-2 text-xs text-primary/90 select-all">{word.strongEntry.vietnameseDef}</span>
+        )}
       </div>
     </button>
   )
@@ -383,6 +387,13 @@ function WordDetailPanel({
             <label className="text-xs text-muted-foreground block mb-2">Định nghĩa</label>
             <p className="prose prose-sm max-w-none whitespace-pre-wrap">{entry.definition}</p>
           </div>
+
+          {word.strongEntry?.vietnameseDef && (
+            <div className="sm:col-span-2">
+              <label className="text-xs text-muted-foreground block mb-2">Nghĩa tiếng Việt</label>
+              <p className="prose prose-sm max-w-none whitespace-pre-wrap">{word.strongEntry.vietnameseDef}</p>
+            </div>
+          )}
 
            <div className="sm:col-span-2 flex flex-wrap gap-2">
              <Link href={`/strongs/${entry.strongNumber}`} onClick={onClose} className="flex-1 min-w-[160px]">

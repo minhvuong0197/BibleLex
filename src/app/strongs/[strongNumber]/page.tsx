@@ -165,6 +165,7 @@ async function getStrongEntry(strongNumber: string): Promise<StrongEntryResult |
       thayersDef: null,
       bdbDef: null,
       lsjDef: null,
+      vietnameseDef: null,
       derivation: null,
       tdk: null,
       gkNumber: null,

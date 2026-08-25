@@ -24,6 +24,7 @@ interface StrongsEntryProps {
     thayersDef?: string | null
     bdbDef?: string | null
     lsjDef?: string | null
+    vietnameseDef?: string | null
     derivation?: string | null
     tdk?: string | null
     gkNumber?: string | null
@@ -209,8 +210,22 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
         </TabsList>
 
         <TabsContent value="definition" className="space-y-6">
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+            <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary">
+              <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs">VI</span>
+              Nghĩa tiếng Việt
+            </h3>
+            {entry.vietnameseDef ? (
+              <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{entry.vietnameseDef}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Chưa có bản dịch tiếng Việt cho mã này. (Đang cập nhật dữ liệu song ngữ.)
+              </p>
+            )}
+          </div>
+
           <div className="prose prose-sm max-w-none">
-             <h3 className="font-semibold mb-2">Định nghĩa Strongs</h3>
+             <h3 className="font-semibold mb-2">Định nghĩa Strongs (tiếng Anh)</h3>
             <p className="whitespace-pre-wrap">{entry.definition || 'Chưa có định nghĩa cho mục này.'}</p>
           </div>
 
@@ -428,6 +443,9 @@ function CrossRefCard({ ref, isReverse }: { ref: any; isReverse: boolean }) {
                 {target.strongNumber} — {target.transliteration}
               </Link>
               <p className="text-sm text-muted-foreground line-clamp-1">{target.definition}</p>
+              {target.vietnameseDef && (
+                <p className="mt-0.5 text-xs text-primary/90 line-clamp-1">{target.vietnameseDef}</p>
+              )}
             </div>
           </div>
           <Badge variant="secondary" className="text-xs whitespace-nowrap">
