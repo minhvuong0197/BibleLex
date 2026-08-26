@@ -8,6 +8,8 @@
  *  - Strong's Hebrew & Greek dictionaries ...... openscriptures/strongs
  *  - Hebrew OT (WLC, Westminster Leningrad Codex) openscriptures/morphhb
  *  - Greek NT (SBLGNT + morphology) ............ morphgnt/sblgnt
+ *  - LSJ Greek lexicon (brief) ................ STEPBible/STEPBible-Data
+ *  - BDB (Hebrew) & Thayer's (Greek) brief ..... STEPBible/STEPBible-Data (CC BY)
  *
  * Output (into ./data):
  *  - strongs.json      [{ strong, lang, word, translit, pronunciation, derivation, definition, kjv_def }]
@@ -18,7 +20,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -85,7 +87,9 @@ async function buildStrongs() {
       pronunciation: v.pron || null,
       derivation: v.derivation || null,
       definition: v.strongs_def || '',
-      bdbDef: v.strongs_def || '',
+      // bdbDef is filled later from the STEPBible Brief (BDB) lexicon in
+      // buildBriefLexicons(); do NOT copy strongs_def here (mislabeled).
+      bdbDef: '',
       kjv_def: v.kjv_def || null,
     })
   }
@@ -98,7 +102,9 @@ async function buildStrongs() {
       pronunciation: null,
       derivation: v.derivation || null,
       definition: v.strongs_def || '',
-      thayersDef: v.strongs_def || '',
+      // thayersDef is filled later from the STEPBible Brief (Thayer's) lexicon
+      // in buildBriefLexicons(); do NOT copy strongs_def here (mislabeled).
+      thayersDef: '',
       kjv_def: v.kjv_def || null,
     })
   }
@@ -226,6 +232,74 @@ async function buildLsj() {
   }
   writeFileSync(path, JSON.stringify(strongs))
   console.log(`  ✓ ${n} mục tiếng Hy Lạp được gắn định nghĩa LSJ`)
+}
+
+/**
+ * Parse a STEPBible "Brief" lexicon file (TBESH / TBESG) into a map of
+ * canonical Strong number -> cleaned definition text.
+ *
+ * The files are tab-separated; the header row starts with `eStrong` and
+ * contains `Gloss` + `Transliteration`. The definition lives in the LAST
+ * column (Hebrew: "Meaning"; Greek: the Abbott-Smith lexicon text).
+ *
+ * `lang` is 'H' or 'G'. Only canonical entries (e.g. `H1`, `G26`) are kept;
+ * extended forms (e.g. `H0001G`) are skipped so each number maps to one
+ * primary entry.
+ */
+export function parseBriefLexicon(text, lang) {
+  const map = new Map()
+  const lines = String(text).split(/\r?\n/)
+  let started = false
+  for (const line of lines) {
+    if (!started) {
+      if (/^eStrong#?\t/.test(line) && /Gloss/.test(line) && /Transliteration/.test(line)) {
+        started = true
+      }
+      continue
+    }
+    if (!line.trim()) continue
+    const parts = line.split('\t')
+    const es = (parts[0] || '').trim()
+    const m = es.match(/^([HG])(\d+)/)
+    if (!m || m[1] !== lang) continue
+    const key = m[1] + parseInt(m[2], 10)
+    if (map.has(key)) continue
+    const meaning = parts[parts.length - 1] || ''
+    const clean = stripHtml(meaning).replace(/\s+/g, ' ').trim()
+    if (clean) map.set(key, clean)
+  }
+  return map
+}
+
+const BRIEF_LEXICON_URLS = {
+  H: 'https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/TBESH%20-%20Translators%20Brief%20lexicon%20of%20Extended%20Strongs%20for%20Hebrew%20-%20STEPBible.org%20CC%20BY.txt',
+  G: 'https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/TBESG%20-%20Translators%20Brief%20lexicon%20of%20Extended%20Strongs%20for%20Greek%20-%20STEPBible.org%20CC%20BY.txt',
+}
+
+async function buildBriefLexicons() {
+  console.log('\n[1c/4] Brief lexicons — BDB (Hebrew) & Thayer\'s (Greek) from STEPBible (CC BY)')
+  const path = join(DATA, 'strongs.json')
+  const strongs = JSON.parse(readFileSync(path, 'utf-8'))
+  let hN = 0
+  let gN = 0
+  for (const lang of ['H', 'G']) {
+    const txt = await fetchText(BRIEF_LEXICON_URLS[lang], join(RAW, `brief-${lang}.txt`))
+    const map = parseBriefLexicon(txt, lang)
+    for (const e of strongs) {
+      if (e.lang !== lang) continue
+      const def = map.get(e.strong)
+      if (!def) continue
+      if (lang === 'H') {
+        e.bdbDef = def
+        hN++
+      } else {
+        e.thayersDef = def
+        gN++
+      }
+    }
+  }
+  writeFileSync(path, JSON.stringify(strongs))
+  console.log(`  ✓ ${hN} Hebrew (BDB brief), ${gN} Greek (Thayer's brief) filled`)
 }
 
 function hebrewStrongFromLemma(lemma) {
@@ -572,6 +646,7 @@ async function main() {
   console.log('SCRIPTLEX — preparing data from public-domain sources')
   const { greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision } = await buildStrongs()
   await buildLsj()
+  await buildBriefLexicons()
   const hebrew = await buildHebrew()
   const greek = await buildGreek(greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision)
   buildMorphology([...hebrew, ...greek])
@@ -580,7 +655,10 @@ async function main() {
   console.log('  Next: npm run import:data')
 }
 
-main().catch((e) => {
-  console.error('\n✗ Preparation failed:', e.message)
-  process.exit(1)
-})
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
+if (isMain) {
+  main().catch((e) => {
+    console.error('\n✗ Preparation failed:', e.message)
+    process.exit(1)
+  })
+}

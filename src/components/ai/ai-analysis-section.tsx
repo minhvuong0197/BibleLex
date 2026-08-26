@@ -37,7 +37,7 @@ export interface AiAnalysisSectionProps {
   transliteration?: string
 }
 
-export function AiAnalysisSection({ strongNumber, language, transliteration }: AiAnalysisSectionProps) {
+export function AiAnalysisSection({ strongNumber, transliteration }: AiAnalysisSectionProps) {
   const [results, setResults] = useState<Record<AiType, string | null>>({
     translate: null,
     research: null,
@@ -57,8 +57,8 @@ export function AiAnalysisSection({ strongNumber, language, transliteration }: A
   const [model, setModel] = useState<string>('')
   const [providerLabel, setProviderLabel] = useState<string>('')
   const [modelOptions, setModelOptions] = useState<string[]>([])
-  const [apiConfigured, setApiConfigured] = useState<boolean>(true)
 
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
   useEffect(() => {
     let cancelled = false
     setError(null)
@@ -89,7 +89,6 @@ export function AiAnalysisSection({ strongNumber, language, transliteration }: A
           setProviderLabel(meta.providerLabel || '')
           setModelOptions(Array.from(new Set(meta.models || [])))
           setModel(meta.model || '')
-          setApiConfigured(Boolean(meta.apiConfigured))
         }
       })
       .catch(() => {})
@@ -97,6 +96,7 @@ export function AiAnalysisSection({ strongNumber, language, transliteration }: A
       cancelled = true
     }
   }, [strongNumber])
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   async function generate(type: AiType, force: boolean) {
     setLoading((s) => ({ ...s, [type]: true }))

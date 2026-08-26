@@ -2,11 +2,10 @@
 
 import { cn, getBookAbbreviation, getBookViName } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, Search, BookOpen, Eye, EyeOff, Copy } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
+import { ChevronLeft, ChevronRight, Copy } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -14,7 +13,7 @@ interface InterlinearWord {
   wordOrder: number
   hebrewGreek: string
   transliteration: string
-  strongNumber: string
+  strongNumber: string | null
   parsing?: string | null
   english?: string | null
   strongEntry?: {
@@ -56,20 +55,12 @@ interface InterlinearViewerProps {
   }
 }
 
-const MORPH_LABELS: Record<string, string> = {
-  tense: 'Thì',
-  voice: 'Thể',
-  mood: 'Cách',
-  case: 'Cách thức',
-  number: 'Số',
-  person: 'Ngôi',
-  gender: 'Giống',
-}
-
 export function InterlinearViewer({ book, chapter, verses, language, navigation }: InterlinearViewerProps) {
   const router = useRouter()
-  const goToChapter = (ch: number) =>
-    router.push(`/interlinear/${getBookAbbreviation(book)}/${ch}`)
+  const goToChapter = useCallback(
+    (ch: number) => router.push(`/interlinear/${getBookAbbreviation(book)}/${ch}`),
+    [book, router]
+  )
 
   const [showTransliteration, setShowTransliteration] = useState(true)
   const [showParsing, setShowParsing] = useState(true)
@@ -77,7 +68,6 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
   const [showVietnamese, setShowVietnamese] = useState(true)
   const [selectedWord, setSelectedWord] = useState<InterlinearWord | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
 
   const copyToClipboard = async (text: string, label: string) => {
     await navigator.clipboard.writeText(text)
@@ -85,18 +75,21 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
     setTimeout(() => setCopied(null), 2000)
   }
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowLeft' && navigation.prevChapter) {
-      goToChapter(navigation.prevChapter)
-    } else if (e.key === 'ArrowRight' && navigation.nextChapter) {
-      goToChapter(navigation.nextChapter)
-    }
-  }
+  const handleKeyDown = useCallback(
+    (e: { key: string }) => {
+      if (e.key === 'ArrowLeft' && navigation.prevChapter) {
+        goToChapter(navigation.prevChapter)
+      } else if (e.key === 'ArrowRight' && navigation.nextChapter) {
+        goToChapter(navigation.nextChapter)
+      }
+    },
+    [navigation, goToChapter]
+  )
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [navigation, book])
+  }, [navigation, book, goToChapter, handleKeyDown])
 
   return (
     <div className="space-y-6" onKeyDown={handleKeyDown}>
@@ -117,16 +110,16 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration} className={showTransliteration ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showTransliteration && 'bg-accent')} onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration}>
             <span className="mr-1" aria-hidden="true">ἀ/א</span> Phiên âm
           </Button>
-          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing} className={showParsing ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showParsing && 'bg-accent')} onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing}>
             <span className="mr-1" aria-hidden="true">𝔓</span> Phân tích
           </Button>
-          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish} className={showEnglish ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showEnglish && 'bg-accent')} onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish}>
             <span className="mr-1" aria-hidden="true">En</span> Tiếng Anh
           </Button>
-          <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese} className={showVietnamese ? 'bg-accent' : ''}>
+          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showVietnamese && 'bg-accent')} onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese}>
             <span className="mr-1" aria-hidden="true">Vi</span> Tiếng Việt
           </Button>
         </div>
@@ -242,7 +235,6 @@ function WordToken({
   onCopy: (text: string, label: string) => Promise<void>
   copied: string | null
 }) {
-  const isSelected = copied === word.strongNumber
   const lang = word.strongEntry?.language || language
   const isHebrew = lang === 'HEBREW'
 
@@ -278,7 +270,7 @@ function WordToken({
             "px-1.5 py-0.5 text-xs font-mono rounded select-all cursor-pointer",
             "hover:bg-primary/10 transition-colors",
             isHebrew ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-          )} onClick={(e) => { e.stopPropagation(); onCopy(word.strongNumber, word.strongNumber) }}>
+          )} onClick={(e) => { e.stopPropagation(); onCopy(word.strongNumber ?? '', word.strongNumber ?? '') }}>
             {word.strongNumber}
             {copied === word.strongNumber && <span className="ml-1 text-green-600">✓</span>}
           </span>

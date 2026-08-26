@@ -2,10 +2,9 @@ import { Metadata } from 'next'
 import { prisma } from '@/lib/db'
 import { StrongsSearch } from '@/components/strongs/strongs-search'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ChevronRight, BookOpen, Hash, Globe } from 'lucide-react'
-import { BOOKS_OT, BOOKS_NT, getTestament, getBookAbbreviation, getBookViName } from '@/lib/utils'
+import { ChevronRight, BookOpen, Hash } from 'lucide-react'
+import { BOOKS_OT, BOOKS_NT, getBookAbbreviation, getBookViName } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: "Tra cứu Strongs",
@@ -35,7 +34,7 @@ export default async function StrongsIndexPage() {
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
            <li className="text-foreground font-medium" aria-current="page">Tra cứu Strongs</li>
         </ol>
@@ -130,7 +129,7 @@ export default async function StrongsIndexPage() {
   )
 }
 
-function BookList({ books, testament }: { books: string[]; testament: 'OLD' | 'NEW' }) {
+function BookList({ books }: { books: string[]; testament: 'OLD' | 'NEW' }) {
   return (
     <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {books.map((book) => (

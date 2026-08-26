@@ -220,10 +220,10 @@ export default function Home() {
                 </a>
               </Button>
               <Button size="lg" asChild className="w-full sm:w-auto whitespace-nowrap">
-                <a href="/strongs" target="_blank" rel="noopener noreferrer">
+                <Link href="/strongs" target="_blank" rel="noopener noreferrer">
                   <ArrowRight className="h-5 w-5 mr-2" />
                   Bắt đầu khảo cứu
-                </a>
+                </Link>
               </Button>
             </div>
         </div>

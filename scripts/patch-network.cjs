@@ -8,7 +8,7 @@ const original = os.networkInterfaces;
 os.networkInterfaces = function () {
   try {
     return original.call(this);
-  } catch (e) {
+  } catch {
     return {};
   }
 };

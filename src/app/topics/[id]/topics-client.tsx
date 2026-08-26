@@ -28,7 +28,7 @@ interface TopicsClientProps {
   relatedTopics: RelatedTopic[]
 }
 
-export function TopicsClient({ topic, references, relatedTopics }: TopicsClientProps) {
+export function TopicsClient({ references, relatedTopics }: TopicsClientProps) {
   const refs = [...references].sort(
     (a, b) => a.book.localeCompare(b.book) || a.chapter - b.chapter || a.verseStart - b.verseStart
   )

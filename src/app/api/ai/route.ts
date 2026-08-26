@@ -7,18 +7,73 @@ type AiType = 'translate' | 'research' | 'analysis'
 
 const AI_TYPES: AiType[] = ['translate', 'research', 'analysis']
 
-const TYPE_META: Record<AiType, { label: string; icon?: string }> = {
-  translate: { label: 'Dịch chuyên sâu' },
-  research: { label: 'Nghiên cứu chuyên sâu' },
-  analysis: { label: 'Phân tích chuyên sâu' },
+interface AiTargetEntry {
+  strongNumber: string
+  transliteration: string
+  definition: string
+  language: 'HEBREW' | 'GREEK'
+}
+
+interface AiEntry {
+  language: 'HEBREW' | 'GREEK'
+  strongNumber: string
+  transliteration: string
+  pronunciation?: string | null
+  etymology?: string | null
+  derivation?: string | null
+  definition: string
+  kjvDef?: string | null
+  outlineBiblicalUsage?: string | null
+  thayersDef?: string | null
+  bdbDef?: string | null
+  lsjDef?: string | null
+  tdk?: string | null
+  crossRefs?: Array<{ type: string; note?: string | null; targetEntry: AiTargetEntry }>
+  crossRefTargets?: Array<{ type: string; note?: string | null; sourceEntry: AiTargetEntry }>
+}
+
+interface AiStats {
+  totalVerses: number
+  books: string[]
+  firstOccurrence: { book: string; chapter: number; verse: number } | null
+  lastOccurrence: { book: string; chapter: number; verse: number } | null
+}
+
+interface AiMorph {
+  parsings: string
+  count: number
+  tense?: string | null
+  voice?: string | null
+  mood?: string | null
+  case_?: string | null
+  number?: string | null
+  person?: string | null
+  gender?: string | null
+}
+
+interface AiCrossRef {
+  type: string
+  note?: string | null
+  targetEntry: AiTargetEntry
+}
+
+interface AiSampleVerse {
+  book: string
+  chapter: number
+  verse: number
+  transliteration: string
+  verseText?: string | null
+  hebrewGreek?: string | null
+  parsing?: string | null
+  english?: string | null
 }
 
 function buildContext(data: {
-  entry: any
-  stats: any
-  morphology: any[]
-  crossRefs: any[]
-  sampleVerses: any[]
+  entry: AiEntry
+  stats: AiStats
+  morphology: AiMorph[]
+  crossRefs: AiCrossRef[]
+  sampleVerses: AiSampleVerse[]
 }): string {
   const { entry, stats, morphology, crossRefs, sampleVerses } = data
   const langLabel = getLanguageLabel(entry.language)
@@ -183,12 +238,12 @@ async function loadData(formatted: string) {
   }
 
   const crossRefs = [
-    ...(entry.crossRefs || []).map((c: any) => ({
+    ...(entry.crossRefs || []).map((c) => ({
       type: c.type,
       note: c.note,
       targetEntry: c.targetEntry,
     })),
-    ...(entry.crossRefTargets || []).map((c: any) => ({
+    ...(entry.crossRefTargets || []).map((c) => ({
       type: c.type,
       note: c.note,
       targetEntry: c.sourceEntry,

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
@@ -98,9 +99,9 @@ export default async function TopicPage({ params }: PageProps) {
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
-          <li><a href="/topics" className="hover:text-foreground transition-colors">Chủ đề</a></li>
+          <li><Link href="/topics" className="hover:text-foreground transition-colors">Chủ đề</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">{data.topic.topic}</li>
         </ol>

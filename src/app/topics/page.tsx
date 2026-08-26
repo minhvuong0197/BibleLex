@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import { Search, BookOpen, Link as LinkIcon, ChevronRight, Filter, X } from 'lucide-react'
+import { Search, BookOpen, Link as LinkIcon, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export default async function TopicsPage() {
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">Chủ đề & Tham chiếu chéo</li>
         </ol>
@@ -167,7 +167,7 @@ export default async function TopicsPage() {
               <CardTitle>1. Từ mục nhập Strongs</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>Mỗi trang Strongs đều hiển thị tab "Tham chiếu chéo" với:</p>
+              <p>Mỗi trang Strongs đều hiển thị tab &quot;Tham chiếu chéo&quot; với:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Từ có liên quan</li>
                 <li>Được tham chiếu từ</li>
@@ -184,7 +184,7 @@ export default async function TopicsPage() {
               <p>Khi đọc Kinh Thánh đối chiếu, bấm vào chữ bất kỳ:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Xem bảng chi tiết từ</li>
-                <li>Nhấn "Khảo cứu từ vựng" để xem tham chiếu chéo</li>
+                <li>Nhấn &quot;Khảo cứu từ vựng&quot; để xem tham chiếu chéo</li>
                 <li>So sánh cách dùng trong các câu khác</li>
               </ul>
             </CardContent>

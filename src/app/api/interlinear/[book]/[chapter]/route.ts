@@ -41,7 +41,6 @@ export async function GET(
     }
 
     // Get all verse words for these verses
-    const verseIds = verses.map(v => v.id)
     const verseWords = await prisma.verseWord.findMany({
       where: {
         book: bibleBook.name,
@@ -98,6 +97,7 @@ export async function GET(
       chapter: verse.chapter,
       verse: verse.verse,
       text: verse.text,
+      vietnameseText: verse.vietnameseText ?? null,
       words: (wordsByVerse.get(verse.verse) || []).map(w => ({
         wordOrder: w.wordOrder,
         hebrewGreek: w.hebrewGreek,

@@ -131,7 +131,7 @@ async function getInterlinearData(book: string, chapter: number) {
     }
   }
     },
-    ['interlinear-data', book, chapter],
+    ['interlinear-data', book, String(chapter)],
     { revalidate: 60 }
   )()
 }
@@ -174,9 +174,9 @@ export default async function InterlinearPage({ params }: PageProps) {
       <div className="container py-6 md:py-8">
         <nav className="mb-6 text-sm" aria-label="Breadcrumb">
           <ol className="flex items-center gap-2 text-muted-foreground">
-            <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+            <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
             <li aria-hidden="true">/</li>
-            <li><a href="/interlinear" className="hover:text-foreground transition-colors">Kinh Thánh đối chiếu</a></li>
+            <li><Link href="/interlinear" className="hover:text-foreground transition-colors">Kinh Thánh đối chiếu</Link></li>
             <li aria-hidden="true">/</li>
             <li className="text-foreground font-medium" aria-current="page">{getBookViName(data.book.name)}</li>
           </ol>
@@ -198,11 +198,11 @@ export default async function InterlinearPage({ params }: PageProps) {
     <div className="container py-6 md:py-8">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
-          <li><a href="/interlinear" className="hover:text-foreground transition-colors">Kinh Thánh đối chiếu</a></li>
+          <li><Link href="/interlinear" className="hover:text-foreground transition-colors">Kinh Thánh đối chiếu</Link></li>
           <li aria-hidden="true">/</li>
-          <li><a href={`/interlinear/${data.book.abbreviation}`} className="hover:text-foreground transition-colors">{getBookViName(data.book.name)}</a></li>
+          <li><Link href={`/interlinear/${data.book.abbreviation}`} className="hover:text-foreground transition-colors">{getBookViName(data.book.name)}</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">Chương {data.chapter}</li>
         </ol>

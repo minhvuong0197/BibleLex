@@ -2,9 +2,9 @@ import { Metadata } from 'next'
 import { prisma } from '@/lib/db'
 import { StrongsSearch } from '@/components/strongs/strongs-search'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+
 import Link from 'next/link'
-import { ChevronRight, Brain, Search, BookOpen, TrendingUp, Hash } from 'lucide-react'
+import { Brain, Search, BookOpen, TrendingUp, Hash } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: "Khảo cứu từ vựng",
@@ -53,7 +53,7 @@ export default async function WordStudyPage() {
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">Khảo cứu từ vựng</li>
         </ol>

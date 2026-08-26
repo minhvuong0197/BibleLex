@@ -15,7 +15,8 @@
     "db:generate": "prisma generate",
     "import:data": "tsx scripts/import-data.ts",
     "prepare:data": "node scripts/prepare-data.mjs",
-    "download:data": "node scripts/prepare-data.mjs"
+    "download:data": "node scripts/prepare-data.mjs",
+    "test": "node --test"
   },
   "engines": {
     "node": ">=20.9.0"

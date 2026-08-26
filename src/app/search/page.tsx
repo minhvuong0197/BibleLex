@@ -8,15 +8,27 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { cn, formatStrongNumber, parseStrongNumber, getBookAbbreviation } from "@/lib/utils"
+import { cn, getBookAbbreviation } from "@/lib/utils"
 
-interface SearchResult {
-  type: 'strong' | 'verse' | 'topic'
-  id: string
-  title: string
-  snippet: string
-  data: any
+interface StrongSearchData {
+  language?: 'HEBREW' | 'GREEK'
+  strongNumber: string
+  transliteration: string
 }
+interface VerseSearchData {
+  book?: { name?: string | null; abbreviation?: string | null } | null
+  chapter: number
+  verse?: number
+}
+interface TopicSearchData {
+  id: string
+  topic: string
+  description?: string | null
+}
+type SearchResult =
+  | { type: 'strong'; id: string; title: string; snippet: string; data: StrongSearchData }
+  | { type: 'verse'; id: string; title: string; snippet: string; data: VerseSearchData }
+  | { type: 'topic'; id: string; title: string; snippet: string; data: TopicSearchData }
 
 export default function SearchPage() {
   return (
@@ -38,6 +50,7 @@ function SearchContent() {
   const [suggestions, setSuggestions] = useState<SearchResult[]>([])
   const [showSuggest, setShowSuggest] = useState(false)
 
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps, react-hooks/immutability */
   useEffect(() => {
     const q = searchParams.get('q')
     const t = searchParams.get('type') || 'all'
@@ -49,7 +62,9 @@ function SearchContent() {
       performSearch(q, t, l)
     }
   }, [searchParams])
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps, react-hooks/immutability */
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (query.trim().length < 2) {
       setSuggestions([])
@@ -66,8 +81,9 @@ function SearchContent() {
     }, 250)
     return () => clearTimeout(handle)
   }, [query])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  const performSearch = async (q: string, t: string, l = lang) => {
+  async function performSearch(q: string, t: string, l = lang) {
     if (!q.trim()) {
       setResults([])
       return
@@ -81,7 +97,7 @@ function SearchContent() {
       if (!res.ok) throw new Error('Search failed')
       const data = await res.json()
       setResults(data.results || [])
-    } catch (err) {
+    } catch {
       setError('Có lỗi xảy ra khi tìm kiếm')
       setResults([])
     } finally {
@@ -120,7 +136,7 @@ function SearchContent() {
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">Tìm kiếm</li>
         </ol>
@@ -165,7 +181,7 @@ function SearchContent() {
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => { setShowSuggest(false); setSuggestions([]); router.push(`/strongs/${s.id}`) }}
                       >
-                        <span className={cn("rounded px-2 py-0.5 font-mono text-xs", s.data?.language === 'HEBREW' ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300")}>{s.id}</span>
+                        <span className={cn("rounded px-2 py-0.5 font-mono text-xs", s.type === 'strong' && s.data.language === 'HEBREW' ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300")}>{s.id}</span>
                         <span className="truncate">{s.title.replace(/^[^—]*—\s*/, '')}</span>
                       </button>
                     </li>

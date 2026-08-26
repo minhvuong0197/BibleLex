@@ -1,7 +1,7 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Sun, Moon, BookOpen, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -14,10 +14,14 @@ const options = [
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  useEffect(() => setMounted(true), [])
+  // Avoid hydration mismatch: false on the server, true after mount.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
 
   useEffect(() => {
     function onClick(e: MouseEvent) {

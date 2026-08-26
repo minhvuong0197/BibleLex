@@ -1,4 +1,4 @@
-import type { StrongEntry, Morphology, VerseWord, CrossReference, BibleBook, Verse, TopicalEntry, TopicalReference } from '@prisma/client'
+import type { StrongEntry, Morphology, CrossReference, BibleBook, Verse, TopicalEntry, TopicalReference } from '@prisma/client'
 
 export type Language = 'HEBREW' | 'GREEK'
 export type Testament = 'OLD' | 'NEW'

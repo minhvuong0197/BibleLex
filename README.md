@@ -83,7 +83,7 @@ Mở [http://localhost:3000](http://localhost:3000) (khi chạy local). Bản tr
 
 - **Next.js 16** (App Router) + **React 19**
 - **TypeScript** + **Tailwind CSS v4**
-- **Prisma** + **SQLite** (cơ sở dữ liệu nhẹ, không cần server)
+- **Prisma** + **PostgreSQL** (cơ sở dữ liệu server; bản deploy dùng Postgres cloud)
 - **next-themes** (sáng/tối), **lucide-react** (icon)
 
 ---

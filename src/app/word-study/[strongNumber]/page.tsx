@@ -1,8 +1,9 @@
+import Link from "next/link";
 export const dynamic = "force-dynamic"
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
-import { formatStrongNumber, parseStrongNumber, getLanguageLabel, getLanguageCode } from '@/lib/utils'
+import { formatStrongNumber, parseStrongNumber, getLanguageLabel } from '@/lib/utils'
 import { WordStudyClient } from './word-study-client'
 
 interface PageProps {
@@ -127,15 +128,14 @@ export default async function WordStudyPage({ params }: PageProps) {
 
   const formattedNumber = formatStrongNumber(strongNumber)
   const langLabel = getLanguageLabel(data.entry.language)
-  const langCode = getLanguageCode(data.entry.language)
 
   return (
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
-          <li><a href="/word-study" className="hover:text-foreground transition-colors">Khảo cứu từ vựng</a></li>
+          <li><Link href="/word-study" className="hover:text-foreground transition-colors">Khảo cứu từ vựng</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">{formattedNumber}</li>
         </ol>

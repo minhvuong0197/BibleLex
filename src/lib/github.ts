@@ -26,7 +26,33 @@ export interface GitHubRepo {
 
 const USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "minhvuong0197"
 
-async function ghFetch(path: string): Promise<any> {
+interface GitHubUserRaw {
+  login: string
+  name: string | null
+  avatar_url: string
+  bio: string | null
+  company: string | null
+  location: string | null
+  blog: string | null
+  followers: number
+  following: number
+  public_repos: number
+  html_url: string
+  created_at: string
+}
+
+interface GitHubRepoRaw {
+  id: number
+  name: string
+  description: string | null
+  language: string | null
+  stargazers_count: number
+  forks_count: number
+  html_url: string
+  updated_at: string
+}
+
+async function ghFetch<T = unknown>(path: string): Promise<T> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "User-Agent": "Scriptlex",
@@ -50,8 +76,8 @@ export async function getGitHubData(): Promise<{
 }> {
   try {
     const [profile, repos] = await Promise.all([
-      ghFetch(`/users/${USERNAME}`),
-      ghFetch(`/users/${USERNAME}/repos?sort=updated&per_page=12&type=owner`),
+      ghFetch<GitHubUserRaw>(`/users/${USERNAME}`),
+      ghFetch<GitHubRepoRaw[]>(`/users/${USERNAME}/repos?sort=updated&per_page=12&type=owner`),
     ])
     return {
       profile: {
@@ -68,7 +94,7 @@ export async function getGitHubData(): Promise<{
         htmlUrl: profile.html_url,
         createdAt: profile.created_at,
       },
-      repos: (repos as any[]).map((r) => ({
+      repos: repos.map((r) => ({
         id: r.id,
         name: r.name,
         description: r.description,

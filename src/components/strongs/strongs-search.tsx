@@ -1,17 +1,19 @@
 "use client"
 
 import { useState, FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { Search, ArrowRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { cn, formatStrongNumber, parseStrongNumber } from "@/lib/utils"
+import { formatStrongNumber, parseStrongNumber } from "@/lib/utils"
 
 interface StrongsSearchProps {
   defaultValue?: string
 }
 
 export function StrongsSearch({ defaultValue }: StrongsSearchProps) {
+  const router = useRouter()
   const [query, setQuery] = useState(defaultValue || "")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
@@ -33,9 +35,9 @@ export function StrongsSearch({ defaultValue }: StrongsSearchProps) {
 
     setError(undefined)
     setIsLoading(true)
-    
+
     try {
-      window.location.href = `/strongs/${formatStrongNumber(trimmed)}`
+      router.push(`/strongs/${formatStrongNumber(trimmed)}`)
     } catch {
       setError("Có lỗi xảy ra")
     } finally {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Metadata } from "next"
 import {
   GitBranch,
@@ -64,9 +65,9 @@ export default async function GitHubPage() {
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
           <li>
-            <a href="/" className="hover:text-foreground transition-colors">
+            <Link href="/" className="hover:text-foreground transition-colors">
               Trang chủ
-            </a>
+            </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">
@@ -89,6 +90,8 @@ export default async function GitHubPage() {
         <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardContent className="pt-6 flex flex-col items-center text-center">
+              {/* External GitHub avatar URL — next/image remotePatterns not configured */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={profile.avatarUrl}
                 alt={profile.login}

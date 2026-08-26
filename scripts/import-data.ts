@@ -12,7 +12,7 @@
  */
 
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, CrossRefType } from '@prisma/client'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
@@ -93,7 +93,7 @@ async function importStrongs() {
   console.log(`\n[1/5] Strong's entries (${data.length})`)
   const rows = data.map((e) => ({
     strongNumber: e.strong.toUpperCase(),
-    language: e.lang === 'H' ? 'HEBREW' : 'GREEK',
+      language: (e.lang === 'H' ? 'HEBREW' : 'GREEK') as 'HEBREW' | 'GREEK',
     transliteration: e.translit,
     pronunciation: e.pronunciation ?? null,
     etymology: e.derivation ?? null,
@@ -232,7 +232,17 @@ async function importVerseWords() {
         .map((s) => [s.strongNumber, s])
     )
 
-    const rows: any[] = []
+    const rows: Array<{
+      book: string
+      chapter: number
+      verse: number
+      wordOrder: number
+      hebrewGreek: string
+      transliteration: string
+      strongNumber: string | null
+      parsing: string | null
+      english: string | null
+    }> = []
     for (const v of b.verses) {
       for (const w of v.words) {
         const se = w.strongNumber ? strongMap.get(w.strongNumber) : undefined
@@ -283,8 +293,8 @@ async function importMorphology() {
     person: new Set(['FIRST', 'SECOND', 'THIRD']),
     gender: new Set(['MASCULINE', 'FEMININE', 'NEUTER']),
   }
-  const esc = (v: any) => (v == null ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`)
-  const enumVal = (v: any, set: Set<string>) =>
+  const esc = (v: unknown) => (v == null ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`)
+  const enumVal = (v: unknown, set: Set<string>) =>
     !v ? 'NULL' : set.has(String(v).toUpperCase()) ? `'${String(v).toUpperCase()}'` : 'NULL'
   const rows = data.filter((m) => existing.has(m.strong))
   let inserted = 0
@@ -328,7 +338,7 @@ async function importCrossReferences() {
   const existing = new Set(
     (await prisma.strongEntry.findMany({ select: { strongNumber: true } })).map((s) => s.strongNumber)
   )
-  const rows: any[] = []
+  const rows: Array<{ sourceStrong: string; targetStrong: string; type: CrossRefType }> = []
   for (const e of entries) {
     const text = `${e.derivation || ''} ${e.etymology || ''}`
     const refs = text.match(/[GH]\d+/g) || []
@@ -339,7 +349,7 @@ async function importCrossReferences() {
       const num = parseInt(target.slice(1), 10)
       if ((target[0] === 'G' && num > 5624) || (target[0] === 'H' && num > 8674)) continue
       seen.add(target)
-      rows.push({ sourceStrong: e.strongNumber, targetStrong: target, type: classifyType(text, target) })
+      rows.push({ sourceStrong: e.strongNumber, targetStrong: target, type: classifyType(text, target) as CrossRefType })
     }
   }
   await prisma.crossReference.deleteMany({})

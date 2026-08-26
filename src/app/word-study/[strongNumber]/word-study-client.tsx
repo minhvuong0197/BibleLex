@@ -1,13 +1,12 @@
 "use client"
 
-import { cn, getLanguageLabel, getLanguageCode, getBookAbbreviation, getBookViName, TENSE_LABELS, VOICE_LABELS, MOOD_LABELS, CASE_LABELS, NUMBER_LABELS, PERSON_LABELS, GENDER_LABELS } from "@/lib/utils"
+import { cn, getBookAbbreviation, getBookViName, getLanguageLabel, TENSE_LABELS, VOICE_LABELS, MOOD_LABELS, CASE_LABELS, NUMBER_LABELS, PERSON_LABELS, GENDER_LABELS } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { BookOpen, ChevronLeft, ChevronRight, Copy, Hash, BarChart, Network, BookMarked, ArrowRight, Download, Eye, EyeOff } from "lucide-react"
+import { BookOpen, Copy, Hash, BarChart, Network, BookMarked, ArrowRight } from "lucide-react"
 import { useState } from "react"
 import { AiAnalysisSection } from "@/components/ai/ai-analysis-section"
 
@@ -98,9 +97,6 @@ export function WordStudyClient({ entry, stats, sampleVerses, morphologyBreakdow
     setTimeout(() => setCopied(null), 2000)
   }
 
-  const langCode = getLanguageCode(entry.language)
-  const langLabel = getLanguageLabel(entry.language)
-
   const totalMorphCount = morphologyBreakdown.reduce((sum, m) => sum + m.count, 0)
 
   return (
@@ -162,7 +158,7 @@ export function WordStudyClient({ entry, stats, sampleVerses, morphologyBreakdow
         </Card>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'overview' | 'morphology' | 'usage' | 'network' | 'verses' | 'ai')} className="w-full">
         <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1">
           <TabsTrigger value="overview" className="text-center leading-tight">Tổng quan</TabsTrigger>
           <TabsTrigger value="morphology" className="text-center leading-tight">Hình thái</TabsTrigger>
@@ -194,7 +190,7 @@ export function WordStudyClient({ entry, stats, sampleVerses, morphologyBreakdow
 
           {entry.thayersDef && (
             <div className="prose prose-sm max-w-none border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold mb-2">Thayer's Greek Lexicon</h3>
+              <h3 className="font-semibold mb-2">Thayer&apos;s Greek Lexicon</h3>
               <p className="whitespace-pre-wrap">{entry.thayersDef}</p>
             </div>
           )}
@@ -433,7 +429,7 @@ export function WordStudyClient({ entry, stats, sampleVerses, morphologyBreakdow
                   </h3>
                   <div className="space-y-3">
                     {relatedWords.map((ref, i) => (
-                      <WordNetworkCard key={i} ref={ref} isReverse={false} />
+                      <WordNetworkCard key={i} cr={ref} isReverse={false} />
                     ))}
                   </div>
                 </div>
@@ -446,7 +442,7 @@ export function WordStudyClient({ entry, stats, sampleVerses, morphologyBreakdow
                   </h3>
                   <div className="space-y-3">
                     {reverseRelatedWords.map((ref, i) => (
-                      <WordNetworkCard key={i} ref={ref} isReverse={true} />
+                      <WordNetworkCard key={i} cr={ref} isReverse={true} />
                     ))}
                   </div>
                 </div>
@@ -549,9 +545,23 @@ export function WordStudyClient({ entry, stats, sampleVerses, morphologyBreakdow
   )
 }
 
-function WordNetworkCard({ ref, isReverse }: { ref: any; isReverse: boolean }) {
-  const target = isReverse ? ref.sourceEntry : ref.targetEntry
-  const typeLabel = TYPE_LABELS[ref.type] || ref.type
+interface CrossRefEntry {
+  strongNumber: string
+  transliteration: string
+  definition: string
+  language: "HEBREW" | "GREEK"
+}
+interface CrossRef {
+  type: string
+  note?: string | null
+  targetEntry?: CrossRefEntry
+  sourceEntry?: CrossRefEntry
+}
+
+function WordNetworkCard({ cr, isReverse }: { cr: CrossRef; isReverse: boolean }) {
+  const target = isReverse ? cr.sourceEntry : cr.targetEntry
+  if (!target) return null
+  const typeLabel = TYPE_LABELS[cr.type] || cr.type
   
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -572,8 +582,8 @@ function WordNetworkCard({ ref, isReverse }: { ref: any; isReverse: boolean }) {
             {getLanguageLabel(target.language)}
           </Badge>
         </div>
-        {ref.note && (
-          <p className="mt-2 text-xs text-muted-foreground italic">{ref.note}</p>
+        {cr.note && (
+          <p className="mt-2 text-xs text-muted-foreground italic">{cr.note}</p>
         )}
       </CardContent>
     </Card>

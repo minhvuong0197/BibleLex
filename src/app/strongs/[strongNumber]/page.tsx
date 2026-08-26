@@ -1,3 +1,4 @@
+import Link from "next/link";
 export const dynamic = "force-dynamic"
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -186,7 +187,7 @@ async function getStrongEntry(strongNumber: string): Promise<StrongEntryResult |
 const getCachedStrongEntry = unstable_cache(
   getStrongEntry,
   ['strongs-entry-v2'],
-  { tags: ['strongs'], revalidate: 86400 }
+  { tags: ['strongs'], revalidate: 3600 }
 )
 
 async function getStrongEntryCached(strongNumber: string) {
@@ -235,9 +236,9 @@ export default async function StrongsPage({ params }: PageProps) {
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-muted-foreground">
-          <li><a href="/" className="hover:text-foreground transition-colors">Trang chủ</a></li>
+          <li><Link href="/" className="hover:text-foreground transition-colors">Trang chủ</Link></li>
           <li aria-hidden="true">/</li>
-           <li><a href="/strongs" className="hover:text-foreground transition-colors">Tra cứu Strongs</a></li>
+           <li><Link href="/strongs" className="hover:text-foreground transition-colors">Tra cứu Strongs</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-foreground font-medium" aria-current="page">{formattedNumber}</li>
         </ol>

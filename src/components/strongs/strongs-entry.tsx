@@ -1,11 +1,10 @@
 "use client"
 
-import { cn, getLanguageLabel, getLanguageCode, getBookAbbreviation, getBookViName } from "@/lib/utils"
+import { cn, getLanguageLabel, getBookViName } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { BookOpen, ChevronLeft, ChevronRight, Copy, Link2, Hash, BookMarked, AudioLines } from "lucide-react"
+import { Link2, Hash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { AiAnalysisSection } from "@/components/ai/ai-analysis-section"
@@ -77,17 +76,6 @@ interface StrongsEntryProps {
   }>
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  RELATED: 'Liên quan',
-  SYNONYM: 'Đồng nghĩa',
-  ANTONYM: 'Trái nghĩa',
-  ROOT: 'Gốc từ',
-  DERIVATIVE: 'Từ phái sinh',
-  COMPOUND: 'Từ ghép',
-  CITATION: 'Trích dẫn',
-  ALLUSION: 'Ngụ ý',
-}
-
 // Nhãn khi xem ở trang từ NGUỒN (hiển thị từ ĐÍCH): target là gốc/thành phần của từ này
 const FORWARD_LABELS: Record<string, string> = {
   RELATED: 'Liên quan',
@@ -112,16 +100,6 @@ const REVERSE_LABELS: Record<string, string> = {
   ALLUSION: 'Được ngụ ý',
 }
 
-const MORPH_LABELS: Record<string, string> = {
-  tense: 'Thì',
-  voice: 'Thể',
-  mood: 'Cách',
-  case: 'Cách thức',
-  number: 'Số',
-  person: 'Ngôi',
-  gender: 'Giống',
-}
-
 export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) {
   const [activeTab, setActiveTab] = useState<'definition' | 'morphology' | 'crossrefs' | 'usage' | 'ai'>('definition')
   const [copied, setCopied] = useState<string | null>(null)
@@ -132,7 +110,6 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
     setTimeout(() => setCopied(null), 2000)
   }
 
-  const langCode = getLanguageCode(entry.language)
   const langLabel = getLanguageLabel(entry.language)
 
   return (
@@ -245,7 +222,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
 
           {entry.thayersDef && (
             <div className="prose prose-sm max-w-none border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold mb-2">Thayer's Greek Lexicon</h3>
+              <h3 className="font-semibold mb-2">Thayer&apos;s Greek Lexicon</h3>
               <p className="whitespace-pre-wrap">{entry.thayersDef}</p>
             </div>
           )}
@@ -349,7 +326,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
                   <h3 className="font-semibold mb-4">Từ có liên quan</h3>
                   <div className="space-y-3">
                     {entry.crossRefs.map((ref, i) => (
-                      <CrossRefCard key={i} ref={ref} isReverse={false} />
+                      <CrossRefCard key={i} cr={ref} isReverse={false} />
                     ))}
                   </div>
                 </div>
@@ -359,7 +336,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
                   <h3 className="font-semibold mb-4 mt-6">Được tham chiếu từ</h3>
                   <div className="space-y-3">
                     {entry.crossRefTargets.map((ref, i) => (
-                      <CrossRefCard key={i} ref={ref} isReverse={true} />
+                      <CrossRefCard key={i} cr={ref} isReverse={true} />
                     ))}
                   </div>
                 </div>
@@ -427,8 +404,23 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
   )
 }
 
-function CrossRefCard({ ref, isReverse }: { ref: any; isReverse: boolean }) {
-  const target = isReverse ? ref.sourceEntry : ref.targetEntry
+interface CrossRefEntry {
+  strongNumber: string
+  transliteration: string
+  definition: string
+  language: 'HEBREW' | 'GREEK'
+  vietnameseDef?: string | null
+}
+interface CrossRef {
+  type: string
+  note?: string | null
+  targetEntry?: CrossRefEntry
+  sourceEntry?: CrossRefEntry
+}
+
+function CrossRefCard({ cr, isReverse }: { cr: CrossRef; isReverse: boolean }) {
+  const target = isReverse ? cr.sourceEntry : cr.targetEntry
+  if (!target) return null
   const labelMap = isReverse ? REVERSE_LABELS : FORWARD_LABELS
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -436,7 +428,7 @@ function CrossRefCard({ ref, isReverse }: { ref: any; isReverse: boolean }) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Badge variant="outline" className="text-xs whitespace-nowrap">
-              {labelMap[ref.type] || ref.type}
+              {labelMap[cr.type] || cr.type}
             </Badge>
             <div>
               <Link href={`/strongs/${target.strongNumber}`} className="font-mono font-medium hover:text-primary transition-colors">
@@ -452,8 +444,8 @@ function CrossRefCard({ ref, isReverse }: { ref: any; isReverse: boolean }) {
             {getLanguageLabel(target.language)}
           </Badge>
         </div>
-        {ref.note && (
-          <p className="mt-2 text-xs text-muted-foreground italic">{ref.note}</p>
+        {cr.note && (
+          <p className="mt-2 text-xs text-muted-foreground italic">{cr.note}</p>
         )}
       </CardContent>
     </Card>

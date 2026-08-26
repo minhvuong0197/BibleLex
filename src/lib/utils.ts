@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import type { PrismaClient } from "@prisma/client"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,7 +17,7 @@ export function normalizeBookName(name: string): string {
 }
 
 export async function resolveBibleBook(
-  prisma: any,
+  prisma: PrismaClient,
   book: string
 ): Promise<{
   id: string
@@ -40,7 +41,7 @@ export async function resolveBibleBook(
   const target = normalizeBookName(raw)
   return (
     books.find(
-      (b: any) =>
+      (b) =>
         normalizeBookName(b.abbreviation) === target ||
         normalizeBookName(b.name) === target
     ) || null

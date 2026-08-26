@@ -24,8 +24,15 @@ Trả về DUY NHẤT nội dung tiếng Việt. Không tiêu đề, không Mark
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
+interface ChatBody {
+  model: string
+  messages: Array<{ role: string; content: string }>
+  temperature: number
+  reasoning_effort?: string
+}
+
 async function translate(text: string): Promise<string> {
-  const body: any = {
+  const body: ChatBody = {
     model: AI_MODEL,
     messages: [
       { role: 'system', content: SYSTEM },

@@ -40,8 +40,7 @@ let _adjCache: (Adj & { ts: number }) | null = null
 async function getAdjacency(): Promise<Adj> {
   const now = Date.now()
   if (_adjCache && now - _adjCache.ts < 10 * 60 * 1000) {
-    const { ts, ...rest } = _adjCache
-    return rest
+    return { out: _adjCache.out, inc: _adjCache.inc }
   }
   const crs = await prisma.crossReference.findMany({
     select: { sourceStrong: true, targetStrong: true, type: true },
@@ -114,7 +113,7 @@ function toTree(layers: { strong: string; type: string; from: string }[][]) {
   return roots
 }
 
-function TreeList({ nodes, byNum }: { nodes: TNode[]; byNum: Map<string, any> }) {
+function TreeList({ nodes, byNum }: { nodes: TNode[]; byNum: Map<string, { strongNumber: string; transliteration: string; definition: string; language: 'HEBREW' | 'GREEK' }> }) {
   if (!nodes.length) return <p className="text-sm text-muted-foreground">Không có.</p>
   return (
     <ul className="space-y-2">

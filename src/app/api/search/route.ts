@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { parseStrongNumber, formatStrongNumber, getBookViName, BOOK_VI } from '@/lib/utils'
+import type { Prisma } from '@prisma/client'
+
+type SearchResult = {
+  type: 'strong' | 'verse' | 'topic'
+  id: string
+  title: string
+  snippet: string
+  data: unknown
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -13,7 +22,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ results: [] })
     }
 
-    const results: any[] = []
+    const results: SearchResult[] = []
 
     // Strong's number search
     if (type === 'all' || type === 'strong') {
@@ -35,7 +44,7 @@ export async function GET(request: NextRequest) {
         }
       } else {
         // Search by transliteration or definition
-        const strongWhere: any = {
+        const strongWhere: Prisma.StrongEntryWhereInput = {
           OR: [
             { transliteration: { contains: q, mode: 'insensitive' } },
             { definition: { contains: q, mode: 'insensitive' } },
