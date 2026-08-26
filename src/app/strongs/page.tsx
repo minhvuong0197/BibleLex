@@ -137,9 +137,14 @@ function BookList({ books }: { books: string[]; testament: 'OLD' | 'NEW' }) {
           <Card className="transition-shadow h-full border-l-4 hover:shadow-md border-primary">
             <CardContent className="pt-3 pb-3 pr-3 pl-3">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-sm group-hover:text-primary transition-colors">
-                  {getBookViName(book)}
-                </span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold text-white bg-blue-600 flex-shrink-0">
+                    {getBookAbbreviation(book)}
+                  </span>
+                  <span className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                    {getBookViName(book)}
+                  </span>
+                </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </div>
             </CardContent>

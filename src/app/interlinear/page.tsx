@@ -102,9 +102,9 @@ export default async function InterlinearIndexPage() {
                         <CardContent className="pt-4 pb-4 pr-4 pl-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <span className={cn("w-8 h-8 rounded flex items-center justify-center text-xs font-bold text-white flex-shrink-0", `bg-${info.color}-600`)}>
-                                {abbreviation}
-                              </span>
+                              <span className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold text-white flex-shrink-0 bg-blue-600">
+                                 {abbreviation}
+                               </span>
                               <span className="font-medium text-sm truncate group-hover:text-primary transition-colors">
                                 {getBookViName(book)}
                               </span>
