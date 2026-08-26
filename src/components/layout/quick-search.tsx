@@ -7,7 +7,6 @@ import { parseQuickReference, quickBookSuggestions, type QuickBook, type ParsedR
 
 export function QuickSearch() {
   const router = useRouter()
-  const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<QuickBook[]>([])
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -21,15 +20,21 @@ export function QuickSearch() {
     return () => document.removeEventListener("mousedown", onDoc)
   }, [])
 
-  function update(q: string) {
-    setQuery(q)
-    if (!q.trim()) {
+  // Input uncontrolled để tương thích IME tiếng Việt (gõ dấu không bị ngắt).
+  function refresh(val: string) {
+    if (!val.trim()) {
       setSuggestions([])
       setOpen(false)
       return
     }
-    setSuggestions(quickBookSuggestions(q, 8))
+    setSuggestions(quickBookSuggestions(val, 8))
     setOpen(true)
+  }
+
+  function clearInput() {
+    if (inputRef.current) inputRef.current.value = ""
+    setOpen(false)
+    setSuggestions([])
   }
 
   function go(target: QuickBook | ParsedReference) {
@@ -48,12 +53,12 @@ export function QuickSearch() {
       ? `/interlinear/${abbr}/${chapter}#${abbr}-${chapter}-${verse}`
       : `/interlinear/${abbr}/${chapter}`
     router.push(href)
-    setOpen(false)
-    setQuery("")
+    clearInput()
   }
 
   function submit() {
-    const parsed = parseQuickReference(query)
+    const val = inputRef.current?.value ?? ""
+    const parsed = parseQuickReference(val)
     if (parsed) {
       go(parsed)
       return
@@ -62,17 +67,19 @@ export function QuickSearch() {
   }
 
   function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    // Đang soạn dấu IME (vd gõ 'Sáng') -> không can thiệp phím
+    if (e.nativeEvent.isComposing) return
     if (e.key === " ") {
       const el = e.currentTarget
-      const pos = el.selectionStart ?? query.length
-      const before = query.slice(0, pos)
+      const val = el.value
+      const pos = el.selectionStart ?? val.length
+      const before = val.slice(0, pos)
       // Sau khi gõ số chương, Space tự chuyển thành ':' để gõ số câu
       if (/ \d+$/.test(before)) {
         e.preventDefault()
-        const newVal = query.slice(0, pos) + ":" + query.slice(pos)
-        setQuery(newVal)
-        setSuggestions(quickBookSuggestions(newVal, 8))
-        setOpen(true)
+        const newVal = val.slice(0, pos) + ":" + val.slice(pos)
+        if (inputRef.current) inputRef.current.value = newVal
+        refresh(newVal)
         requestAnimationFrame(() => {
           const node = inputRef.current
           if (node) node.selectionStart = node.selectionEnd = pos + 1
@@ -93,10 +100,10 @@ export function QuickSearch() {
         <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
         <input
           ref={inputRef}
-          value={query}
-          onChange={(e) => update(e.target.value)}
+          defaultValue=""
+          onChange={(e) => refresh(e.target.value)}
           onKeyDown={onKey}
-          onFocus={() => query.trim() && setOpen(true)}
+          onFocus={() => inputRef.current?.value.trim() && setOpen(true)}
           placeholder="Tìm sách (vd: Sa 1:1, Mat 2)…"
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           aria-label="Tìm kiếm nhanh Kinh Thánh"
