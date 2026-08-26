@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import { unstable_cache } from 'next/cache'
+import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
+import { VersionSelector } from '@/components/interlinear/version-selector'
 import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
 
@@ -10,6 +12,7 @@ import { resolveBibleBook, getBookViName } from '@/lib/utils'
 
 interface PageProps {
   params: Promise<{ book: string; chapter: string }>
+  searchParams: Promise<{ version?: string }>
 }
 
 export async function generateStaticParams() {
@@ -20,7 +23,7 @@ export async function generateStaticParams() {
 }
 
 
-async function getInterlinearData(book: string, chapter: number) {
+async function getInterlinearData(book: string, chapter: number, versionCode: string) {
   return unstable_cache(
     async () => {
       const bibleBook = await resolveBibleBook(prisma, book)
@@ -40,7 +43,7 @@ async function getInterlinearData(book: string, chapter: number) {
       where: { bookId: bibleBook.id, chapter: chapter + 1 },
       select: { chapter: true }
     })
-  ])
+   ])
 
   const verseWords = await prisma.verseWord.findMany({
     where: {
@@ -85,12 +88,32 @@ async function getInterlinearData(book: string, chapter: number) {
   const crossRefCounts: Record<number, number> = {}
   for (const r of xrefAgg) crossRefCounts[r.fromVerse] = r._count._all
 
+  // Bản dịch: lấy text của version đang chọn, fallback về VI1934 rồi vietnameseText cũ
+      const [translations, fallbackTranslations] = await Promise.all([
+        prisma.verseTranslation.findMany({
+          where: { bookId: bibleBook.id, chapter, versionId: versionCode },
+          select: { verse: true, text: true },
+        }),
+        versionCode !== 'VI1934'
+          ? prisma.verseTranslation.findMany({
+              where: { bookId: bibleBook.id, chapter, versionId: 'VI1934' },
+              select: { verse: true, text: true },
+            })
+          : Promise.resolve([] as { verse: number; text: string }[]),
+      ])
+      const versionText = new Map<number, string>(translations.map((t) => [t.verse, t.text]))
+      const fallbackText = new Map<number, string>(fallbackTranslations.map((t) => [t.verse, t.text]))
+
   const interlinearVerses = verses.map(verse => ({
       book: bibleBook.name,
       chapter: verse.chapter,
       verse: verse.verse,
         text: verse.text,
-        vietnameseText: verse.vietnameseText ?? null,
+        vietnameseText:
+          versionText.get(verse.verse) ??
+          fallbackText.get(verse.verse) ??
+          verse.vietnameseText ??
+          null,
         kjvText: verse.kjvText ?? null,
         words: (wordsByVerse.get(verse.verse) || []).map(w => ({
       wordOrder: w.wordOrder,
@@ -133,6 +156,7 @@ async function getInterlinearData(book: string, chapter: number) {
       chapters: bibleBook.chapters
     },
     chapter,
+    versionCode,
     verses: interlinearVerses,
     crossRefCounts,
     navigation: {
@@ -141,7 +165,7 @@ async function getInterlinearData(book: string, chapter: number) {
     }
   }
     },
-    ['interlinear-data', book, String(chapter)],
+    ['interlinear-data', book, String(chapter), versionCode],
     { revalidate: 60 }
   )()
 }
@@ -165,15 +189,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function InterlinearPage({ params }: PageProps) {
+export default async function InterlinearPage({ params, searchParams }: PageProps) {
   const { book, chapter } = await params
+  const { version } = await searchParams
+  const cookieStore = await cookies()
+  const versionCode = version || cookieStore.get('scriptlex_version')?.value || 'VI1934'
   const chapterNum = parseInt(chapter, 10)
   
   if (isNaN(chapterNum)) {
     notFound()
   }
 
-  const data = await getInterlinearData(book, chapterNum)
+  const [data, versions] = await Promise.all([
+    getInterlinearData(book, chapterNum, versionCode),
+    prisma.bibleVersion.findMany({ orderBy: { ordinal: 'asc' } }),
+  ])
   
   if (!data) {
     notFound()
@@ -204,6 +234,8 @@ export default async function InterlinearPage({ params }: PageProps) {
     )
   }
 
+  const currentVersion = versions.find((v) => v.id === versionCode) ?? versions[0]
+
   return (
     <div className="container py-6 md:py-8">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
@@ -218,6 +250,15 @@ export default async function InterlinearPage({ params }: PageProps) {
         </ol>
       </nav>
 
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <VersionSelector
+          versions={versions.map((v) => ({ code: v.id, name: v.name, abbreviation: v.abbreviation }))}
+          current={currentVersion?.id ?? 'VI1934'}
+          book={data.book.abbreviation}
+          chapter={data.chapter}
+        />
+      </div>
+
       <InterlinearViewer
         book={data.book.name}
         chapter={data.chapter}
@@ -225,6 +266,7 @@ export default async function InterlinearPage({ params }: PageProps) {
         crossRefCounts={data.crossRefCounts}
         language={data.book.testament === 'OLD' ? 'HEBREW' : 'GREEK'}
         navigation={data.navigation}
+        versionLabel={currentVersion?.name}
       />
     </div>
   )

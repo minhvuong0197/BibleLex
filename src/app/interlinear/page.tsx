@@ -1,8 +1,11 @@
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import { ChevronRight, BookOpen, Globe, Type } from 'lucide-react'
 import { BOOKS_OT, BOOKS_NT, getBookAbbreviation, getBookViName } from '@/lib/utils'
+import { VersionPreference } from '@/components/interlinear/version-preference'
+import { prisma } from '@/lib/db'
 
 export const metadata: Metadata = {
   title: "Kinh Thánh đối chiếu",
@@ -27,6 +30,10 @@ const testamentInfo = {
 }
 
 export default async function InterlinearIndexPage() {
+  const versions = await prisma.bibleVersion.findMany({ orderBy: { ordinal: 'asc' } })
+  const cookieStore = await cookies()
+  const currentVersion = cookieStore.get('scriptlex_version')?.value || 'VI1934'
+
   return (
     <div className="container py-8 md:py-12">
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
@@ -45,6 +52,12 @@ export default async function InterlinearIndexPage() {
         <p className="mt-2 text-lg text-muted-foreground">
           Kinh Thánh đối chiếu với phân tích từ vựng Hê-bơ-rơ/Hy-lạp nguyên ngữ. Mỗi chữ đều hiển thị số Strongs, sự phân tích hình thái, và định nghĩa.
         </p>
+        <div className="mt-4">
+          <VersionPreference
+            versions={versions.map((v) => ({ code: v.id, name: v.name, abbreviation: v.abbreviation }))}
+            current={currentVersion}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mb-12">

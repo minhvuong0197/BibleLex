@@ -55,9 +55,10 @@ interface InterlinearViewerProps {
     prevChapter: number | null
     nextChapter: number | null
   }
+  versionLabel?: string
 }
 
-export function InterlinearViewer({ book, chapter, verses, crossRefCounts, language, navigation }: InterlinearViewerProps) {
+export function InterlinearViewer({ book, chapter, verses, crossRefCounts, language, navigation, versionLabel }: InterlinearViewerProps) {
   const router = useRouter()
   const goToChapter = useCallback(
     (ch: number) => router.push(`/interlinear/${getBookAbbreviation(book)}/${ch}`),
@@ -133,8 +134,8 @@ export function InterlinearViewer({ book, chapter, verses, crossRefCounts, langu
           <Button variant="outline" size="sm" className={toggleCls(showKjv)} onClick={() => setShowKjv(!showKjv)} aria-pressed={showKjv}>
             <span className="mr-1" aria-hidden="true">KJV</span> Tiếng Anh (KJV)
           </Button>
-          <Button variant="outline" size="sm" className={toggleCls(showVietnamese)} onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese}>
-            <span className="mr-1" aria-hidden="true">Vi</span> Tiếng Việt
+          <Button variant="outline" size="sm" className={toggleCls(showVietnamese)} onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese} title={versionLabel ? `Bản dịch: ${versionLabel}` : 'Tiếng Việt'}>
+            <span className="mr-1" aria-hidden="true">Vi</span> {versionLabel ? versionLabel : 'Tiếng Việt'}
           </Button>
         </div>
       </div>
