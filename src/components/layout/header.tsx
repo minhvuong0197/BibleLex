@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Search, Menu, X, BookOpen, Brain, Link as LinkIcon, GitBranch } from "lucide-react"
 import { Brand } from "@/components/layout/brand"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
+import { QuickSearch } from "@/components/layout/quick-search"
 import { useClientPathname } from "@/components/layout/use-client-pathname"
 import { useState } from "react"
 
@@ -45,6 +46,10 @@ export function Header() {
               </Link>
             ))}
           </nav>
+
+          <div className="hidden md:block w-64">
+            <QuickSearch />
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -56,7 +61,8 @@ export function Header() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden border-t px-4 py-4 space-y-2">
+        <div className="md:hidden border-t px-4 py-4 space-y-3">
+          <QuickSearch />
           <nav className="space-y-1" role="navigation" aria-label="Mobile navigation">
             {navigation.map((item) => (
               <Link

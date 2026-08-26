@@ -139,6 +139,178 @@ export function getTestament(book: string): 'OLD' | 'NEW' {
   return BOOKS_OT.includes(book) ? 'OLD' : 'NEW'
 }
 
+// ---------------------------------------------------------------------------
+// Tìm kiếm nhanh & gõ tắt sách (Quick Search / shortcuts)
+// ---------------------------------------------------------------------------
+
+// Bí danh gõ tắt tiếng Việt (và vài biến thể tiếng Anh) cho từng sách,
+// key theo tên tiếng Anh (trùng với BOOKS_OT / BOOKS_NT).
+const VI_ALIASES: Record<string, string[]> = {
+  'Genesis': ['Sa', 'Stk', 'Sáng', 'Sáng thế ký', 'Sáng-thế Ký'],
+  'Exodus': ['Xuat', 'XH', 'Xuất', 'Xuất ê-díp-tô ký', 'Xuất Ê-díp-tô Ký'],
+  'Leviticus': ['Levi', 'Lê-vi', 'Lêvi'],
+  'Numbers': ['Dan', 'Dân', 'Dân số ký', 'Dân-số Ký'],
+  'Deuteronomy': ['Phuc', 'Phục', 'Phục truyền', 'Phục-truyền Luật-lệ Ký', 'Phục truyền luật lệ ký'],
+  'Joshua': ['Giosue', 'Giô-suê'],
+  'Judges': ['Quan', 'Quan xet', 'Quan Xét', 'Các quan xét', 'Các Quan Xét'],
+  'Ruth': ['Rut', 'Ru-tơ'],
+  '1 Samuel': ['1Sa', 'ISam', '1Sam', 'I sam', 'Sa-mu-ên'],
+  '2 Samuel': ['2Sa', 'IISam', '2Sam', 'II sam', 'Sa-mu-ên 2'],
+  '1 Kings': ['1Vua', 'IVua', '1Kgs', 'I cac vua', 'Các vua'],
+  '2 Kings': ['2Vua', 'IIVua', '2Kgs', 'II cac vua'],
+  '1 Chronicles': ['1Su', 'ISu', '1Chr', '1Ch', 'I su-ky', 'Sử-ký'],
+  '2 Chronicles': ['2Su', 'IISu', '2Chr', '2Ch', 'II su-ky'],
+  'Ezra': ['Exra', 'E-xơ-ra'],
+  'Nehemiah': ['Neh', 'Nehemi', 'Nê-hê-mi'],
+  'Esther': ['Esthe', 'E-xơ-te'],
+  'Job': ['Giop', 'Gióp'],
+  'Psalms': ['Thi', 'Thi thin', 'Thi-thiên'],
+  'Proverbs': ['Cham', 'Châm-ngôn', 'Chamngon'],
+  'Ecclesiastes': ['Truyen', 'Truyền-đạo', 'Truyen dao'],
+  'Song of Solomon': ['Nha', 'Nhã-ca', 'Nhaca'],
+  'Isaiah': ['Esai', 'E-sai'],
+  'Jeremiah': ['Gieremi', 'Giê-rê-mi'],
+  'Lamentations': ['Ca thuong', 'Ca-thương'],
+  'Ezekiel': ['Exechien', 'E-xê-chi-ên'],
+  'Daniel': ['Danien', 'Da-ni-ên'],
+  'Hosea': ['Ose', 'Ô-sê'],
+  'Joel': ['Gio-en', 'Giô-ên'],
+  'Amos': ['Amot', 'A-mốt'],
+  'Obadiah': ['Abd', 'Ab-dia', 'Áp-đia'],
+  'Jonah': ['Gio-na', 'Giô-na'],
+  'Micah': ['Mic', 'Mi-chê', 'Mi-che'],
+  'Nahum': ['Nah', 'Na-hum'],
+  'Habakkuk': ['Hab', 'Ha-ba-cúc', 'Haba cuc'],
+  'Zephaniah': ['Sopho', 'Sô-phô-ni', 'Sophoni'],
+  'Haggai': ['Aghe', 'A-ghê'],
+  'Zechariah': ['Xacha', 'Xa-cha-ri', 'Xachari'],
+  'Malachi': ['Mal', 'Ma-la-chi'],
+  'Matthew': ['Mat', 'Mt', 'Ma-thi-ơ', 'Ma thi o'],
+  'Mark': ['Mac', 'Mác'],
+  'Luke': ['Luc', 'Lu-ca'],
+  'John': ['Gi', 'Giăng', 'Giang'],
+  'Acts': ['CV', 'Cv', 'Công-vụ', 'Công vu'],
+  'Romans': ['Rom', 'Rô-ma', 'Roma'],
+  '1 Corinthians': ['1Co', 'ICor', '1Cor', 'I cô-rinh-tô', 'Corinthians'],
+  '2 Corinthians': ['2Co', 'IICor', '2Cor', 'II cô-rinh-tô'],
+  'Galatians': ['Gal', 'Ga-la-ti'],
+  'Ephesians': ['Eph', 'Ê-phê-sô', 'Ephe so'],
+  'Philippians': ['Phil', 'Phi-líp'],
+  'Colossians': ['Col', 'Cô-lô-se'],
+  '1 Thessalonians': ['1Th', 'ITe', '1Thess', 'I tê-sa-lô-ni-ca', 'Tesan'],
+  '2 Thessalonians': ['2Th', 'IITe', '2Thess', 'II tê-sa-lô-ni-ca'],
+  '1 Timothy': ['1Ti', 'ITim', '1Tim', 'I ti-mô-thê'],
+  '2 Timothy': ['2Ti', 'IITim', '2Tim', 'II ti-mô-thê'],
+  'Titus': ['Tit', 'Tít'],
+  'Philemon': ['Phlm', 'Phi-lê-môn', 'Philemon'],
+  'Hebrews': ['Heb', 'Hê-bơ-rơ', 'He bo ro'],
+  'James': ['Jas', 'Gia-cơ', 'Gia co'],
+  '1 Peter': ['1Pe', 'IPe', '1Pet', 'I phi-e-rơ', 'Phier'],
+  '2 Peter': ['2Pe', 'IIPe', '2Pet', 'II phi-e-rơ'],
+  '1 John': ['1Jn', 'IGiang', '1John', 'I giăng'],
+  '2 John': ['2Jn', 'IIGiang', '2John', 'II giăng'],
+  '3 John': ['3Jn', 'IIIGiang', '3John', 'III giăng'],
+  'Jude': ['Giu-de', 'Giu-đe'],
+  'Revelation': ['Rev', 'Khải-huyền', 'Khai huyen'],
+}
+
+export interface QuickBook {
+  abbr: string
+  en: string
+  vi: string
+  aliases: string[]
+}
+
+export const QUICK_BOOKS: QuickBook[] = [...BOOKS_OT, ...BOOKS_NT].map((name) => ({
+  abbr: BOOK_ABBREVIATIONS[name] ?? name.slice(0, 3),
+  en: name,
+  vi: BOOK_VI[name] ?? name,
+  aliases: VI_ALIASES[name] ?? [],
+}))
+
+function stripDiacritics(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+}
+
+export function normalizeQuery(s: string): string {
+  return stripDiacritics(s)
+    .replace(/[-_./]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function bookCandidates(b: QuickBook): string[] {
+  return [b.abbr, b.en, b.vi, ...b.aliases]
+}
+
+function matchBookAliasRaw(q: string): { book: QuickBook; aliasLen: number } | null {
+  let best: QuickBook | null = null
+  let bestLen = 0
+  for (const b of QUICK_BOOKS) {
+    for (const c of bookCandidates(b)) {
+      const nc = normalizeQuery(c)
+      if (!nc) continue
+      if (q === nc) {
+        if (nc.length >= bestLen) {
+          best = b
+          bestLen = nc.length
+        }
+      } else if (q.startsWith(nc)) {
+        const next = q[nc.length]
+        if (next === undefined || /[\s\d:]/.test(next)) {
+          if (nc.length > bestLen) {
+            best = b
+            bestLen = nc.length
+          }
+        }
+      }
+    }
+  }
+  return best ? { book: best, aliasLen: bestLen } : null
+}
+
+export function matchBookAlias(raw: string): QuickBook | null {
+  const m = matchBookAliasRaw(normalizeQuery(raw))
+  return m ? m.book : null
+}
+
+export interface ParsedReference {
+  abbr: string
+  chapter: number
+  verse?: number
+}
+
+export function parseQuickReference(raw: string): ParsedReference | null {
+  const q = normalizeQuery(raw)
+  const m = matchBookAliasRaw(q)
+  if (!m) return null
+  const rest = q.slice(m.aliasLen).trim()
+  const mm = rest.match(/^(\d+)(?::(\d+))?/)
+  if (!mm) return { abbr: m.book.abbr, chapter: 1 }
+  const chapter = parseInt(mm[1], 10)
+  const verse = mm[2] ? parseInt(mm[2], 10) : undefined
+  return { abbr: m.book.abbr, chapter, verse }
+}
+
+export function quickBookSuggestions(raw: string, limit = 8): QuickBook[] {
+  const q = normalizeQuery(raw)
+  if (!q) return QUICK_BOOKS.slice(0, limit)
+  const scored: { b: QuickBook; score: number }[] = []
+  for (const b of QUICK_BOOKS) {
+    let bestScore = Infinity
+    for (const c of bookCandidates(b)) {
+      const nc = normalizeQuery(c)
+      if (!nc) continue
+      if (nc === q) bestScore = Math.min(bestScore, 0)
+      else if (nc.startsWith(q)) bestScore = Math.min(bestScore, nc.length - q.length + 1)
+      else if (nc.includes(q)) bestScore = Math.min(bestScore, 100 + nc.indexOf(q))
+    }
+    if (bestScore !== Infinity) scored.push({ b, score: bestScore })
+  }
+  scored.sort((a, b) => a.score - b.score)
+  return scored.slice(0, limit).map((s) => s.b)
+}
+
 // Re-export morphological label maps (defined in types.ts) so components can
 // import every UI helper from a single module.
 export {
