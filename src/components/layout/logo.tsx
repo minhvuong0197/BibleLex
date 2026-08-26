@@ -12,29 +12,29 @@ export function Logo({ className }: { className?: string }) {
           <stop offset="1" stopColor="#eef4ff" />
         </linearGradient>
       </defs>
-      {/* trang trái & phải (khối, chuyển sáng nhẹ) */}
+      {/* trang trái & phải: tỉ lệ cao hơn, cân đối, viền trắng quanh sách */}
       <path
-        d="M12 6 C 10 4.4 6 4 3.8 5.6 L 3.8 17.5 C 6 15.8 9.8 16 12 17.4 Z"
+        d="M12 4.5 C 10 3 6 2.8 3.8 4.3 L 3.8 19.2 C 6 17.4 9.8 17.6 12 19 Z"
         fill="url(#slxPage)"
-        stroke="#2563eb"
-        strokeWidth="1.1"
+        stroke="#ffffff"
+        strokeWidth="1.3"
         strokeLinejoin="round"
       />
       <path
-        d="M12 6 C 14 4.4 18 4 20.2 5.6 L 20.2 17.5 C 18 15.8 14.2 16 12 17.4 Z"
+        d="M12 4.5 C 14 3 18 2.8 20.2 4.3 L 20.2 19.2 C 18 17.4 14.2 17.6 12 19 Z"
         fill="url(#slxPage)"
-        stroke="#2563eb"
-        strokeWidth="1.1"
+        stroke="#ffffff"
+        strokeWidth="1.3"
         strokeLinejoin="round"
       />
-      {/* gáy giữa */}
-      <path d="M12 6 L 12 17.4" stroke="#2563eb" strokeWidth="1.4" strokeLinecap="round" />
+      {/* gáy giữa (xanh) */}
+      <path d="M12 4.5 L 12 19" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" />
       {/* dòng chữ trang */}
-      <g stroke="#93c5fd" strokeWidth="0.9" strokeLinecap="round" opacity="0.9">
-        <path d="M5.6 9 h4" />
-        <path d="M5.6 11.4 h3.6" />
-        <path d="M14.4 9 h4" />
-        <path d="M14.4 11.4 h3.6" />
+      <g stroke="#60a5fa" strokeWidth="0.9" strokeLinecap="round" opacity="0.95">
+        <path d="M5.6 8.5 h4" />
+        <path d="M5.6 11 h3.6" />
+        <path d="M14.4 8.5 h4" />
+        <path d="M14.4 11 h3.6" />
       </g>
     </svg>
   )
