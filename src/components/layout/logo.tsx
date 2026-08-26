@@ -6,26 +6,35 @@ export function Logo({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      {/* bóng đổ nhẹ tạo chiều sâu 3D */}
-      <ellipse cx="12" cy="20.6" rx="8" ry="1.6" fill="#1e3a8a" opacity="0.18" />
-      {/* hai trang sách (khối trắng, viền xanh) */}
+      <defs>
+        <linearGradient id="slxPage" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="1" stopColor="#eef4ff" />
+        </linearGradient>
+      </defs>
+      {/* trang trái & phải (khối, chuyển sáng nhẹ) */}
       <path
-        d="M12 5 C 10 3.5 6 3 3.5 5 L 3.5 18 C 6 16 10 16.2 12 17.5 C 14 16.2 18 16 20.5 18 L 20.5 5 C 18 3 14 3.5 12 5 Z"
-        fill="#ffffff"
+        d="M12 6 C 10 4.4 6 4 3.8 5.6 L 3.8 17.5 C 6 15.8 9.8 16 12 17.4 Z"
+        fill="url(#slxPage)"
         stroke="#2563eb"
         strokeWidth="1.1"
         strokeLinejoin="round"
       />
-      {/* nếp gấp chính giữa */}
-      <path d="M12 5 L 12 17.5" stroke="#2563eb" strokeWidth="1.3" strokeLinecap="round" />
-      {/* gáy sách (binding) nhô nhẹ ở đỉnh */}
-      <rect x="11" y="3.1" width="2" height="3.4" rx="1.1" fill="#2563eb" />
-      {/* dòng chữ trang (nhẹ) */}
-      <g stroke="#93c5fd" strokeWidth="0.9" strokeLinecap="round" opacity="0.95">
-        <path d="M6 8 h4" />
-        <path d="M6 10.6 h4" />
-        <path d="M14 8 h4" />
-        <path d="M14 10.6 h4" />
+      <path
+        d="M12 6 C 14 4.4 18 4 20.2 5.6 L 20.2 17.5 C 18 15.8 14.2 16 12 17.4 Z"
+        fill="url(#slxPage)"
+        stroke="#2563eb"
+        strokeWidth="1.1"
+        strokeLinejoin="round"
+      />
+      {/* gáy giữa */}
+      <path d="M12 6 L 12 17.4" stroke="#2563eb" strokeWidth="1.4" strokeLinecap="round" />
+      {/* dòng chữ trang */}
+      <g stroke="#93c5fd" strokeWidth="0.9" strokeLinecap="round" opacity="0.9">
+        <path d="M5.6 9 h4" />
+        <path d="M5.6 11.4 h3.6" />
+        <path d="M14.4 9 h4" />
+        <path d="M14.4 11.4 h3.6" />
       </g>
     </svg>
   )
