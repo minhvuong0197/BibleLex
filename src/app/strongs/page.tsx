@@ -129,7 +129,7 @@ export default async function StrongsIndexPage() {
   )
 }
 
-function BookList({ books }: { books: string[]; testament: 'OLD' | 'NEW' }) {
+function BookList({ books, testament }: { books: string[]; testament: 'OLD' | 'NEW' }) {
   return (
     <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {books.map((book) => (
