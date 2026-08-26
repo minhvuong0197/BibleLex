@@ -77,6 +77,14 @@ async function getInterlinearData(book: string, chapter: number) {
     wordsByVerse.get(word.verse)!.push(word)
   }
 
+  const xrefAgg = await prisma.verseCrossReference.groupBy({
+    by: ['fromVerse'],
+    where: { fromBook: bibleBook.name, fromChapter: chapter },
+    _count: { _all: true }
+  })
+  const crossRefCounts: Record<number, number> = {}
+  for (const r of xrefAgg) crossRefCounts[r.fromVerse] = r._count._all
+
   const interlinearVerses = verses.map(verse => ({
       book: bibleBook.name,
       chapter: verse.chapter,
@@ -125,6 +133,7 @@ async function getInterlinearData(book: string, chapter: number) {
     },
     chapter,
     verses: interlinearVerses,
+    crossRefCounts,
     navigation: {
       prevChapter: prevChapter?.chapter ?? null,
       nextChapter: nextChapter?.chapter ?? null
@@ -212,6 +221,7 @@ export default async function InterlinearPage({ params }: PageProps) {
         book={data.book.name}
         chapter={data.chapter}
         verses={data.verses}
+        crossRefCounts={data.crossRefCounts}
         language={data.book.testament === 'OLD' ? 'HEBREW' : 'GREEK'}
         navigation={data.navigation}
       />

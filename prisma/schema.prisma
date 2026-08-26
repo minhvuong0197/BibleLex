@@ -123,6 +123,22 @@ model Verse {
   @@map("verses")
 }
 
+model VerseCrossReference {
+  id          String   @id @default(cuid())
+  fromBook    String   @map("from_book")
+  fromChapter Int      @map("from_chapter")
+  fromVerse   Int      @map("from_verse")
+  toBook      String?  @map("to_book")
+  toChapter   Int      @map("to_chapter")
+  toVerse     Int      @map("to_verse")
+  toLabel     String   @map("to_label")
+  anchor      String?  @map("anchor")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([fromBook, fromChapter, fromVerse])
+  @@map("verse_cross_references")
+}
+
 model TopicalEntry {
   id          String   @id @default(cuid())
   topic       String   @unique

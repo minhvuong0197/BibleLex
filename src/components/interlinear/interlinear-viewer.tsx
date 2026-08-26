@@ -48,6 +48,7 @@ interface InterlinearViewerProps {
   book: string
   chapter: number
   verses: InterlinearVerse[]
+  crossRefCounts: Record<number, number>
   language: 'HEBREW' | 'GREEK'
   navigation: {
     prevChapter: number | null
@@ -55,7 +56,7 @@ interface InterlinearViewerProps {
   }
 }
 
-export function InterlinearViewer({ book, chapter, verses, language, navigation }: InterlinearViewerProps) {
+export function InterlinearViewer({ book, chapter, verses, crossRefCounts, language, navigation }: InterlinearViewerProps) {
   const router = useRouter()
   const goToChapter = useCallback(
     (ch: number) => router.push(`/interlinear/${getBookAbbreviation(book)}/${ch}`),
@@ -139,6 +140,7 @@ export function InterlinearViewer({ book, chapter, verses, language, navigation 
               onWordClick={setSelectedWord}
               onCopy={copyToClipboard}
               copied={copied}
+              crossRefCount={crossRefCounts[verse.verse] ?? 0}
             />
           ))}
         </div>
@@ -164,7 +166,8 @@ function InterlinearVerseComponent({
   showVietnamese,
   onWordClick,
   onCopy,
-  copied
+  copied,
+  crossRefCount
 }: {
   verse: InterlinearVerse
   language: 'HEBREW' | 'GREEK'
@@ -175,10 +178,12 @@ function InterlinearVerseComponent({
   onWordClick: (word: InterlinearWord) => void
   onCopy: (text: string, label: string) => Promise<void>
   copied: string | null
+  crossRefCount: number
 }) {
   const isHebrew = language === 'HEBREW'
+  const [xrefOpen, setXrefOpen] = useState(false)
   return (
-    <article className="space-y-3" role="listitem">
+    <article id={`${verse.book}-${verse.chapter}-${verse.verse}`} className="space-y-3 scroll-mt-20" role="listitem">
       <div className="flex items-start gap-4">
           <span className="flex-shrink-0 w-16 sm:w-20 text-right text-sm text-muted-foreground font-mono select-none">
           {getBookViName(verse.book)} {verse.chapter}:{verse.verse}
@@ -211,7 +216,82 @@ function InterlinearVerseComponent({
           />
         ))}
       </div>
+
+      {crossRefCount > 0 && (
+        <div className="ml-0 sm:ml-20 mt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setXrefOpen((o) => !o)}
+            aria-expanded={xrefOpen}
+            className="text-xs"
+          >
+            <span aria-hidden="true" className="mr-1">📖</span>
+            Cross-references ({crossRefCount})
+          </Button>
+          {xrefOpen && (
+            <CrossRefPanel book={verse.book} chapter={verse.chapter} verse={verse.verse} />
+          )}
+        </div>
+      )}
     </article>
+  )
+}
+
+interface CrossRefItem {
+  toBook: string | null
+  toChapter: number
+  toVerse: number
+  toLabel: string
+  anchor: string | null
+}
+
+function CrossRefPanel({ book, chapter, verse }: { book: string; chapter: number; verse: number }) {
+  const [data, setData] = useState<CrossRefItem[] | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    fetch(`/api/crossrefs/verse?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled) setData(d.references ?? [])
+      })
+      .catch(() => {
+        if (!cancelled) setData([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [book, chapter, verse])
+
+  if (loading) return <p className="mt-2 text-xs text-muted-foreground">Đang tải cross-references…</p>
+  if (!data || data.length === 0)
+    return <p className="mt-2 text-xs text-muted-foreground">Không có cross-reference cho câu này.</p>
+
+  return (
+    <ul className="mt-2 space-y-1 text-sm">
+      {data.map((r, i) => {
+        const href = r.toBook
+          ? `/interlinear/${getBookAbbreviation(r.toBook)}/${r.toChapter}#${r.toBook}-${r.toChapter}-${r.toVerse}`
+          : null
+        return (
+          <li key={i} className="leading-snug">
+            {href ? (
+              <Link href={href} className="text-primary hover:underline">
+                {r.toLabel}
+              </Link>
+            ) : (
+              <span className="text-foreground/80">{r.toLabel}</span>
+            )}
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
