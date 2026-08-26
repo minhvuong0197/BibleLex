@@ -13,11 +13,11 @@ const HTTLVN_ABBREVS = (
 
 const VERSION_META: Record<string, { name: string; abbreviation: string; year?: number }> = {
   VI1934: { name: 'Truyền Thống', abbreviation: 'TT', year: 1925 },
-  RVV11: { name: 'Bản Dịch 2011', abbreviation: 'RVV11', year: 2011 },
-  BPT: { name: 'Bản Phổ Thông', abbreviation: 'BPT' },
-  NVB: { name: 'Bản Dịch Mới (2002)', abbreviation: 'NVB', year: 2002 },
-  BDY: { name: 'Bản Dịch Việt', abbreviation: 'BDY' },
+  RVV11: { name: 'Hiệu Đính 2010', abbreviation: 'RVV11', year: 2010 },
   BD2011: { name: 'Bản Dịch 2011', abbreviation: 'BD2011', year: 2011 },
+  BPT: { name: 'Bản Phổ Thông', abbreviation: 'BPT' },
+  NVB: { name: 'Bản Dịch Mới', abbreviation: 'NVB', year: 2002 },
+  BDY: { name: 'Bản Diễn Ý', abbreviation: 'BDY' },
 }
 
 function decodeEntities(s: string): string {
@@ -140,11 +140,13 @@ function parseChapter(html: string, abbrev: string, chapter: number): { verse: n
 
 async function upsertVerses(rows: { bookId: string; chapter: number; verse: number; versionId: string; text: string }[]) {
   if (rows.length === 0) return
-  const cols = ['book_id', 'chapter', 'verse', 'version_id', 'text']
+  const seen = new Map<string, { bookId: string; chapter: number; verse: number; versionId: string; text: string }>()
+  for (const r of rows) seen.set(`${r.bookId}:${r.chapter}:${r.verse}`, r)
+  const uniq = [...seen.values()]
   const placeholders: string[] = []
   const params: unknown[] = []
   let i = 1
-  for (const r of rows) {
+  for (const r of uniq) {
     placeholders.push(`(gen_random_uuid(), $${i++}, $${i++}, $${i++}, $${i++}, $${i++})`)
     params.push(r.bookId, r.chapter, r.verse, r.versionId, r.text)
   }
@@ -192,7 +194,11 @@ async function main() {
         for (const v of vs) rows.push({ bookId, chapter: ch, verse: v.verse, versionId: code, text: v.text })
         await sleep(10)
       }
-      await upsertVerses(rows)
+      try {
+        await upsertVerses(rows)
+      } catch (e) {
+        console.error(`  ! upsert failed for ${code}:${ab} (${String((e as Error).message).slice(0, 100)})`)
+      }
       total += rows.length
       console.log(`  ${code}: ${ab} -> ${rows.length} verses (cum ${total})`)
     }

@@ -3,6 +3,7 @@ import { unstable_cache } from 'next/cache'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { BookText } from 'lucide-react'
 import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
 import { VersionSelector } from '@/components/interlinear/version-selector'
 import { prisma } from '@/lib/db'
@@ -257,6 +258,12 @@ export default async function InterlinearPage({ params, searchParams }: PageProp
           book={data.book.abbreviation}
           chapter={data.chapter}
         />
+        <Link
+          href={`/read/${data.book.abbreviation}/${data.chapter}`}
+          className="inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium hover:bg-accent"
+        >
+          <BookText className="h-4 w-4" /> Đọc chương này
+        </Link>
       </div>
 
       <InterlinearViewer

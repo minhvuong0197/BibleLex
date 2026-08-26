@@ -64,6 +64,35 @@ async function main() {
   )
   const after = await prisma.verseTranslation.count({ where: { versionId: 'VI1934' } })
   console.log(`Seeded verse translations VI1934: ${after} rows (insert result ${String(res)})`)
+
+  // Bản tiếng Anh: King James Version (public domain), lấy từ cột kjv_text
+  await prisma.bibleVersion.upsert({
+    where: { id: 'KJV' },
+    update: {},
+    create: {
+      id: 'KJV',
+      name: 'King James Version',
+      abbreviation: 'KJV',
+      language: 'en',
+      year: 1611,
+      source: 'public domain',
+      note: 'Tiếng Anh - Kinh James (1611)',
+      ordinal: 100,
+    },
+  })
+  const kjvExisting = await prisma.verseTranslation.count({ where: { versionId: 'KJV' } })
+  if (kjvExisting === 0) {
+    const kres = await prisma.$executeRawUnsafe(
+      `INSERT INTO "verse_translations" ("id","book_id","chapter","verse","version_id","text")
+       SELECT gen_random_uuid(), "book_id","chapter","verse",'KJV',"kjv_text"
+       FROM "verses" WHERE "kjv_text" IS NOT NULL
+       ON CONFLICT ("book_id","chapter","verse","version_id") DO NOTHING`,
+    )
+    const kafter = await prisma.verseTranslation.count({ where: { versionId: 'KJV' } })
+    console.log(`Seeded verse translations KJV: ${kafter} rows (insert result ${String(kres)})`)
+  } else {
+    console.log(`VerseTranslation KJV already has ${kjvExisting} rows; skip copy`)
+  }
 }
 
 main()

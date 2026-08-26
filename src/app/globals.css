@@ -201,3 +201,16 @@
     @apply border-l-4 border-primary pl-4 my-4 italic text-muted-foreground;
   }
 }
+/* Trang đọc Kinh Thánh: cột song song các bản dịch */
+.reader-cols {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .reader-cols {
+    grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  }
+}
+.reader-verses p {
+  scroll-margin-top: 5rem;
+}
