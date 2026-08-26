@@ -12,29 +12,29 @@ export function Logo({ className }: { className?: string }) {
           <stop offset="1" stopColor="#eef4ff" />
         </linearGradient>
       </defs>
-      {/* trang trái & phải: tỉ lệ cao hơn, cân đối, viền trắng quanh sách */}
+      {/* trang trái & phải: tỉ lệ mở tự nhiên (rộng > cao), viền trắng */}
       <path
-        d="M12 4.5 C 10 3 6 2.8 3.8 4.3 L 3.8 19.2 C 6 17.4 9.8 17.6 12 19 Z"
+        d="M12 6 C 10 4.7 6.5 4.5 3.5 5.7 L 3.5 18.3 C 6.5 16.5 10 16.7 12 18.3 Z"
         fill="url(#slxPage)"
         stroke="#ffffff"
         strokeWidth="1.3"
         strokeLinejoin="round"
       />
       <path
-        d="M12 4.5 C 14 3 18 2.8 20.2 4.3 L 20.2 19.2 C 18 17.4 14.2 17.6 12 19 Z"
+        d="M12 6 C 14 4.7 17.5 4.5 20.5 5.7 L 20.5 18.3 C 17.5 16.5 14 16.7 12 18.3 Z"
         fill="url(#slxPage)"
         stroke="#ffffff"
         strokeWidth="1.3"
         strokeLinejoin="round"
       />
       {/* gáy giữa (xanh) */}
-      <path d="M12 4.5 L 12 19" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M12 6 L 12 18.3" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" />
       {/* dòng chữ trang */}
       <g stroke="#60a5fa" strokeWidth="0.9" strokeLinecap="round" opacity="0.95">
-        <path d="M5.6 8.5 h4" />
-        <path d="M5.6 11 h3.6" />
-        <path d="M14.4 8.5 h4" />
-        <path d="M14.4 11 h3.6" />
+        <path d="M5.6 9.5 h4" />
+        <path d="M5.6 12 h3.6" />
+        <path d="M14.4 9.5 h4" />
+        <path d="M14.4 12 h3.6" />
       </g>
     </svg>
   )
