@@ -12,9 +12,9 @@ export function Logo({ className }: { className?: string }) {
     >
       <rect x="5.5" y="3.5" width="13" height="17" rx="2" />
       <path d="M8.5 3.5v17" opacity={0.45} />
-      {/* Thập tự giá vuông (4 cạnh, đầu vuông) */}
-      <rect x="10.8" y="6" width="2.4" height="8" fill="currentColor" stroke="none" />
-      <rect x="8.5" y="8.8" width="7" height="2.4" fill="currentColor" stroke="none" />
+      {/* Thập tự giá Latin: thanh ngang ngắn ở trên, thanh dọc kéo dài xuống */}
+      <rect x="10.8" y="5" width="2.4" height="11" fill="currentColor" stroke="none" />
+      <rect x="9" y="7.2" width="6" height="2.4" fill="currentColor" stroke="none" />
     </svg>
   )
 }
