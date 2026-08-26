@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Search } from "lucide-react"
-import { parseQuickReference, quickBookSuggestions, type QuickBook, type ParsedReference } from "@/lib/utils"
+import { parseQuickReference, quickBookSuggestions, QUICK_BOOKS, type QuickBook, type ParsedReference } from "@/lib/utils"
 
 export function QuickSearch() {
   const router = useRouter()
