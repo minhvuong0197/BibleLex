@@ -41,16 +41,20 @@ export function QuickSearch() {
     let abbr: string
     let chapter = 1
     let verse: number | undefined
+    let bookName: string
     if ("abbr" in target && "vi" in target) {
-      abbr = (target as QuickBook).abbr
+      const b = target as QuickBook
+      abbr = b.abbr
+      bookName = b.en
     } else {
       const p = target as ParsedReference
       abbr = p.abbr
       chapter = p.chapter ?? 1
       verse = p.verse
+      bookName = QUICK_BOOKS.find((x) => x.abbr === abbr)?.en ?? abbr
     }
     const href = verse
-      ? `/interlinear/${abbr}/${chapter}#${abbr}-${chapter}-${verse}`
+      ? `/interlinear/${abbr}/${chapter}#${bookName}-${chapter}-${verse}`
       : `/interlinear/${abbr}/${chapter}`
     router.push(href)
     clearInput()
@@ -73,7 +77,8 @@ export function QuickSearch() {
       const pos = el.selectionStart ?? val.length
       const before = val.slice(0, pos)
       // Sau khi gõ số chương, Space luôn chuyển thành ':' (không phụ thuộc IME)
-      if (/ \d+$/.test(before)) {
+      // Dùng \s để bắt cả khoảng trắng thường lẫn NBSP mà bộ gõ tiếng Việt hay chèn
+      if (/(?:^|\s)\d+$/.test(before)) {
         e.preventDefault()
         const newVal = val.slice(0, pos) + ":" + val.slice(pos)
         if (inputRef.current) inputRef.current.value = newVal
