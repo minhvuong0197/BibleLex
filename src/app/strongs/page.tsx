@@ -138,7 +138,7 @@ function BookList({ books }: { books: string[]; testament: 'OLD' | 'NEW' }) {
             <CardContent className="pt-3 pb-3 pr-3 pl-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold text-white bg-blue-600 flex-shrink-0">
+                  <span className={cn("w-8 h-8 rounded flex items-center justify-center text-xs font-bold text-white flex-shrink-0", testament === 'OLD' ? 'bg-green-600' : 'bg-blue-600')}>
                     {getBookAbbreviation(book)}
                   </span>
                   <span className="font-medium text-sm truncate group-hover:text-primary transition-colors">
