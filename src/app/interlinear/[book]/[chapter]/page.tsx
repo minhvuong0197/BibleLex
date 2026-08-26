@@ -89,9 +89,10 @@ async function getInterlinearData(book: string, chapter: number) {
       book: bibleBook.name,
       chapter: verse.chapter,
       verse: verse.verse,
-      text: verse.text,
-      vietnameseText: verse.vietnameseText ?? null,
-      words: (wordsByVerse.get(verse.verse) || []).map(w => ({
+        text: verse.text,
+        vietnameseText: verse.vietnameseText ?? null,
+        kjvText: verse.kjvText ?? null,
+        words: (wordsByVerse.get(verse.verse) || []).map(w => ({
       wordOrder: w.wordOrder,
       hebrewGreek: w.hebrewGreek,
       transliteration: w.transliteration,

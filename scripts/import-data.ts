@@ -84,6 +84,13 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out
 }
 
+function normStrong(s?: string | null) {
+  return s ? s.toUpperCase().replace(/[^HG0-9]/g, '') : null
+}
+function stripMarks(s = '') {
+  return s.replace(/[֑-ׁׂ-ֽׄ]/g, '').replace(/[ؑ-؟ٰ-ٱ]/g, '').replace(/[̀-ͯ]/g, '')
+}
+
 async function importStrongs() {
   const data = readJSON('strongs.json') as StrongEntryInput[]
   if ((await prisma.strongEntry.count()) > 14000) {
@@ -224,6 +231,12 @@ async function importVerseWords() {
 
   console.log('\n[3/5] Verse words')
   let total = 0
+  let kjvMap: Record<string, Array<{ strongs: string; english: string; original: string }>> | null = null
+  try {
+    kjvMap = JSON.parse(readFileSync(join(DATA_DIR, 'kjv_interlinear.json'), 'utf-8'))
+  } catch {
+    kjvMap = null
+  }
   for (const b of books) {
     const book = await prisma.bibleBook.findFirst({ where: { name: b.name } })
     if (!book) continue
@@ -244,9 +257,25 @@ async function importVerseWords() {
       english: string | null
     }> = []
     for (const v of b.verses) {
+      const kjv = kjvMap ? (kjvMap[`${b.name}|${v.chapter}|${v.verse}`] || []) : []
+      const kn = kjv.map((k) => ({ s: normStrong(k.strongs), o: stripMarks(k.original), en: k.english || null }))
+      let p = 0
       for (const w of v.words) {
         const se = w.strongNumber ? strongMap.get(w.strongNumber) : undefined
-        const kjvGloss = se?.kjvDef?.split(',')[0]?.trim() || null
+        let english: string | null = se?.kjvDef?.split(',')[0]?.trim() || null
+        const ws = normStrong(w.strongNumber)
+        const wo = stripMarks(w.hebrewGreek)
+        let j = -1
+        if (ws) {
+          for (let i = p; i < kn.length; i++) if (kn[i].s === ws) { j = i; break }
+        }
+        if (j < 0 && wo) {
+          for (let i = p; i < kn.length; i++) if (kn[i].o && kn[i].o === wo) { j = i; break }
+        }
+        if (j >= 0) {
+          english = kn[j].en || null
+          p = j + 1
+        }
         rows.push({
           book: b.name,
           chapter: v.chapter,
@@ -256,7 +285,7 @@ async function importVerseWords() {
           transliteration: se?.transliteration || '',
           strongNumber: w.strongNumber,
           parsing: w.parsing,
-          english: kjvGloss,
+          english,
         })
       }
     }
@@ -466,6 +495,42 @@ async function importVietnamese() {
   console.log(`  ✓ ${updated.toLocaleString()} câu được gắn bản dịch tiếng Việt`)
 }
 
+async function importKjvText() {
+  const path = join(DATA_DIR, 'kjv_text.json')
+  if (!existsSync(path)) {
+    console.log('\n[8/8] KJV text — không có file kjv_text.json, bỏ qua')
+    return
+  }
+  const map = JSON.parse(readFileSync(path, 'utf-8')) as Record<string, Record<string, Record<string, string>>>
+  console.log('\n[8/8] KJV text (bản tiếng Anh đối chiếu)')
+  const books = await prisma.bibleBook.findMany({ select: { id: true, abbreviation: true } })
+  const abbrId = new Map(books.map((b) => [b.abbreviation, b.id]))
+  const done = await prisma.verse.findMany({ where: { kjvText: { not: null } }, select: { bookId: true, chapter: true, verse: true } })
+  const doneSet = new Set(done.map((r) => `${r.bookId}:${r.chapter}:${r.verse}`))
+  let updated = 0
+  for (const [abbr, chapters] of Object.entries(map)) {
+    const bookId = abbrId.get(abbr)
+    if (!bookId) continue
+    const ops: Array<{ bookId: string; chapter: number; verse: number; text: string }> = []
+    for (const [ch, vm] of Object.entries(chapters)) {
+      for (const [vs, text] of Object.entries(vm)) {
+        const chapter = parseInt(ch, 10)
+        const verse = parseInt(vs, 10)
+        if (!doneSet.has(`${bookId}:${chapter}:${verse}`)) ops.push({ bookId, chapter, verse, text })
+      }
+    }
+    for (const c of chunk(ops, 100)) {
+      await Promise.all(
+        c.map((o) =>
+          prisma.verse.updateMany({ where: { bookId: o.bookId, chapter: o.chapter, verse: o.verse }, data: { kjvText: o.text } })
+        )
+      )
+      updated += c.length
+    }
+  }
+  console.log(`  ✓ ${updated.toLocaleString()} câu được gắn bản KJV`)
+}
+
 async function main() {
   console.log('SCRIPTLEX — importing data into the database')
   if (process.env.CLEAR_DATA === '1') {
@@ -489,6 +554,7 @@ async function main() {
   await importCrossReferences()
   await importTopicalData()
   await importVietnamese()
+  await importKjvText()
 
   const stats = await Promise.all([
     prisma.strongEntry.count(),

@@ -642,6 +642,60 @@ async function buildVietnamese() {
   console.log(`  ✓ ${out.length} câu tiếng Việt (${myBooks.length} sách khớp)`)
 }
 
+/* ------------------------------------------------------------------ */
+/*  KJV aligned interlinear (per-word English) + KJV verse text        */
+/* ------------------------------------------------------------------ */
+
+const INTERLINEAR_URL =
+  'https://raw.githubusercontent.com/kennethreitz/kjvstudy.org/main/kjvstudy_org/data/interlinear.json.gz'
+const KJV_TEXT_URL =
+  'https://raw.githubusercontent.com/midvash/bible-data/main/versions/en/kjv/kjv.json'
+
+async function fetchBinary(url, dest) {
+  if (existsSync(dest)) return dest
+  process.stdout.write(`  ↓ ${url.split('/').pop()} ... `)
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const buf = Buffer.from(await res.arrayBuffer())
+  writeFileSync(dest, buf)
+  process.stdout.write(`ok (${(buf.length / 1024).toFixed(0)} KB)\n`)
+  return dest
+}
+
+async function buildKjvInterlinear() {
+  console.log('\n[6/6] KJV aligned interlinear (per-word English) — public domain')
+  const { gunzipSync } = await import('zlib')
+  const path = join(RAW, 'interlinear.json.gz')
+  await fetchBinary(INTERLINEAR_URL, path)
+  const inter = JSON.parse(gunzipSync(readFileSync(path)).toString('utf-8'))
+  const map = {}
+  for (const [key, words] of Object.entries(inter)) {
+    const [book, chapter, verse] = key.split(':')
+    map[`${book}|${chapter}|${verse}`] = words
+  }
+  writeFileSync(join(DATA, 'kjv_interlinear.json'), JSON.stringify(map))
+  console.log(`  ✓ ${Object.keys(map).length.toLocaleString()} verses mapped`)
+}
+
+async function buildKjvText() {
+  console.log('\n[7/7] KJV 1769 verse text — public domain (midvash/bible-data)')
+  const path = join(RAW, 'kjv.json')
+  await fetchBinary(KJV_TEXT_URL, path)
+  const json = JSON.parse(readFileSync(path, 'utf-8'))
+  const out = {}
+  for (const bk of json.books || []) {
+    const m = {}
+    for (const c of bk.chapters || []) {
+      const vm = {}
+      for (const v of c.verses || []) vm[v.number] = v.text
+      m[c.chapter] = vm
+    }
+    out[bk.book] = m
+  }
+  writeFileSync(join(DATA, 'kjv_text.json'), JSON.stringify(out))
+  console.log(`  ✓ ${Object.keys(out).length} sách KJV`)
+}
+
 async function main() {
   console.log('SCRIPTLEX — preparing data from public-domain sources')
   const { greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision } = await buildStrongs()
@@ -651,6 +705,8 @@ async function main() {
   const greek = await buildGreek(greekLemmaMap, greekLemmaMapCollapsed, collapsedCollision)
   buildMorphology([...hebrew, ...greek])
   await buildVietnamese()
+  await buildKjvInterlinear()
+  await buildKjvText()
   console.log('\n✓ All data prepared in ./data')
   console.log('  Next: npm run import:data')
 }

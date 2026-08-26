@@ -41,6 +41,7 @@ interface InterlinearVerse {
   verse: number
   text: string
   vietnameseText?: string | null
+  kjvText?: string | null
   words: InterlinearWord[]
 }
 
@@ -67,8 +68,17 @@ export function InterlinearViewer({ book, chapter, verses, crossRefCounts, langu
   const [showParsing, setShowParsing] = useState(true)
   const [showEnglish, setShowEnglish] = useState(true)
   const [showVietnamese, setShowVietnamese] = useState(true)
+  const [showKjv, setShowKjv] = useState(true)
   const [selectedWord, setSelectedWord] = useState<InterlinearWord | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+
+  const toggleCls = (active: boolean) =>
+    cn(
+      "border min-h-[36px] px-2.5 py-1 rounded-md text-xs font-semibold transition-colors",
+      active
+        ? "bg-primary-foreground text-primary border-primary-foreground shadow"
+        : "bg-transparent text-primary-foreground/70 border-primary-foreground/30 hover:bg-primary-foreground/10"
+    )
 
   const copyToClipboard = async (text: string, label: string) => {
     await navigator.clipboard.writeText(text)
@@ -111,16 +121,19 @@ export function InterlinearViewer({ book, chapter, verses, crossRefCounts, langu
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showTransliteration && 'bg-accent')} onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration}>
+          <Button variant="outline" size="sm" className={toggleCls(showTransliteration)} onClick={() => setShowTransliteration(!showTransliteration)} aria-pressed={showTransliteration}>
             <span className="mr-1" aria-hidden="true">ἀ/א</span> Phiên âm
           </Button>
-          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showParsing && 'bg-accent')} onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing}>
+          <Button variant="outline" size="sm" className={toggleCls(showParsing)} onClick={() => setShowParsing(!showParsing)} aria-pressed={showParsing}>
             <span className="mr-1" aria-hidden="true">𝔓</span> Phân tích
           </Button>
-          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showEnglish && 'bg-accent')} onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish}>
+          <Button variant="outline" size="sm" className={toggleCls(showEnglish)} onClick={() => setShowEnglish(!showEnglish)} aria-pressed={showEnglish}>
             <span className="mr-1" aria-hidden="true">En</span> Tiếng Anh
           </Button>
-          <Button variant="outline" size="sm" className={cn("bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25", showVietnamese && 'bg-accent')} onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese}>
+          <Button variant="outline" size="sm" className={toggleCls(showKjv)} onClick={() => setShowKjv(!showKjv)} aria-pressed={showKjv}>
+            <span className="mr-1" aria-hidden="true">KJV</span> Tiếng Anh (KJV)
+          </Button>
+          <Button variant="outline" size="sm" className={toggleCls(showVietnamese)} onClick={() => setShowVietnamese(!showVietnamese)} aria-pressed={showVietnamese}>
             <span className="mr-1" aria-hidden="true">Vi</span> Tiếng Việt
           </Button>
         </div>
@@ -141,6 +154,8 @@ export function InterlinearViewer({ book, chapter, verses, crossRefCounts, langu
               onCopy={copyToClipboard}
               copied={copied}
               crossRefCount={crossRefCounts[verse.verse] ?? 0}
+              kjvText={verse.kjvText ?? null}
+              showKjv={showKjv}
             />
           ))}
         </div>
@@ -167,7 +182,9 @@ function InterlinearVerseComponent({
   onWordClick,
   onCopy,
   copied,
-  crossRefCount
+  crossRefCount,
+  kjvText,
+  showKjv
 }: {
   verse: InterlinearVerse
   language: 'HEBREW' | 'GREEK'
@@ -179,6 +196,8 @@ function InterlinearVerseComponent({
   onCopy: (text: string, label: string) => Promise<void>
   copied: string | null
   crossRefCount: number
+  kjvText: string | null
+  showKjv: boolean
 }) {
   const isHebrew = language === 'HEBREW'
   const [xrefOpen, setXrefOpen] = useState(false)
@@ -195,6 +214,11 @@ function InterlinearVerseComponent({
           {showVietnamese && verse.vietnameseText && (
             <p className="mt-1 text-sm leading-relaxed text-foreground/80 border-r-2 border-primary/40 pr-3 text-right" dir="ltr">
               {verse.vietnameseText}
+            </p>
+          )}
+          {showKjv && kjvText && (
+            <p className="mt-1 text-sm leading-relaxed text-foreground/70 border-l-2 border-amber-400/60 pl-3" dir="ltr">
+              {kjvText}
             </p>
           )}
         </div>
