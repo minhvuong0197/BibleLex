@@ -435,8 +435,8 @@ function WordDetailPanel({
             <div>
               <label className="text-xs text-primary-foreground/80 block mb-1">Số Strongs</label>
               <div className="flex items-center gap-2">
-                <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded">{entry.strongNumber}</code>
-                <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => onCopy(entry.strongNumber, 'Số Strongs')}>
+                <code className="font-mono text-lg px-2 py-1 bg-primary-foreground text-primary rounded">{entry.strongNumber}</code>
+                <Button variant="outline" size="sm" className="bg-primary-foreground/25 text-primary-foreground border border-primary-foreground/40 hover:bg-primary-foreground/40" onClick={() => onCopy(entry.strongNumber, 'Số Strongs')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -444,8 +444,8 @@ function WordDetailPanel({
             <div>
               <label className="text-xs text-primary-foreground/80 block mb-1">Phiên âm</label>
               <div className="flex items-center gap-2">
-                <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded flex-1">{word.transliteration}</code>
-                <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => onCopy(word.transliteration, 'Phiên âm')}>
+                <code className="font-mono text-lg px-2 py-1 bg-primary-foreground text-primary rounded flex-1">{word.transliteration}</code>
+                <Button variant="outline" size="sm" className="bg-primary-foreground/25 text-primary-foreground border border-primary-foreground/40 hover:bg-primary-foreground/40" onClick={() => onCopy(word.transliteration, 'Phiên âm')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -456,8 +456,8 @@ function WordDetailPanel({
             <div>
               <label className="text-xs text-primary-foreground/80 block mb-1">Phân tích</label>
               <div className="flex items-center gap-2">
-                <code className="font-mono text-lg px-2 py-1 bg-white/90 text-foreground rounded flex-1">{word.parsing}</code>
-                <Button variant="outline" size="sm" className="bg-primary-foreground/15 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/25" onClick={() => onCopy(word.parsing!, 'Parsing')}>
+                <code className="font-mono text-lg px-2 py-1 bg-primary-foreground text-primary rounded flex-1">{word.parsing}</code>
+                <Button variant="outline" size="sm" className="bg-primary-foreground/25 text-primary-foreground border border-primary-foreground/40 hover:bg-primary-foreground/40" onClick={() => onCopy(word.parsing!, 'Parsing')}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
