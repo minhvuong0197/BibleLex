@@ -7,38 +7,29 @@ export function Logo({ className }: { className?: string }) {
       overflow="visible"
     >
       {/* soft contact shadow for 3D depth */}
-      <ellipse cx="12" cy="24.6" rx="7" ry="1.2" fill="#1e40af" opacity="0.15" />
+      <ellipse cx="12" cy="25.2" rx="6.5" ry="1.1" fill="#1e3a8a" opacity="0.18" />
       <g strokeLinejoin="round" strokeLinecap="round">
-        {/* folded page corner — bleeds above the frame */}
-        <path
-          d="M12 -2.2 L19.5 -3.4 L20.6 1 L13.2 2.2 Z"
-          fill="#ffffff"
-          stroke="#2563eb"
-          strokeWidth="0.8"
-        />
-        {/* book back cover (white) */}
+        {/* book cover (white) — bleeds above and below the frame */}
         <rect
           x="5.5"
-          y="2"
+          y="-2.5"
           width="13"
-          height="18.5"
-          rx="2.3"
+          height="25"
+          rx="2.4"
           fill="#ffffff"
           stroke="#2563eb"
           strokeWidth="1.1"
         />
         {/* spine (blue) */}
-        <rect x="5.5" y="2" width="3" height="18.5" rx="2.3" fill="#2563eb" />
-        {/* page edges */}
-        <path d="M18 3.5 v15.5" stroke="#bfdbfe" strokeWidth="1" />
-        <path d="M17 3.9 v14.7" stroke="#bfdbfe" strokeWidth="0.8" />
-        {/* cross on the cover */}
-        <g stroke="#2563eb" strokeWidth="1.7">
-          <path d="M12.2 6 v7.4" />
-          <path d="M9.1 9 h6.2" />
+        <rect x="5.5" y="-2.5" width="3.2" height="25" rx="2.4" fill="#2563eb" />
+        {/* page edges on the right */}
+        <path d="M17.8 -1.3 v22.6" stroke="#dbeafe" stroke-width="1" />
+        <path d="M18.6 -1 v21.8" stroke="#dbeafe" stroke-width="0.9" />
+        {/* cross centered on the cover */}
+        <g stroke="#2563eb" stroke-width="2">
+          <path d="M12.1 3.4 v8.4" />
+          <path d="M8.6 6.8 h6.9" />
         </g>
-        {/* ribbon bookmark — bleeds below the frame */}
-        <path d="M14.4 20.5 L14.4 27 L12.2 24.9 L10 27 L10 20.5 Z" fill="#2563eb" />
       </g>
     </svg>
   )
