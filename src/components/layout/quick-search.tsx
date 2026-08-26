@@ -67,14 +67,12 @@ export function QuickSearch() {
   }
 
   function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
-    // Đang soạn dấu IME (vd gõ 'Sáng') -> không can thiệp phím
-    if (e.nativeEvent.isComposing) return
     if (e.key === " ") {
       const el = e.currentTarget
       const val = el.value
       const pos = el.selectionStart ?? val.length
       const before = val.slice(0, pos)
-      // Sau khi gõ số chương, Space tự chuyển thành ':' để gõ số câu
+      // Sau khi gõ số chương, Space luôn chuyển thành ':' (không phụ thuộc IME)
       if (/ \d+$/.test(before)) {
         e.preventDefault()
         const newVal = val.slice(0, pos) + ":" + val.slice(pos)
@@ -86,7 +84,12 @@ export function QuickSearch() {
         })
         return
       }
-    } else if (e.key === "Enter") {
+      // Space khác (vd chốt dấu IME) -> giữ mặc định, không đổi
+      return
+    }
+    // Các phím khác: bỏ qua khi đang soạn dấu IME
+    if (e.nativeEvent.isComposing) return
+    if (e.key === "Enter") {
       e.preventDefault()
       submit()
     } else if (e.key === "Escape") {
