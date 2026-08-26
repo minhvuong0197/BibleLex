@@ -11,6 +11,7 @@ export function QuickSearch() {
   const [open, setOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<QuickBook[]>([])
   const wrapRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     function onDoc(e: MouseEvent) {
@@ -61,7 +62,24 @@ export function QuickSearch() {
   }
 
   function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
+    if (e.key === " ") {
+      const el = e.currentTarget
+      const pos = el.selectionStart ?? query.length
+      const before = query.slice(0, pos)
+      // Sau khi gõ số chương, Space tự chuyển thành ':' để gõ số câu
+      if (/ \d+$/.test(before)) {
+        e.preventDefault()
+        const newVal = query.slice(0, pos) + ":" + query.slice(pos)
+        setQuery(newVal)
+        setSuggestions(quickBookSuggestions(newVal, 8))
+        setOpen(true)
+        requestAnimationFrame(() => {
+          const node = inputRef.current
+          if (node) node.selectionStart = node.selectionEnd = pos + 1
+        })
+        return
+      }
+    } else if (e.key === "Enter") {
       e.preventDefault()
       submit()
     } else if (e.key === "Escape") {
@@ -74,6 +92,7 @@ export function QuickSearch() {
       <div className="flex items-center gap-2 rounded-lg border bg-background px-2.5 h-9 focus-within:ring-2 focus-within:ring-ring">
         <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
         <input
+          ref={inputRef}
           value={query}
           onChange={(e) => update(e.target.value)}
           onKeyDown={onKey}
