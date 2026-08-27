@@ -17,10 +17,35 @@ const VERSION_META: Record<string, { name: string; abbreviation: string; year?: 
     year: 2000,
     url: 'https://raw.githubusercontent.com/midvash/bible-data/main/versions/en/web/web.json',
   },
+  YLT: {
+    name: "Young's Literal Translation",
+    abbreviation: 'YLT',
+    year: 1898,
+    url: 'https://api.getbible.net/v2/ylt.json',
+  },
 }
 
 function normalize(s: string): string {
-  return s.normalize('NFD').toLowerCase().replace(/[^a-z]/g, '')
+  return s.normalize('NFD').toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+const NAME_ALIASES: Record<string, string> = {
+  songofsongs: 'Song of Solomon',
+}
+
+function resolveBook(abbr: string | null, enName: string, abbrMap: Map<string, string>, nameMap: Map<string, string>): string | undefined {
+  if (abbr) {
+    const a = abbrMap.get(abbr)
+    if (a) return a
+  }
+  const n = nameMap.get(normalize(enName))
+  if (n) return n
+  const al = NAME_ALIASES[normalize(enName)]
+  if (al) {
+    const m = nameMap.get(normalize(al))
+    if (m) return m
+  }
+  return undefined
 }
 
 function sleep(ms: number) {
@@ -93,26 +118,41 @@ async function main() {
     })
 
     const data = await fetchJson(meta.url)
-    const entries: any[] = Object.values(data.books)
+    const rawBooks: any = data.books
+    const isArray = Array.isArray(rawBooks)
+    const booksList: any[] = isArray ? rawBooks : Object.values(rawBooks)
     let total = 0
-    for (const entry of entries) {
-      const bookId = abbrMap.get(entry.book) || nameMap.get(normalize(entry.englishName))
+    for (const entry of booksList) {
+      const abbr = isArray ? entry.abbreviation || null : entry.book
+      const enName = isArray ? entry.name : entry.englishName
+      const bookId = resolveBook(abbr, enName, abbrMap, nameMap)
       if (!bookId) {
-        console.warn(`! skip book ${entry.book} / ${entry.englishName}`)
+        console.warn(`! skip book ${abbr} / ${enName}`)
         continue
       }
       const rows: { bookId: string; chapter: number; verse: number; versionId: string; text: string }[] = []
-      for (const [chStr, chObj] of Object.entries(entry.chapters)) {
-        const chapter = Number(chStr)
-        const verses = (chObj as any).verses || []
-        for (const v of verses) {
-          if (v && v.text) rows.push({ bookId, chapter, verse: v.number, versionId: code, text: v.text })
+      const chapters = entry.chapters
+      if (Array.isArray(chapters)) {
+        for (const ch of chapters) {
+          const chapter = Number(ch.chapter)
+          const verses = ch.verses || []
+          for (const v of verses) {
+            if (v && v.text) rows.push({ bookId, chapter, verse: Number(v.verse), versionId: code, text: v.text })
+          }
+        }
+      } else {
+        for (const [chStr, chObj] of Object.entries(chapters)) {
+          const chapter = Number(chStr)
+          const verses = (chObj as any).verses || []
+          for (const v of verses) {
+            if (v && v.text) rows.push({ bookId, chapter, verse: Number(v.number), versionId: code, text: v.text })
+          }
         }
       }
       try {
         await upsertVerses(rows)
       } catch (e) {
-        console.error(`! upsert failed ${code}:${entry.book} (${String((e as Error).message).slice(0, 100)})`)
+        console.error(`! upsert failed ${code}:${enName} (${String((e as Error).message).slice(0, 100)})`)
       }
       total += rows.length
     }

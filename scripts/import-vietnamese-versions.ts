@@ -156,6 +156,19 @@ async function upsertVerses(rows: { bookId: string; chapter: number; verse: numb
   await prisma.$executeRawUnsafe(sql, ...params)
 }
 
+async function mapLimit<T, U>(items: T[], limit: number, fn: (t: T) => Promise<U>): Promise<U[]> {
+  const results: U[] = new Array(items.length)
+  let idx = 0
+  async function worker() {
+    while (idx < items.length) {
+      const cur = idx++
+      results[cur] = await fn(items[cur])
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => worker()))
+  return results
+}
+
 async function main() {
   const codes = process.argv.slice(2)
   const versionCodes = codes.length ? codes : ['VI1934']
@@ -187,13 +200,13 @@ async function main() {
     let total = 0
     for (const [ab, bookId] of abbrevToBook) {
       const chapters = bookById.get(bookId)!.chapters
-      const rows: { bookId: string; chapter: number; verse: number; versionId: string; text: string }[] = []
-      for (let ch = 1; ch <= chapters; ch++) {
+      const chapterNums = Array.from({ length: chapters }, (_, i) => i + 1)
+      const results = await mapLimit(chapterNums, 8, async (ch) => {
         const html = await fetchText(`https://kinhthanh.httlvn.org/doc-kinh-thanh/${ab}/${ch}?v=${code}`)
         const vs = parseChapter(html, ab, ch)
-        for (const v of vs) rows.push({ bookId, chapter: ch, verse: v.verse, versionId: code, text: v.text })
-        await sleep(10)
-      }
+        return vs.map((v) => ({ bookId, chapter: ch, verse: v.verse, versionId: code, text: v.text }))
+      })
+      const rows = results.flat()
       try {
         await upsertVerses(rows)
       } catch (e) {
