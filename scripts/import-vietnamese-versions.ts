@@ -12,12 +12,12 @@ const HTTLVN_ABBREVS = (
 ).split(/\s+/)
 
 const VERSION_META: Record<string, { name: string; abbreviation: string; year?: number }> = {
-  VI1934: { name: 'Truyền Thống', abbreviation: 'TT', year: 1925 },
-  RVV11: { name: 'Hiệu Đính 2010', abbreviation: 'RVV11', year: 2010 },
+  VI1934: { name: 'Truyền Thống 1925', abbreviation: 'TT1925', year: 1925 },
+  RVV11: { name: 'Hiệu Đính 2010', abbreviation: 'HĐ2010', year: 2010 },
   BD2011: { name: 'Bản Dịch 2011', abbreviation: 'BD2011', year: 2011 },
   BPT: { name: 'Bản Phổ Thông', abbreviation: 'BPT' },
   NVB: { name: 'Bản Dịch Mới', abbreviation: 'NVB', year: 2002 },
-  BDY: { name: 'Bản Diễn Ý', abbreviation: 'BDY' },
+  BDY: { name: 'Bản Hiện Đại 2015', abbreviation: 'BHĐ2015' },
 }
 
 function decodeEntities(s: string): string {
