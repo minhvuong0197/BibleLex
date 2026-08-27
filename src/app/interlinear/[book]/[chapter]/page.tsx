@@ -194,7 +194,7 @@ export default async function InterlinearPage({ params, searchParams }: PageProp
   const { book, chapter } = await params
   const { version } = await searchParams
   const cookieStore = await cookies()
-  const versionCode = version || cookieStore.get('scriptlex_version')?.value || 'VI1934'
+  let versionCode = version || cookieStore.get('scriptlex_version')?.value || 'VI1934'
   const chapterNum = parseInt(chapter, 10)
   
   if (isNaN(chapterNum)) {
@@ -203,8 +203,10 @@ export default async function InterlinearPage({ params, searchParams }: PageProp
 
   const [data, versions] = await Promise.all([
     getInterlinearData(book, chapterNum, versionCode),
-    prisma.bibleVersion.findMany({ orderBy: { ordinal: 'asc' } }),
+    prisma.bibleVersion.findMany({ where: { public: true }, orderBy: { ordinal: 'asc' } }),
   ])
+  const publicIds = new Set(versions.map((v) => v.id))
+  if (!publicIds.has(versionCode)) versionCode = 'VI1934'
   
   if (!data) {
     notFound()

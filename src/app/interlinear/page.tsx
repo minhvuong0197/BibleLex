@@ -30,9 +30,11 @@ const testamentInfo = {
 }
 
 export default async function InterlinearIndexPage() {
-  const versions = await prisma.bibleVersion.findMany({ orderBy: { ordinal: 'asc' } })
+  const versions = await prisma.bibleVersion.findMany({ where: { public: true }, orderBy: { ordinal: 'asc' } })
   const cookieStore = await cookies()
-  const currentVersion = cookieStore.get('scriptlex_version')?.value || 'VI1934'
+  const currentVersion = versions.some((v) => v.id === cookieStore.get('scriptlex_version')?.value)
+    ? cookieStore.get('scriptlex_version')?.value!
+    : 'VI1934'
 
   return (
     <div className="container py-8 md:py-12">

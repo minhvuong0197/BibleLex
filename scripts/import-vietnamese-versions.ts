@@ -11,13 +11,13 @@ const HTTLVN_ABBREVS = (
   'os phi phil phu ro ru sa so thi tit tr xa xu'
 ).split(/\s+/)
 
-const VERSION_META: Record<string, { name: string; abbreviation: string; year?: number }> = {
-  VI1934: { name: 'Truyền Thống 1925', abbreviation: 'TT1925', year: 1925 },
-  RVV11: { name: 'Hiệu Đính 2010', abbreviation: 'HĐ2010', year: 2010 },
-  BD2011: { name: 'Bản Dịch 2011', abbreviation: 'BD2011', year: 2011 },
-  BPT: { name: 'Bản Phổ Thông', abbreviation: 'BPT' },
-  NVB: { name: 'Bản Dịch Mới', abbreviation: 'NVB', year: 2002 },
-  BDY: { name: 'Bản Hiện Đại 2015', abbreviation: 'BHĐ2015' },
+const VERSION_META: Record<string, { name: string; abbreviation: string; year?: number; public?: boolean }> = {
+  VI1934: { name: 'Truyền Thống 1925', abbreviation: 'TT1925', year: 1925, public: true },
+  RVV11: { name: 'Hiệu Đính 2010', abbreviation: 'HĐ2010', year: 2010, public: false },
+  BD2011: { name: 'Bản Dịch 2011', abbreviation: 'BD2011', year: 2011, public: false },
+  BPT: { name: 'Bản Phổ Thông', abbreviation: 'BPT', public: false },
+  NVB: { name: 'Bản Dịch Mới', abbreviation: 'NVB', year: 2002, public: false },
+  BDY: { name: 'Bản Hiện Đại 2015', abbreviation: 'BHĐ2015', public: false },
 }
 
 function decodeEntities(s: string): string {
@@ -184,7 +184,7 @@ async function main() {
     const meta = VERSION_META[code] ?? { name: code, abbreviation: code }
     await prisma.bibleVersion.upsert({
       where: { id: code },
-      update: { name: meta.name, abbreviation: meta.abbreviation, year: meta.year ?? null, source: 'kinhthanh.httlvn.org' },
+      update: { name: meta.name, abbreviation: meta.abbreviation, year: meta.year ?? null, source: 'kinhthanh.httlvn.org', public: meta.public ?? true },
       create: {
         id: code,
         name: meta.name,
@@ -193,6 +193,7 @@ async function main() {
         year: meta.year ?? null,
         source: 'kinhthanh.httlvn.org',
         note: `Nguồn: HTTLVN (kinhthanh.httlvn.org)`,
+        public: meta.public ?? true,
         ordinal: 0,
       },
     })

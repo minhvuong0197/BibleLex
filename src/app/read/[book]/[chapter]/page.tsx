@@ -24,7 +24,7 @@ export default async function ReadPage({ params, searchParams }: PageProps) {
   const chapterNum = parseInt(chapter, 10)
   if (isNaN(chapterNum)) notFound()
 
-  const allVersions = await prisma.bibleVersion.findMany({ orderBy: { ordinal: 'asc' } })
+  const allVersions = await prisma.bibleVersion.findMany({ where: { public: true }, orderBy: { ordinal: 'asc' } })
   const paramCodes = (versionsParam || cookieStore.get('scriptlex_read_versions')?.value || '')
     .split(',')
     .map((s) => s.trim())

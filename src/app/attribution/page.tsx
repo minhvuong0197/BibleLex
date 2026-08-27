@@ -173,6 +173,9 @@ export default async function AttributionPage() {
           </td>
           <td className="px-4 py-3 align-top">
             <Badge info={info} />
+            {!v.public && (
+              <div className="mt-1 text-xs text-muted-foreground">Đang tạm ẩn khỏi giao diện công khai</div>
+            )}
           </td>
         </tr>
       )

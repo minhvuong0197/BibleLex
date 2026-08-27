@@ -267,6 +267,7 @@ model BibleVersion {
   source       String?
   note         String?
   ordinal      Int      @default(0)
+  public       Boolean  @default(true)
   createdAt    DateTime @default(now()) @map("created_at")
 
   translations VerseTranslation[]
