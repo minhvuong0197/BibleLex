@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -17,6 +18,49 @@ export const metadata: Metadata = {
   description: 'Không gian đọc Kinh Thánh với nhiều bản dịch song song và đọc tự động (audio).',
 }
 
+const getPublicVersions = unstable_cache(
+  () => prisma.bibleVersion.findMany({ where: { public: true }, orderBy: { ordinal: 'asc' } }),
+  ['public-versions'],
+  { revalidate: 86400 },
+)
+
+async function getReadChapter(book: string, chapterNum: number, codes: string[]) {
+  return unstable_cache(
+    async () => {
+      const bibleBook = await resolveBibleBook(prisma, book)
+      if (!bibleBook) return null
+      const [verses, translations, prevChapter, nextChapter] = await Promise.all([
+        prisma.verse.findMany({
+          where: { bookId: bibleBook.id, chapter: chapterNum },
+          orderBy: { verse: 'asc' },
+          select: { verse: true },
+        }),
+        prisma.verseTranslation.findMany({
+          where: { bookId: bibleBook.id, chapter: chapterNum, versionId: { in: codes } },
+          select: { verse: true, versionId: true, text: true },
+        }),
+        prisma.verse.findFirst({ where: { bookId: bibleBook.id, chapter: chapterNum - 1 }, select: { chapter: true } }),
+        prisma.verse.findFirst({ where: { bookId: bibleBook.id, chapter: chapterNum + 1 }, select: { chapter: true } }),
+      ])
+
+      const byVerse = new Map<number, Record<string, string>>()
+      for (const t of translations) {
+        if (!byVerse.has(t.verse)) byVerse.set(t.verse, {})
+        byVerse.get(t.verse)![t.versionId] = t.text
+      }
+      const readerVerses = verses.map((v) => ({ verse: v.verse, texts: byVerse.get(v.verse) ?? {} }))
+      return {
+        bibleBook: { id: bibleBook.id, name: bibleBook.name, abbreviation: bibleBook.abbreviation },
+        readerVerses,
+        prevChapter,
+        nextChapter,
+      }
+    },
+    ['read-chapter', book, String(chapterNum), codes.join(',')],
+    { revalidate: 3600 },
+  )()
+}
+
 export default async function ReadPage({ params, searchParams }: PageProps) {
   const { book, chapter } = await params
   const { versions: versionsParam } = await searchParams
@@ -24,7 +68,7 @@ export default async function ReadPage({ params, searchParams }: PageProps) {
   const chapterNum = parseInt(chapter, 10)
   if (isNaN(chapterNum)) notFound()
 
-  const allVersions = await prisma.bibleVersion.findMany({ where: { public: true }, orderBy: { ordinal: 'asc' } })
+  const allVersions = await getPublicVersions()
   const paramCodes = (versionsParam || cookieStore.get('scriptlex_read_versions')?.value || '')
     .split(',')
     .map((s) => s.trim())
@@ -32,29 +76,9 @@ export default async function ReadPage({ params, searchParams }: PageProps) {
   const selectedCodes = paramCodes.filter((c) => allVersions.some((v) => v.id === c))
   const codes = selectedCodes.length ? selectedCodes : ['VI1934', 'KJV'].filter((c) => allVersions.some((v) => v.id === c))
 
-  const bibleBook = await resolveBibleBook(prisma, book)
-  if (!bibleBook) notFound()
-
-  const [verses, translations, prevChapter, nextChapter] = await Promise.all([
-    prisma.verse.findMany({
-      where: { bookId: bibleBook.id, chapter: chapterNum },
-      orderBy: { verse: 'asc' },
-      select: { verse: true },
-    }),
-    prisma.verseTranslation.findMany({
-      where: { bookId: bibleBook.id, chapter: chapterNum, versionId: { in: codes } },
-      select: { verse: true, versionId: true, text: true },
-    }),
-    prisma.verse.findFirst({ where: { bookId: bibleBook.id, chapter: chapterNum - 1 }, select: { chapter: true } }),
-    prisma.verse.findFirst({ where: { bookId: bibleBook.id, chapter: chapterNum + 1 }, select: { chapter: true } }),
-  ])
-
-  const byVerse = new Map<number, Record<string, string>>()
-  for (const t of translations) {
-    if (!byVerse.has(t.verse)) byVerse.set(t.verse, {})
-    byVerse.get(t.verse)![t.versionId] = t.text
-  }
-  const readerVerses = verses.map((v) => ({ verse: v.verse, texts: byVerse.get(v.verse) ?? {} }))
+  const data = await getReadChapter(book, chapterNum, codes)
+  if (!data) notFound()
+  const { bibleBook, readerVerses, prevChapter, nextChapter } = data
 
   const selectedVersions = codes
     .map((c) => allVersions.find((v) => v.id === c)!)

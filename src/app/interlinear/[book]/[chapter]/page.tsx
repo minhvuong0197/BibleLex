@@ -54,24 +54,21 @@ async function getInterlinearData(book: string, chapter: number, versionCode: st
     },
     orderBy: [{ verse: 'asc' }, { wordOrder: 'asc' }],
     include: {
-      strongEntry: true
+      strongEntry: {
+        select: {
+          strongNumber: true,
+          transliteration: true,
+          definition: true,
+          vietnameseDef: true,
+          language: true,
+        },
+      },
     }
   })
 
   const strongNumbers = Array.from(
     new Set(verseWords.map(w => w.strongNumber).filter((s): s is string => s !== null))
   )
-  const morphRows = strongNumbers.length
-    ? await prisma.morphology.findMany({
-        where: { strongNumber: { in: strongNumbers } },
-        distinct: ['strongNumber'],
-        orderBy: { count: 'desc' }
-      })
-    : []
-  const morphByStrong = new Map<string, typeof morphRows[number]>()
-  for (const m of morphRows) {
-    if (!morphByStrong.has(m.strongNumber)) morphByStrong.set(m.strongNumber, m)
-  }
 
   const wordsByVerse = new Map<number, typeof verseWords>()
   for (const word of verseWords) {
@@ -81,15 +78,20 @@ async function getInterlinearData(book: string, chapter: number, versionCode: st
     wordsByVerse.get(word.verse)!.push(word)
   }
 
-  const xrefAgg = await prisma.verseCrossReference.groupBy({
-    by: ['fromVerse'],
-    where: { fromBook: bibleBook.name, fromChapter: chapter },
-    _count: { _all: true }
-  })
-  const crossRefCounts: Record<number, number> = {}
-  for (const r of xrefAgg) crossRefCounts[r.fromVerse] = r._count._all
-
-  // Bản dịch: lấy text của version đang chọn, fallback về VI1934 rồi vietnameseText cũ
+  const [morphRows, xrefAgg, translationRes] = await Promise.all([
+    strongNumbers.length
+      ? prisma.morphology.findMany({
+          where: { strongNumber: { in: strongNumbers } },
+          distinct: ['strongNumber'],
+          orderBy: { count: 'desc' },
+        })
+      : Promise.resolve([] as Awaited<ReturnType<typeof prisma.morphology.findMany>>),
+    prisma.verseCrossReference.groupBy({
+      by: ['fromVerse'],
+      where: { fromBook: bibleBook.name, fromChapter: chapter },
+      _count: { _all: true },
+    }),
+    (async () => {
       const [translations, fallbackTranslations] = await Promise.all([
         prisma.verseTranslation.findMany({
           where: { bookId: bibleBook.id, chapter, versionId: versionCode },
@@ -102,8 +104,21 @@ async function getInterlinearData(book: string, chapter: number, versionCode: st
             })
           : Promise.resolve([] as { verse: number; text: string }[]),
       ])
-      const versionText = new Map<number, string>(translations.map((t) => [t.verse, t.text]))
-      const fallbackText = new Map<number, string>(fallbackTranslations.map((t) => [t.verse, t.text]))
+      return { translations, fallbackTranslations }
+    })(),
+  ])
+
+  const morphByStrong = new Map<string, (typeof morphRows)[number]>()
+  for (const m of morphRows) {
+    if (!morphByStrong.has(m.strongNumber)) morphByStrong.set(m.strongNumber, m)
+  }
+
+  const crossRefCounts: Record<number, number> = {}
+  for (const r of xrefAgg) crossRefCounts[r.fromVerse] = r._count._all
+
+  const { translations, fallbackTranslations } = translationRes
+  const versionText = new Map<number, string>(translations.map((t) => [t.verse, t.text]))
+  const fallbackText = new Map<number, string>(fallbackTranslations.map((t) => [t.verse, t.text]))
 
   const interlinearVerses = verses.map(verse => ({
       book: bibleBook.name,
