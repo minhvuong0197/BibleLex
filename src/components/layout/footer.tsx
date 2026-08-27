@@ -50,7 +50,7 @@ export function Footer() {
               <li>WLC (Hebrew) / SBLGNT (Greek) — PD</li>
               <li>BDB &amp; Thayer (lexicon) — PD</li>
               <li>LSJ (STEPBible) — CC BY 4.0</li>
-              <li>Kinh Thánh 1934 (Việt) — PD</li>
+              <li>Một số bản Việt có bản quyền — xem /attribution</li>
             </ul>
           </nav>
 
