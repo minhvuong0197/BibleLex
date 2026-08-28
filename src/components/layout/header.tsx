@@ -17,6 +17,7 @@ const navigation = [
   { name: "Đọc Kinh Thánh", href: "/read/Gen/1", icon: BookText },
   { name: "Khảo cứu từ vựng", href: "/word-study", icon: Brain },
   { name: "Chủ đề", href: "/topics", icon: LinkIcon },
+  { name: "Từ điển", href: "/dictionaries", icon: BookText },
   { name: "GitHub", href: "/github", icon: GitBranch },
 ]
 

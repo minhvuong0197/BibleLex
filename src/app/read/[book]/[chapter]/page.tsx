@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
 import { VersionMultiSelector } from '@/components/reader/version-multi-selector'
 import { BibleNav } from '@/components/layout/bible-nav'
+import { CommentaryPanel } from '@/components/reader/commentary-panel'
 import { BibleReader } from '@/components/reader/bible-reader'
 
 interface PageProps {
@@ -126,6 +127,8 @@ export default async function ReadPage({ params, searchParams }: PageProps) {
         versions={selectedVersions}
         navigation={{ prevChapter: prevChapter?.chapter ?? null, nextChapter: nextChapter?.chapter ?? null }}
       />
+
+      <CommentaryPanel book={bibleBook.name} chapter={chapterNum} />
     </div>
   )
 }
