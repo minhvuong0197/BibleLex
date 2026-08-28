@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { useRouter } from "next/navigation"
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, ChevronLeft, ChevronRight } from "lucide-react"
+import { useStudy, VerseStudyButtons } from "@/components/reader/verse-study"
 
 interface ReaderVerse {
   verse: number
@@ -39,6 +40,7 @@ export function BibleReader({
   navigation: Navigation
 }) {
   const router = useRouter()
+  const study = useStudy()
   const primary = versions[0]
   const primaryCode = primary?.code
   const lang = ttsLang(primary?.language)
@@ -258,13 +260,16 @@ export function BibleReader({
               {verses.map((verse) => {
                 const text = verse.texts[v.code]
                 const active = currentVerse === verse.verse && v.code === primaryCode
+                const vref = `${bookAbbrev} ${chapter}:${verse.verse}`
+                const hl = study.state.highlights[vref]
                 return (
                   <p
                     key={verse.verse}
                     data-verse={verse.verse}
                     className={
                       "flex gap-2 rounded-md px-1 py-0.5 transition-colors " +
-                      (active ? "bg-primary/10 ring-1 ring-primary/30" : "")
+                      (active ? "bg-primary/10 ring-1 ring-primary/30 " : "") +
+                      (hl ? hl + " " : "")
                     }
                   >
                     <sup className="select-none pt-1 text-xs font-semibold text-muted-foreground">{verse.verse}</sup>
@@ -272,13 +277,16 @@ export function BibleReader({
                       {text ? text : <span className="text-muted-foreground/50">—</span>}
                     </span>
                     {v.code === primaryCode && (
-                      <button
-                        onClick={() => playVerse(verse.verse)}
-                        className="self-start pt-1 text-muted-foreground hover:text-primary"
-                        aria-label={`Đọc câu ${verse.verse}`}
-                      >
-                        <Volume2 className="h-4 w-4" />
-                      </button>
+                      <span className="relative flex items-start gap-0.5 self-start pt-1">
+                        <button
+                          onClick={() => playVerse(verse.verse)}
+                          className="text-muted-foreground hover:text-primary"
+                          aria-label={`Đọc câu ${verse.verse}`}
+                        >
+                          <Volume2 className="h-4 w-4" />
+                        </button>
+                        <VerseStudyButtons ref={vref} study={study} />
+                      </span>
                     )}
                   </p>
                 )

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Search, Menu, X, BookOpen, BookText, Brain, Link as LinkIcon, GitBranch } from "lucide-react"
+import { Search, Menu, X, BookOpen, BookText, Brain, Link as LinkIcon, GitBranch, Bookmark } from "lucide-react"
 import { Brand } from "@/components/layout/brand"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { QuickSearch } from "@/components/layout/quick-search"
@@ -18,6 +18,7 @@ const navigation = [
   { name: "Khảo cứu từ vựng", href: "/word-study", icon: Brain },
   { name: "Chủ đề", href: "/topics", icon: LinkIcon },
   { name: "Từ điển", href: "/dictionaries", icon: BookText },
+  { name: "Học của tôi", href: "/study", icon: Bookmark },
   { name: "GitHub", href: "/github", icon: GitBranch },
 ]
 
