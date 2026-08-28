@@ -71,8 +71,12 @@ export function BibleReader({
       const vs = window.speechSynthesis.getVoices()
       setVoices(vs)
       if (!voiceURI) {
-        const v = pickVoice(langRef.current)
-        if (v) setVoiceURI(v.voiceURI)
+        const want = langRef.current.split('-')[0].toLowerCase()
+        const male = vs.find(
+          (x) => x.lang?.toLowerCase().startsWith('vi') && /nam/i.test(x.name) && !/huynh/i.test(x.name)
+        )
+        const first = vs.find((x) => x.lang?.toLowerCase().startsWith(want))
+        setVoiceURI((male || first)?.voiceURI ?? null)
       }
     }
     load()
