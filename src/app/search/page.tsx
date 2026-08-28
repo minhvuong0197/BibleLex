@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { cn, getBookAbbreviation } from "@/lib/utils"
+import { cn, getBookAbbreviation, BOOKS_OT, BOOKS_NT, BOOK_VI } from "@/lib/utils"
 
 interface StrongSearchData {
   language?: 'HEBREW' | 'GREEK'
@@ -16,9 +16,12 @@ interface StrongSearchData {
   transliteration: string
 }
 interface VerseSearchData {
-  book?: { name?: string | null; abbreviation?: string | null } | null
+  book?: string | { name?: string | null; abbreviation?: string | null } | null
   chapter: number
   verse?: number
+  lemma?: boolean
+  hebrewGreek?: string
+  transliteration?: string
 }
 interface TopicSearchData {
   id: string
@@ -29,6 +32,8 @@ type SearchResult =
   | { type: 'strong'; id: string; title: string; snippet: string; data: StrongSearchData }
   | { type: 'verse'; id: string; title: string; snippet: string; data: VerseSearchData }
   | { type: 'topic'; id: string; title: string; snippet: string; data: TopicSearchData }
+
+const ALL_BOOKS = [...BOOKS_OT, ...BOOKS_NT]
 
 export default function SearchPage() {
   return (
@@ -44,22 +49,54 @@ function SearchContent() {
   const [query, setQuery] = useState(searchParams.get('q') || '')
   const [type, setType] = useState(searchParams.get('type') || 'all')
   const [lang, setLang] = useState(searchParams.get('lang') || 'all')
+  const [book, setBook] = useState(searchParams.get('book') || 'all')
+  const [testament, setTestament] = useState(searchParams.get('testament') || 'all')
   const [results, setResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [suggestions, setSuggestions] = useState<SearchResult[]>([])
   const [showSuggest, setShowSuggest] = useState(false)
 
+  function runSearch(q: string, t: string, l: string, b: string, te: string) {
+    if (!q.trim()) {
+      setResults([])
+      return
+    }
+    setIsLoading(true)
+    setError(null)
+    const params = new URLSearchParams({ q: q.trim(), type: t })
+    if (l !== 'all') params.set('lang', l)
+    if (t === 'verse' || t === 'all') {
+      if (b !== 'all') params.set('book', b)
+      if (te !== 'all') params.set('testament', te)
+    }
+    fetch(`/api/search?${params}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Search failed')
+        return res.json()
+      })
+      .then((data) => setResults(data.results || []))
+      .catch(() => {
+        setError('Có lỗi xảy ra khi tìm kiếm')
+        setResults([])
+      })
+      .finally(() => setIsLoading(false))
+  }
+
   /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps, react-hooks/immutability */
   useEffect(() => {
     const q = searchParams.get('q')
     const t = searchParams.get('type') || 'all'
     const l = searchParams.get('lang') || 'all'
+    const b = searchParams.get('book') || 'all'
+    const te = searchParams.get('testament') || 'all'
     if (q) {
       setQuery(q)
       setType(t)
       setLang(l)
-      performSearch(q, t, l)
+      setBook(b)
+      setTestament(te)
+      runSearch(q, t, l, b, te)
     }
   }, [searchParams])
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps, react-hooks/immutability */
@@ -83,54 +120,47 @@ function SearchContent() {
   }, [query])
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  async function performSearch(q: string, t: string, l = lang) {
-    if (!q.trim()) {
-      setResults([])
-      return
-    }
-    setIsLoading(true)
-    setError(null)
-    try {
-      const params = new URLSearchParams({ q: q.trim(), type: t })
-      if (l !== 'all') params.set('lang', l)
-      const res = await fetch(`/api/search?${params}`)
-      if (!res.ok) throw new Error('Search failed')
-      const data = await res.json()
-      setResults(data.results || [])
-    } catch {
-      setError('Có lỗi xảy ra khi tìm kiếm')
-      setResults([])
-    } finally {
-      setIsLoading(false)
-    }
+  const pushParams = (q: string, t: string, l: string, b: string, te: string) => {
+    const params = new URLSearchParams({ q, type: t })
+    if (l !== 'all') params.set('lang', l)
+    if (b !== 'all') params.set('book', b)
+    if (te !== 'all') params.set('testament', te)
+    router.push(`/search?${params}`)
   }
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     const trimmed = query.trim()
     if (!trimmed) return
-    const params = new URLSearchParams({ q: trimmed, type })
-    router.push(`/search?${params}`)
+    pushParams(trimmed, type, lang, book, testament)
   }
 
   const handleTypeChange = (newType: string) => {
     setType(newType)
-    const params = new URLSearchParams({ q: query.trim(), type: newType })
-    if (lang !== 'all') params.set('lang', lang)
-    router.push(`/search?${params}`)
+    pushParams(query.trim() || query, newType, lang, book, testament)
   }
-
   const handleLangChange = (newLang: string) => {
     setLang(newLang)
-    const params = new URLSearchParams({ q: query.trim(), type, lang: newLang })
-    router.push(`/search?${params}`)
+    pushParams(query.trim() || query, type, newLang, book, testament)
+  }
+  const handleBookChange = (newBook: string) => {
+    setBook(newBook)
+    pushParams(query.trim() || query, type, lang, newBook, testament)
+  }
+  const handleTestamentChange = (newTe: string) => {
+    setTestament(newTe)
+    pushParams(query.trim() || query, type, lang, book, newTe)
   }
 
   const clearSearch = () => {
     setQuery('')
     setResults([])
+    setBook('all')
+    setTestament('all')
     router.push('/search')
   }
+
+  const showScope = type === 'verse' || type === 'all'
 
   return (
     <div className="container py-8 md:py-12">
@@ -227,6 +257,51 @@ function SearchContent() {
                 ))}
               </div>
             )}
+
+            {showScope && (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Sách:</span>
+                  <select
+                    value={book}
+                    onChange={(e) => handleBookChange(e.target.value)}
+                    className="h-8 rounded-md border bg-background px-2 text-xs"
+                  >
+                    <option value="all">Tất cả</option>
+                    <optgroup label="Cựu Ước">
+                      {BOOKS_OT.map((b) => (
+                        <option key={b} value={b}>{BOOK_VI[b] || b}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Tân Ước">
+                      {BOOKS_NT.map((b) => (
+                        <option key={b} value={b}>{BOOK_VI[b] || b}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Testament:</span>
+                  {[['all', 'Tất cả'], ['OT', 'Cựu Ước'], ['NT', 'Tân Ước']].map(([te, label]) => (
+                    <Button
+                      key={te}
+                      type="button"
+                      variant={testament === te ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleTestamentChange(te)}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {showScope && (
+              <p className="text-xs text-muted-foreground">
+                Mẹo: dùng <code className="rounded bg-muted px-1">OR</code>, <code className="rounded bg-muted px-1">-từ</code> (loại trừ), <code className="rounded bg-muted px-1">"cụm từ"</code> (trích dẫn). Nhập số Strongs (vd <code className="rounded bg-muted px-1">G26</code>) ở mục Kinh Thánh để tìm mọi câu chứa từ gốc đó.
+              </p>
+            )}
           </form>
         </CardContent>
       </Card>
@@ -289,10 +364,31 @@ function SearchResultCard({ result }: { result: SearchResult }) {
   }
 
   if (type === 'verse') {
+    const v = data
+    if (v.lemma) {
+      return (
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="pt-4 pb-4 pr-4 pl-4">
+            <Link href={`/interlinear/${v.book}/${v.chapter}`} className="group">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold group-hover:text-primary transition-colors">{typeof v.book === 'string' ? v.book : ''} {v.chapter}:{v.verse}</h3>
+                    <Badge variant="outline" className="text-xs">Lemma · {v.hebrewGreek}</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{snippet}</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
+      )
+    }
     return (
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="pt-4 pb-4 pr-4 pl-4">
-          <Link href={`/interlinear/${getBookAbbreviation(data.book?.name || '')}/${data.chapter}`} className="group">
+          <Link href={`/interlinear/${getBookAbbreviation((v.book && typeof v.book === 'object' ? v.book.name || '' : '') || '')}/${v.chapter}`} className="group">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
