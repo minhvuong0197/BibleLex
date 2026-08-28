@@ -101,7 +101,8 @@ export function AuthMenu() {
           <User className="h-4 w-4" /> Đăng nhập
         </Button>
         {open && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setOpen(false)}>
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-4" onClick={() => setOpen(false)}>
+            <div className="flex min-h-full items-center justify-center">
             <div className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">{forgot ? "Quên mật khẩu" : tab === "login" ? "Đăng nhập" : "Tạo tài khoản"}</h2>
@@ -169,6 +170,7 @@ export function AuthMenu() {
               <p className="mt-3 text-xs text-muted-foreground">
                 Chưa xác nhận email? Kiểm tra hộp thư (hoặc console dev) để lấy link xác nhận.
               </p>
+            </div>
             </div>
           </div>
         )}
