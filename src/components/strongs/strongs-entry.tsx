@@ -4,7 +4,7 @@ import { cn, getLanguageLabel, getBookViName } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Link2, Hash } from "lucide-react"
+import { Link2, Hash, Loader2, Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { AiAnalysisSection } from "@/components/ai/ai-analysis-section"
@@ -103,6 +103,24 @@ const REVERSE_LABELS: Record<string, string> = {
 export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) {
   const [activeTab, setActiveTab] = useState<'definition' | 'morphology' | 'crossrefs' | 'usage' | 'ai'>('definition')
   const [copied, setCopied] = useState<string | null>(null)
+  const [lexVi, setLexVi] = useState<Record<string, string>>({})
+  const [lexBusy, setLexBusy] = useState<Record<string, boolean>>({})
+
+  const translateLex = async (kind: 'thayer' | 'bdb', source: string) => {
+    if (lexVi[kind] || lexBusy[kind]) return
+    setLexBusy((b) => ({ ...b, [kind]: true }))
+    try {
+      const res = await fetch(
+        `/api/dictionary/translate?term=${encodeURIComponent(entry.strongNumber)}&source=${encodeURIComponent(source)}`
+      )
+      const data = await res.json()
+      setLexVi((v) => ({ ...v, [kind]: data.vietnameseDef || '__NA__' }))
+    } catch {
+      setLexVi((v) => ({ ...v, [kind]: '__NA__' }))
+    } finally {
+      setLexBusy((b) => ({ ...b, [kind]: false }))
+    }
+  }
 
   const copyToClipboard = async (text: string, label: string) => {
     await navigator.clipboard.writeText(text)
@@ -224,6 +242,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
             <div className="prose prose-sm max-w-none border-l-4 border-blue-500 pl-4">
               <h3 className="font-semibold mb-2">Thayer&apos;s Greek Lexicon</h3>
               <p className="whitespace-pre-wrap">{entry.thayersDef}</p>
+              <LexTranslate kind="thayer" source="Thayer's Greek Lexicon" vi={lexVi.thayer} busy={lexBusy.thayer} onTranslate={translateLex} />
             </div>
           )}
 
@@ -231,6 +250,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
             <div className="prose prose-sm max-w-none border-l-4 border-amber-500 pl-4">
               <h3 className="font-semibold mb-2">Brown-Driver-Briggs Hebrew Lexicon</h3>
               <p className="whitespace-pre-wrap">{entry.bdbDef}</p>
+              <LexTranslate kind="bdb" source="Brown-Driver-Briggs Hebrew Lexicon" vi={lexVi.bdb} busy={lexBusy.bdb} onTranslate={translateLex} />
             </div>
           )}
 
@@ -450,4 +470,28 @@ function CrossRefCard({ cr, isReverse }: { cr: CrossRef; isReverse: boolean }) {
       </CardContent>
     </Card>
   )
+}
+
+function LexTranslate({
+  kind,
+  source,
+  vi,
+  busy,
+  onTranslate,
+}: {
+  kind: 'thayer' | 'bdb'
+  source: string
+  vi?: string
+  busy?: boolean
+  onTranslate: (k: 'thayer' | 'bdb', s: string) => void
+}) {
+  if (!vi)
+    return (
+      <Button variant="ghost" size="sm" className="mt-2" onClick={() => onTranslate(kind, source)} disabled={busy}>
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+        Dịch tiếng Việt
+      </Button>
+    )
+  if (vi === '__NA__') return <p className="mt-2 text-xs text-muted-foreground">Chưa dịch được.</p>
+  return <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-primary/90">{vi}</p>
 }

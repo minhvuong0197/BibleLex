@@ -88,6 +88,20 @@ export async function GET(
     const viDef = await ensureVietnameseDef(entry)
     if (viDef) entry.vietnameseDef = viDef
 
+    // Lexicon gốc (BDB Hebrew / Thayer Greek) từ dictionary_entries, tra theo số Strong's.
+    const lexiconRows = await prisma.dictionaryEntry.findMany({
+      where: {
+        term: formattedNumber,
+        source: {
+          in: ["Brown-Driver-Briggs Hebrew Lexicon", "Thayer's Greek Lexicon"],
+        },
+      },
+    })
+    const bdbDef = lexiconRows.find((r) => r.source === "Brown-Driver-Briggs Hebrew Lexicon")?.definition || null
+    const thayersDef = lexiconRows.find((r) => r.source === "Thayer's Greek Lexicon")?.definition || null
+    if (bdbDef) entry.bdbDef = bdbDef
+    if (thayersDef) entry.thayersDef = thayersDef
+
     // Get verse texts for the sample verses
     const verseWords = await prisma.verseWord.findMany({
       where: { strongNumber: formattedNumber },
