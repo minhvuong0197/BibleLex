@@ -378,3 +378,18 @@ model Highlight {
   @@index([userId])
   @@map("highlights")
 }
+
+model DictionaryEntry {
+  id            String   @id @default(cuid())
+  term          String
+  source        String
+  definition    String   @db.Text
+  vietnameseDef String?  @db.Text @map("vietnamese_def")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([term, source])
+  @@index([term])
+  @@index([source])
+  @@map("dictionary_entries")
+}
