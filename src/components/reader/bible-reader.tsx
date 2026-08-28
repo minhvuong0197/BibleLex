@@ -4,13 +4,10 @@ import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { useRouter } from "next/navigation"
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, ChevronLeft, ChevronRight } from "lucide-react"
 
-// Giọng Vbee (tiếng Việt) — mặc định Nam Sài Gòn (miền Nam)
-const VBEE_VOICES = [
-  { code: "s_sg_male_thientam_ytstable_vc", name: "Nam Sài Gòn (miền Nam)" },
-  { code: "n_hanoi_male_protrainer_education_vc", name: "Nam Hà Nội" },
-  { code: "n_namdinh_male_haichuyen20251209185109485_book_vc", name: "Nam Nam Định (đọc sách)" },
-  { code: "n_hanoi_female_nguyetnga2_book_vc", name: "Nữ Hà Nội (đọc sách)" },
-  { code: "n_hanoi_female_ngochuyen_full_48k-fhg", name: "Nữ Ngọc Huyền (miền Bắc)" },
+// Giọng Azure TTS (tiếng Việt, miễn phí F0) — mặc định Nam (NamMinh)
+const TTS_VOICES = [
+  { code: "vi-VN-NamMinhNeural", name: "Nam (NamMinh)" },
+  { code: "vi-VN-HoaiMyNeural", name: "Nữ (HoaiMy)" },
 ]
 
 interface ReaderVerse {
@@ -58,7 +55,7 @@ export function BibleReader({
   const [rate, setRate] = useState(1)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const [voiceURI, setVoiceURI] = useState<string | null>(null)
-  const [vbeeVoice, setVbeeVoice] = useState(VBEE_VOICES[0].code)
+  const [ttsVoice, setTtsVoice] = useState(TTS_VOICES[0].code)
   const [supported, setSupported] = useState(true)
 
   const queueRef = useRef<{ verse: number; text: string }[]>([])
@@ -71,12 +68,12 @@ export function BibleReader({
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const preloadRef = useRef<HTMLAudioElement | null>(null)
-  const vbeeVoiceRef = useRef(vbeeVoice)
+  const ttsVoiceRef = useRef(ttsVoice)
 
   useEffect(() => { rateRef.current = rate }, [rate])
   useEffect(() => { langRef.current = lang }, [lang])
   useEffect(() => { primaryRef.current = primaryCode }, [primaryCode])
-  useEffect(() => { vbeeVoiceRef.current = vbeeVoice }, [vbeeVoice])
+  useEffect(() => { ttsVoiceRef.current = ttsVoice }, [ttsVoice])
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -125,7 +122,7 @@ export function BibleReader({
     a.onerror = () => advance()
     a.play().catch(() => {})
     if (index + 1 < items.length) {
-      const n = new Audio(vbeeUrl(items[index + 1].text, vbeeVoiceRef.current, rateRef.current))
+      const n = new Audio(vbeeUrl(items[index + 1].text, ttsVoiceRef.current, rateRef.current))
       preloadRef.current = n
       n.load()
     }
@@ -139,7 +136,7 @@ export function BibleReader({
       const next = preloadRef.current
       preloadRef.current = null
       if (next) startAudio(next, idxRef.current)
-      else startAudio(new Audio(vbeeUrl(items[idxRef.current].text, vbeeVoiceRef.current, rateRef.current)), idxRef.current)
+      else startAudio(new Audio(vbeeUrl(items[idxRef.current].text, ttsVoiceRef.current, rateRef.current)), idxRef.current)
     } else {
       stopPlayback()
     }
@@ -157,7 +154,7 @@ export function BibleReader({
       setCurrentVerse(null)
       return
     }
-    startAudio(new Audio(vbeeUrl(items[idxRef.current].text, vbeeVoiceRef.current, rateRef.current)), idxRef.current)
+    startAudio(new Audio(vbeeUrl(items[idxRef.current].text, ttsVoiceRef.current, rateRef.current)), idxRef.current)
   }
 
   function speakSpeech() {
@@ -282,8 +279,8 @@ export function BibleReader({
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <label className="font-medium text-foreground">Giọng</label>
           {useVbee ? (
-            <select value={vbeeVoice} onChange={(e) => setVbeeVoice(e.target.value)} className="h-8 rounded-md border bg-background px-2 text-xs">
-              {VBEE_VOICES.map((vv) => (
+            <select value={ttsVoice} onChange={(e) => setTtsVoice(e.target.value)} className="h-8 rounded-md border bg-background px-2 text-xs">
+              {TTS_VOICES.map((vv) => (
                 <option key={vv.code} value={vv.code}>{vv.name}</option>
               ))}
             </select>

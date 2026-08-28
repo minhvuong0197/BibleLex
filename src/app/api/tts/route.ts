@@ -1,60 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
 
-const VBEE_APP_ID = process.env.VBEE_APP_ID
-const VBEE_ACCESS_TOKEN = process.env.VBEE_ACCESS_TOKEN
-const DEFAULT_VOICE =
-  process.env.VBEE_VOICE_CODE || "s_sg_male_thientam_ytstable_vc"
+const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY
+const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || "southeastasia"
+const DEFAULT_VOICE = process.env.TTS_VOICE || "vi-VN-NamMinhNeural"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
-export const maxDuration = 60
+export const maxDuration = 30
 
-async function generateSpeech(
-  text: string,
-  voiceCode: string,
-  speedRate: number
-): Promise<string> {
-  const res = await fetch("https://vbee.vn/api/v1/tts", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${VBEE_ACCESS_TOKEN}`,
-    },
-    body: JSON.stringify({
-      app_id: VBEE_APP_ID,
-      input_text: text,
-      voice_code: voiceCode,
-      audio_type: "mp3",
-      speed_rate: speedRate,
-      callback_url: "https://example.com/callback",
-    }),
-  })
-  if (!res.ok) throw new Error(`Vbee HTTP ${res.status}`)
-  const data = await res.json()
-  if (data.status !== 1) throw new Error(data.error_message || data.error_code)
-  const requestId = data.result?.request_id
-  if (!requestId) throw new Error("Thiếu request_id từ Vbee")
-  if (data.result?.audio_link) return data.result.audio_link
-  for (let i = 0; i < 30; i++) {
-    await new Promise((r) => setTimeout(r, 2000))
-    const s = await fetch(`https://vbee.vn/api/v1/tts/${requestId}`, {
-      headers: { Authorization: `Bearer ${VBEE_ACCESS_TOKEN}` },
-    })
-    if (!s.ok) continue
-    const sd = await s.json()
-    if (sd.status === 1) {
-      if (sd.result?.status === "SUCCESS" && sd.result?.audio_link)
-        return sd.result.audio_link
-      if (sd.result?.status === "FAILURE") throw new Error("Vbee xử lý thất bại")
-    }
-  }
-  throw new Error("Vbee quá thời gian chờ")
+function xmlEscape(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
 }
 
 export async function GET(req: NextRequest) {
-  if (!VBEE_ACCESS_TOKEN || !VBEE_APP_ID) {
+  if (!AZURE_SPEECH_KEY) {
     return NextResponse.json(
-      { error: "Chưa cấu hình Vbee (thiếu VBEE_APP_ID/VBEE_ACCESS_TOKEN)" },
+      { error: "Chưa cấu hình Azure TTS (thiếu AZURE_SPEECH_KEY)" },
       { status: 503 }
     )
   }
@@ -64,11 +30,27 @@ export async function GET(req: NextRequest) {
   if (!text || text.length > 2000) {
     return NextResponse.json({ error: "Thiếu hoặc quá dài văn bản" }, { status: 400 })
   }
+  const pct = Math.round((rate - 1) * 100)
+  const rateAttr = `${pct > 0 ? "+" : ""}${pct}%`
+  const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='vi-VN'><voice name='${voice}'><prosody rate='${rateAttr}'>${xmlEscape(text)}</prosody></voice></speak>`
   try {
-    const link = await generateSpeech(text, voice, rate)
-    const audio = await fetch(link)
-    if (!audio.ok) return NextResponse.json({ error: "Lỗi tải audio" }, { status: 502 })
-    const buf = await audio.arrayBuffer()
+    const res = await fetch(
+      `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`,
+      {
+        method: "POST",
+        headers: {
+          "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
+          "Content-Type": "application/ssml+xml",
+          "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
+        },
+        body: ssml,
+      }
+    )
+    if (!res.ok) {
+      const err = await res.text().catch(() => "")
+      return NextResponse.json({ error: `Azure TTS ${res.status}: ${err.slice(0, 200)}` }, { status: 502 })
+    }
+    const buf = await res.arrayBuffer()
     return new NextResponse(buf, {
       headers: {
         "Content-Type": "audio/mpeg",
@@ -76,6 +58,6 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Lỗi Vbee" }, { status: 500 })
+    return NextResponse.json({ error: e?.message || "Lỗi Azure TTS" }, { status: 500 })
   }
 }
