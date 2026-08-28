@@ -99,8 +99,10 @@ export async function GET(
     })
     const bdbDef = lexiconRows.find((r) => r.source === "Brown-Driver-Briggs Hebrew Lexicon")?.definition || null
     const thayersDef = lexiconRows.find((r) => r.source === "Thayer's Greek Lexicon")?.definition || null
+    const lsjDef = lexiconRows.find((r) => r.source === "Liddell-Scott-Jones Greek Lexicon")?.definition || null
     if (bdbDef) entry.bdbDef = bdbDef
     if (thayersDef) entry.thayersDef = thayersDef
+    if (lsjDef) entry.lsjDef = lsjDef
 
     // Get verse texts for the sample verses
     const verseWords = await prisma.verseWord.findMany({

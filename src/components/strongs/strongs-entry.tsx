@@ -106,7 +106,7 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
   const [lexVi, setLexVi] = useState<Record<string, string>>({})
   const [lexBusy, setLexBusy] = useState<Record<string, boolean>>({})
 
-  const translateLex = async (kind: 'thayer' | 'bdb', source: string) => {
+  const translateLex = async (kind: 'thayer' | 'bdb' | 'lsj', source: string) => {
     if (lexVi[kind] || lexBusy[kind]) return
     setLexBusy((b) => ({ ...b, [kind]: true }))
     try {
@@ -255,11 +255,18 @@ export function StrongsEntry({ entry, stats, sampleVerses }: StrongsEntryProps) 
           )}
 
           {entry.lsjDef && (
-            <div className="prose prose-sm max-w-none border-l-4 border-purple-500 pl-4">
-              <h3 className="font-semibold mb-2">Liddell-Scott-Jones Greek Lexicon</h3>
-              <p className="whitespace-pre-wrap">{entry.lsjDef}</p>
-            </div>
+            <details className="prose prose-sm max-w-none border-l-4 border-purple-500 pl-4 rounded">
+              <summary className="cursor-pointer select-none py-2 font-semibold">
+                Liddell-Scott-Jones Greek Lexicon (LSJ đầy đủ — nhấn để mở)
+              </summary>
+              <p className="whitespace-pre-wrap pt-2">{entry.lsjDef}</p>
+              <LexTranslate kind="lsj" source="Liddell-Scott-Jones Greek Lexicon" vi={lexVi.lsj} busy={lexBusy.lsj} onTranslate={translateLex} />
+            </details>
           )}
+
+          <p className="mt-6 text-xs text-muted-foreground">
+            Nguồn lexicon gốc: STEPBible (Thayer / Abbott-Smith, BDB, LSJ) — giấy phép CC BY 4.0.
+          </p>
 
           {entry.etymology && (
             <div className="prose prose-sm max-w-none border-l-4 border-gray-500 pl-4">
@@ -479,11 +486,11 @@ function LexTranslate({
   busy,
   onTranslate,
 }: {
-  kind: 'thayer' | 'bdb'
+  kind: 'thayer' | 'bdb' | 'lsj'
   source: string
   vi?: string
   busy?: boolean
-  onTranslate: (k: 'thayer' | 'bdb', s: string) => void
+  onTranslate: (k: 'thayer' | 'bdb' | 'lsj', s: string) => void
 }) {
   if (!vi)
     return (

@@ -174,6 +174,10 @@ export default function DictionariesPage() {
           </div>
         </div>
       )}
+
+      <p className="mt-8 border-t pt-4 text-xs text-muted-foreground">
+        Nguồn: từ điển công cộng (Easton, Smith, Hitchcock, Torrey) và lexicon gốc từ STEPBible (Thayer / Abbott-Smith, BDB, LSJ) — giấy phép CC BY 4.0. Định nghĩa tiếng Việt được dịch tự động theo yêu cầu.
+      </p>
     </div>
   )
 }

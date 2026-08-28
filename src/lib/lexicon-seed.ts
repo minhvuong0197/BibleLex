@@ -4,9 +4,14 @@ import { prisma } from "@/lib/db"
 
 const LOCAL_DIR = join(process.cwd(), "scripts", "data")
 
-const SOURCES: { file: string; lang: "H" | "G"; source: string }[] = [
+const SOURCES: { file?: string; url?: string; lang: "H" | "G"; source: string }[] = [
   { file: "tbesH.txt", lang: "H", source: "Brown-Driver-Briggs Hebrew Lexicon" },
   { file: "tbesg.txt", lang: "G", source: "Thayer's Greek Lexicon" },
+  {
+    url: "https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/TFLSJ%20%200-5624%20-%20Translators%20Formatted%20full%20LSJ%20Bible%20lexicon%20-%20STEPBible.org%20CC%20BY.txt",
+    lang: "G",
+    source: "Liddell-Scott-Jones Greek Lexicon",
+  },
 ]
 
 function stripHtml(s: string) {
@@ -44,15 +49,30 @@ function parseBriefLexicon(text: string, lang: "H" | "G") {
   return map
 }
 
+async function getText(s: { file?: string; url?: string }) {
+  if (s.file) {
+    const p = join(LOCAL_DIR, s.file)
+    if (existsSync(p)) return readFileSync(p, "utf8")
+  }
+  if (s.url) {
+    const res = await fetch(s.url, { redirect: "follow" })
+    if (!res.ok) throw new Error(`fetch ${s.url} failed: ${res.status}`)
+    return await res.text()
+  }
+  throw new Error("no source available")
+}
+
 export async function seedLexicons() {
   let total = 0
   for (const s of SOURCES) {
-    const path = join(LOCAL_DIR, s.file)
-    if (!existsSync(path)) {
-      console.log(`[lexicon] missing ${s.file}, skipping`)
+    let text: string
+    try {
+      text = await getText(s)
+    } catch (e) {
+      console.log(`[lexicon] ${s.source}: ${(e as Error).message}`)
       continue
     }
-    const map = parseBriefLexicon(readFileSync(path, "utf8"), s.lang)
+    const map = parseBriefLexicon(text, s.lang)
     console.log(`[lexicon] ${s.source}: ${map.size} entries parsed`)
 
     const rows = Array.from(map.entries()).map(([term, definition]) => ({
@@ -77,3 +97,4 @@ export async function seedLexicons() {
   }
   return total
 }
+
