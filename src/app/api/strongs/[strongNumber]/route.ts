@@ -1,6 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { parseStrongNumber, formatStrongNumber } from '@/lib/utils'
+import { generateAiText } from '@/lib/ai'
+
+export const maxDuration = 60
+
+const STRONG_VI_SYSTEM = `Bạn là chuyên gia từ vựng Kinh Thánh, thông thạo tiếng Hê-bơ-rơ cổ và Hy-lạp Koine. Nhiệm vụ: dịch định nghĩa từ vựng Kinh Thánh (tiếng Anh) sang tiếng Việt ngắn gọn, CHỈ nghĩa cốt lõi (1-3 dòng), văn phong Kinh Thánh Tiếng Việt 1934, khách quan, học thuật. Trả về DUY NHẤT nội dung tiếng Việt. Không tiêu đề, không Markdown, không dấu ngoặc, không giải thích thêm.`
+
+async function ensureVietnameseDef(entry: {
+  strongNumber: string
+  definition: string
+  kjvDef: string | null
+  vietnameseDef: string | null
+}): Promise<string | null> {
+  if (entry.vietnameseDef && entry.vietnameseDef.trim()) return entry.vietnameseDef
+  const source = (entry.kjvDef && entry.kjvDef.trim()) || entry.definition.trim()
+  if (!source) return null
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const { text } = await generateAiText(STRONG_VI_SYSTEM, source, { temperature: 0.3, timeoutMs: 18000 })
+      const vi = text.trim().replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
+      if (vi) {
+        await prisma.strongEntry
+          .update({ where: { strongNumber: entry.strongNumber }, data: { vietnameseDef: vi } })
+          .catch(() => {})
+        return vi
+      }
+      return null
+    } catch (e) {
+      const msg = (e as Error)?.message || ''
+      console.error(`translate strong ${entry.strongNumber} attempt ${attempt} failed:`, msg.slice(0, 100))
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 1500))
+    }
+  }
+  return null
+}
 
 export async function GET(
   request: NextRequest,
@@ -49,6 +83,10 @@ export async function GET(
         { status: 404 }
       )
     }
+
+    // Dịch sang tiếng Việt theo yêu cầu (nếu chưa có), rồi lưu vào DB để dùng lại.
+    const viDef = await ensureVietnameseDef(entry)
+    if (viDef) entry.vietnameseDef = viDef
 
     // Get verse texts for the sample verses
     const verseWords = await prisma.verseWord.findMany({
