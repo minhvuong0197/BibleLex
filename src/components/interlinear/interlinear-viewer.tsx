@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Copy } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { StrongsHoverCard } from "@/components/strongs/strongs-hover-card"
 
 interface InterlinearWord {
   wordOrder: number
@@ -371,14 +372,27 @@ function WordToken({
         )}
         
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className={cn(
-            "px-1.5 py-0.5 text-xs font-mono rounded select-all cursor-pointer",
-            "hover:bg-primary/10 transition-colors",
-            isHebrew ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-          )} onClick={(e) => { e.stopPropagation(); onCopy(word.strongNumber ?? '', word.strongNumber ?? '') }}>
-            {word.strongNumber}
-            {copied === word.strongNumber && <span className="ml-1 text-green-600">✓</span>}
-          </span>
+           {word.strongEntry ? (
+            <StrongsHoverCard data={word.strongEntry}>
+              <span className={cn(
+                "px-1.5 py-0.5 text-xs font-mono rounded select-all cursor-pointer",
+                "hover:bg-primary/10 transition-colors",
+                isHebrew ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+              )} onClick={(e) => { e.stopPropagation(); onCopy(word.strongNumber ?? '', word.strongNumber ?? '') }}>
+                {word.strongNumber}
+                {copied === word.strongNumber && <span className="ml-1 text-green-600">✓</span>}
+              </span>
+            </StrongsHoverCard>
+          ) : (
+            <span className={cn(
+              "px-1.5 py-0.5 text-xs font-mono rounded select-all cursor-pointer",
+              "hover:bg-primary/10 transition-colors",
+              isHebrew ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+            )} onClick={(e) => { e.stopPropagation(); onCopy(word.strongNumber ?? '', word.strongNumber ?? '') }}>
+              {word.strongNumber}
+              {copied === word.strongNumber && <span className="ml-1 text-green-600">✓</span>}
+            </span>
+          )}
           
           {showParsing && word.parsing && (
             <span className="px-1.5 py-0.5 text-xs font-mono rounded bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 select-all">

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { BookText } from 'lucide-react'
 import { InterlinearViewer } from '@/components/interlinear/interlinear-viewer'
 import { VersionSelector } from '@/components/interlinear/version-selector'
+import { BibleNav } from '@/components/layout/bible-nav'
 import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
 
@@ -259,12 +260,15 @@ export default async function InterlinearPage({ params, searchParams }: PageProp
       </nav>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <VersionSelector
-          versions={versions.map((v) => ({ code: v.id, name: v.name, abbreviation: v.abbreviation }))}
-          current={currentVersion?.id ?? 'VI1934'}
-          book={data.book.abbreviation}
-          chapter={data.chapter}
-        />
+        <div className="flex items-center gap-2">
+          <BibleNav variant="button" />
+          <VersionSelector
+            versions={versions.map((v) => ({ code: v.id, name: v.name, abbreviation: v.abbreviation }))}
+            current={currentVersion?.id ?? 'VI1934'}
+            book={data.book.abbreviation}
+            chapter={data.chapter}
+          />
+        </div>
         <Link
           href={`/read/${data.book.abbreviation}/${data.chapter}`}
           className="inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium hover:bg-accent"

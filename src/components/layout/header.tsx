@@ -8,6 +8,7 @@ import { Brand } from "@/components/layout/brand"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { QuickSearch } from "@/components/layout/quick-search"
 import { useClientPathname } from "@/components/layout/use-client-pathname"
+import { BibleNav } from "@/components/layout/bible-nav"
 import { useState } from "react"
 
 const navigation = [
@@ -51,6 +52,9 @@ export function Header() {
           <div className="hidden md:block w-64">
             <QuickSearch />
           </div>
+          <div className="hidden md:block">
+            <BibleNav variant="button" />
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -63,8 +67,9 @@ export function Header() {
 
       {mobileMenuOpen && (
         <div className="md:hidden border-t px-4 py-4 space-y-3">
-          <QuickSearch />
-          <nav className="space-y-1" role="navigation" aria-label="Mobile navigation">
+           <QuickSearch />
+           <BibleNav variant="button" />
+           <nav className="space-y-1" role="navigation" aria-label="Mobile navigation">
             {navigation.map((item) => (
               <Link
                 key={item.name}

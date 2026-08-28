@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
 import { VersionMultiSelector } from '@/components/reader/version-multi-selector'
+import { BibleNav } from '@/components/layout/bible-nav'
 import { BibleReader } from '@/components/reader/bible-reader'
 
 interface PageProps {
@@ -106,12 +107,15 @@ export default async function ReadPage({ params, searchParams }: PageProps) {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{getBookViName(bibleBook.name)} {chapterNum}</h1>
           <p className="text-sm text-muted-foreground">Đọc Kinh Thánh — nhiều bản dịch song song</p>
         </div>
-        <VersionMultiSelector
-          versions={versionsForSelector}
-          selected={selectedVersions.map((v) => v.code)}
-          book={bibleBook.abbreviation}
-          chapter={chapterNum}
-        />
+        <div className="flex items-center gap-2">
+          <BibleNav variant="button" />
+          <VersionMultiSelector
+            versions={versionsForSelector}
+            selected={selectedVersions.map((v) => v.code)}
+            book={bibleBook.abbreviation}
+            chapter={chapterNum}
+          />
+        </div>
       </div>
 
       <BibleReader
