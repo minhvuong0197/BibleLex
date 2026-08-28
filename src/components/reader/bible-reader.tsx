@@ -47,6 +47,7 @@ export function BibleReader({
   const [isPlaying, setIsPlaying] = useState(false)
   const [rate, setRate] = useState(1)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
+  const [voiceURI, setVoiceURI] = useState<string | null>(null)
   const [supported, setSupported] = useState(true)
 
   const queueRef = useRef<{ verse: number; text: string }[]>([])
@@ -66,7 +67,14 @@ export function BibleReader({
       setSupported(false)
       return
     }
-    const load = () => setVoices(window.speechSynthesis.getVoices())
+    const load = () => {
+      const vs = window.speechSynthesis.getVoices()
+      setVoices(vs)
+      if (!voiceURI) {
+        const v = pickVoice(langRef.current)
+        if (v) setVoiceURI(v.voiceURI)
+      }
+    }
     load()
     window.speechSynthesis.onvoiceschanged = load
     return () => {
@@ -76,8 +84,14 @@ export function BibleReader({
   }, [])
 
   function pickVoice(l: string): SpeechSynthesisVoice | undefined {
-    const want = l.split('-')[0]
-    return voices.find((v) => v.lang?.toLowerCase().startsWith(want)) || voices.find((v) => v.lang?.toLowerCase().startsWith('vi')) || voices[0]
+    const want = l.split('-')[0].toLowerCase()
+    const langVoices = voices.filter((v) => v.lang?.toLowerCase().startsWith(want))
+    if (want === 'vi') {
+      // Ưu tiên giọng Nam (miền Nam / nam tính), loại trừ giọng nữ (Huynh)
+      const male = langVoices.find((v) => /nam/i.test(v.name) && !/huynh/i.test(v.name))
+      if (male) return male
+    }
+    return langVoices[0] || voices.find((v) => v.lang?.toLowerCase().startsWith('vi')) || voices[0]
   }
 
   function stopPlayback() {
@@ -97,7 +111,7 @@ export function BibleReader({
     const it = items[idxRef.current]
     const u = new SpeechSynthesisUtterance(it.text)
     u.lang = langRef.current
-    const v = pickVoice(langRef.current)
+    const v = voices.find((x) => x.voiceURI === voiceURI) || pickVoice(langRef.current)
     if (v) u.voice = v
     u.rate = rateRef.current
     u.onstart = () => setCurrentVerse(it.verse)
@@ -198,6 +212,22 @@ export function BibleReader({
           <span className="font-medium text-foreground">{primary ? primary.abbreviation : ''}</span>
           <span>·</span>
           <span>{currentVerse != null ? `Câu ${currentVerse}` : 'Sẵn sàng'}</span>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <label className="font-medium text-foreground">Giọng</label>
+          <select
+            value={voiceURI ?? ''}
+            onChange={(e) => setVoiceURI(e.target.value || null)}
+            className="h-8 rounded-md border bg-background px-2 text-xs"
+          >
+            {voices
+              .filter((v) => v.lang?.toLowerCase().startsWith(lang.split('-')[0].toLowerCase()))
+              .map((v) => (
+                <option key={v.voiceURI} value={v.voiceURI}>
+                  {v.name}
+                </option>
+              ))}
+          </select>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <label className="text-xs text-muted-foreground">Tốc độ</label>
