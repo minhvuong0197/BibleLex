@@ -7,6 +7,8 @@ import { BOOKS_OT, BOOKS_NT, getBookAbbreviation, getBookViName } from '@/lib/ut
 import { VersionPreference } from '@/components/interlinear/version-preference'
 import { prisma } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Kinh Thánh đối chiếu",
   description: "Kinh Thánh đối chiếu Hê-bơ-rơ/Hy-lạp và Việt/Anh với phân tích từ vựng từng chữ. Xem sự phân tích hình thái, số Strongs, và bấm để tra cứu chi tiết.",

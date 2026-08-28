@@ -10,11 +10,6 @@ interface PageProps {
 
 export const dynamic = 'force-dynamic'
 
-export async function generateStaticParams() {
-  const topics = await prisma.topicalEntry.findMany({ select: { id: true } })
-  return topics.map((t) => ({ id: t.id }))
-}
-
 
 async function getTopicData(id: string) {
   const topic = await prisma.topicalEntry.findUnique({

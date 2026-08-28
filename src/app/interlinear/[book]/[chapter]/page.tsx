@@ -9,20 +9,10 @@ import { VersionSelector } from '@/components/interlinear/version-selector'
 import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
 
-// Prerendered tĩnh cho 66 sách (chương 1) qua generateStaticParams; cần DATABASE_URL ở bước build.
-
 interface PageProps {
   params: Promise<{ book: string; chapter: string }>
   searchParams: Promise<{ version?: string }>
 }
-
-export async function generateStaticParams() {
-  const books = await prisma.bibleBook.findMany({
-    select: { abbreviation: true },
-  })
-  return books.map((b) => ({ book: b.abbreviation, chapter: "1" }))
-}
-
 
 async function getInterlinearData(book: string, chapter: number, versionCode: string) {
   return unstable_cache(
