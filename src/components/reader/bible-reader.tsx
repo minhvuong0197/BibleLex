@@ -4,13 +4,6 @@ import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { useRouter } from "next/navigation"
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, ChevronLeft, ChevronRight } from "lucide-react"
 
-// Giọng ElevenLabs (tiếng Việt, gói Free, không cần thẻ) — mặc định Nam (Adam)
-const TTS_VOICES = [
-  { code: "pNInz6obpgDQGcFmaJgB", name: "Nam (Adam)" },
-  { code: "CwhRBWXzGAHq8TQ4Fs17", name: "Nam (Ravi)" },
-  { code: "21m00Tcm4TlvDq8ikWAM", name: "Nữ (Rachel)" },
-]
-
 interface ReaderVerse {
   verse: number
   texts: Record<string, string>
@@ -49,14 +42,12 @@ export function BibleReader({
   const primary = versions[0]
   const primaryCode = primary?.code
   const lang = ttsLang(primary?.language)
-  const useTts = lang.toLowerCase().startsWith("vi")
 
   const [currentVerse, setCurrentVerse] = useState<number | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [rate, setRate] = useState(1)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const [voiceURI, setVoiceURI] = useState<string | null>(null)
-  const [ttsVoice, setTtsVoice] = useState(TTS_VOICES[0].code)
   const [supported, setSupported] = useState(true)
 
   const queueRef = useRef<{ verse: number; text: string }[]>([])
@@ -67,14 +58,10 @@ export function BibleReader({
   const langRef = useRef(lang)
   const primaryRef = useRef(primaryCode)
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const preloadRef = useRef<HTMLAudioElement | null>(null)
-  const ttsVoiceRef = useRef(ttsVoice)
 
   useEffect(() => { rateRef.current = rate }, [rate])
   useEffect(() => { langRef.current = lang }, [lang])
   useEffect(() => { primaryRef.current = primaryCode }, [primaryCode])
-  useEffect(() => { ttsVoiceRef.current = ttsVoice }, [ttsVoice])
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -97,69 +84,17 @@ export function BibleReader({
       const male = langVoices.find((v) => /nam/i.test(v.name) && !/huynh/i.test(v.name))
       if (male) return male
     }
-    return langVoices[0] || voices.find((v) => v.lang?.toLowerCase().startsWith("vi")) || voices[0]
+    return langVoices[0] || voices.find((v) => v.lang?.toLowerCase().startsWith(want)) || voices[0]
   }
 
   function stopPlayback() {
     if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel()
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = "" }
-    if (preloadRef.current) { preloadRef.current.pause(); preloadRef.current.src = "" }
-    audioRef.current = null
-    preloadRef.current = null
     isPlayingRef.current = false
     pausedRef.current = false
     setIsPlaying(false)
   }
 
-  function ttsUrl(text: string, voice: string): string {
-    return `/api/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`
-  }
-
-  function startAudio(a: HTMLAudioElement, index: number) {
-    const items = queueRef.current
-    audioRef.current = a
-    a.playbackRate = Math.min(2, Math.max(0.5, rateRef.current))
-    a.onplay = () => setCurrentVerse(items[index].verse)
-    a.onended = () => advance()
-    a.onerror = () => advance()
-    a.play().catch(() => {})
-    if (index + 1 < items.length) {
-      const n = new Audio(ttsUrl(items[index + 1].text, ttsVoiceRef.current))
-      preloadRef.current = n
-      n.load()
-    }
-  }
-
-  function advance() {
-    if (!isPlayingRef.current) return
-    idxRef.current += 1
-    const items = queueRef.current
-    if (idxRef.current < items.length) {
-      const next = preloadRef.current
-      preloadRef.current = null
-      if (next) startAudio(next, idxRef.current)
-      else startAudio(new Audio(ttsUrl(items[idxRef.current].text, ttsVoiceRef.current)), idxRef.current)
-    } else {
-      stopPlayback()
-    }
-  }
-
   function speakCurrent() {
-    if (useTts) speakTts()
-    else speakSpeech()
-  }
-
-  function speakTts() {
-    const items = queueRef.current
-    if (idxRef.current >= items.length) {
-      stopPlayback()
-      setCurrentVerse(null)
-      return
-    }
-    startAudio(new Audio(ttsUrl(items[idxRef.current].text, ttsVoiceRef.current)), idxRef.current)
-  }
-
-  function speakSpeech() {
     const synth = window.speechSynthesis
     const items = queueRef.current
     if (idxRef.current >= items.length) {
@@ -205,8 +140,7 @@ export function BibleReader({
     if (typeof window === "undefined") return
     if (pausedRef.current && isPlayingRef.current) {
       pausedRef.current = false
-      if (useTts) audioRef.current?.play().catch(() => {})
-      else if ("speechSynthesis" in window) window.speechSynthesis.resume()
+      if ("speechSynthesis" in window) window.speechSynthesis.resume()
       setIsPlaying(true)
       return
     }
@@ -231,8 +165,7 @@ export function BibleReader({
   function pause() {
     if (typeof window === "undefined") return
     pausedRef.current = true
-    if (useTts) audioRef.current?.pause()
-    else if ("speechSynthesis" in window) window.speechSynthesis.pause()
+    if ("speechSynthesis" in window) window.speechSynthesis.pause()
     setIsPlaying(false)
   }
 
@@ -280,21 +213,13 @@ export function BibleReader({
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <label className="font-medium text-foreground">Giọng</label>
-          {useTts ? (
-            <select value={ttsVoice} onChange={(e) => setTtsVoice(e.target.value)} className="h-8 rounded-md border bg-background px-2 text-xs">
-              {TTS_VOICES.map((vv) => (
-                <option key={vv.code} value={vv.code}>{vv.name}</option>
+          <select value={voiceURI ?? ""} onChange={(e) => setVoiceURI(e.target.value || null)} className="h-8 rounded-md border bg-background px-2 text-xs">
+            {voices
+              .filter((v) => v.lang?.toLowerCase().startsWith(lang.split("-")[0].toLowerCase()))
+              .map((v) => (
+                <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
               ))}
-            </select>
-          ) : (
-            <select value={voiceURI ?? ""} onChange={(e) => setVoiceURI(e.target.value || null)} className="h-8 rounded-md border bg-background px-2 text-xs">
-              {voices
-                .filter((v) => v.lang?.toLowerCase().startsWith(lang.split("-")[0].toLowerCase()))
-                .map((v) => (
-                  <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
-                ))}
-            </select>
-          )}
+          </select>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <label className="text-xs text-muted-foreground">Tốc độ</label>
@@ -305,7 +230,7 @@ export function BibleReader({
             <option value={1.5}>1.5x</option>
           </select>
         </div>
-        {!supported && !useTts && <span className="text-xs text-muted-foreground">Thiết bị không hỗ trợ đọc tự động.</span>}
+        {!supported && <span className="text-xs text-muted-foreground">Thiết bị không hỗ trợ đọc tự động.</span>}
       </div>
 
       {/* Điều hướng chương */}
