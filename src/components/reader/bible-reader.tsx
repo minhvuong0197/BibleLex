@@ -4,6 +4,15 @@ import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { useRouter } from "next/navigation"
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, ChevronLeft, ChevronRight } from "lucide-react"
 
+// Giọng Vbee (tiếng Việt) — mặc định Nam Sài Gòn (miền Nam)
+const VBEE_VOICES = [
+  { code: "s_sg_male_thientam_ytstable_vc", name: "Nam Sài Gòn (miền Nam)" },
+  { code: "n_hanoi_male_protrainer_education_vc", name: "Nam Hà Nội" },
+  { code: "n_namdinh_male_haichuyen20251209185109485_book_vc", name: "Nam Nam Định (đọc sách)" },
+  { code: "n_hanoi_female_nguyetnga2_book_vc", name: "Nữ Hà Nội (đọc sách)" },
+  { code: "n_hanoi_female_ngochuyen_full_48k-fhg", name: "Nữ Ngọc Huyền (miền Bắc)" },
+]
+
 interface ReaderVerse {
   verse: number
   texts: Record<string, string>
@@ -20,7 +29,7 @@ interface Navigation {
 }
 
 function ttsLang(language?: string): string {
-  return language === 'en' ? 'en-US' : 'vi-VN'
+  return language === "en" ? "en-US" : "vi-VN"
 }
 
 export function BibleReader({
@@ -42,43 +51,39 @@ export function BibleReader({
   const primary = versions[0]
   const primaryCode = primary?.code
   const lang = ttsLang(primary?.language)
+  const useVbee = lang.toLowerCase().startsWith("vi")
 
   const [currentVerse, setCurrentVerse] = useState<number | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [rate, setRate] = useState(1)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const [voiceURI, setVoiceURI] = useState<string | null>(null)
+  const [vbeeVoice, setVbeeVoice] = useState(VBEE_VOICES[0].code)
   const [supported, setSupported] = useState(true)
 
   const queueRef = useRef<{ verse: number; text: string }[]>([])
   const idxRef = useRef(0)
   const isPlayingRef = useRef(false)
+  const pausedRef = useRef(false)
   const rateRef = useRef(1)
   const langRef = useRef(lang)
   const primaryRef = useRef(primaryCode)
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const preloadRef = useRef<HTMLAudioElement | null>(null)
+  const vbeeVoiceRef = useRef(vbeeVoice)
 
   useEffect(() => { rateRef.current = rate }, [rate])
   useEffect(() => { langRef.current = lang }, [lang])
   useEffect(() => { primaryRef.current = primaryCode }, [primaryCode])
+  useEffect(() => { vbeeVoiceRef.current = vbeeVoice }, [vbeeVoice])
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       setSupported(false)
       return
     }
-    const load = () => {
-      const vs = window.speechSynthesis.getVoices()
-      setVoices(vs)
-      if (!voiceURI) {
-        const want = langRef.current.split('-')[0].toLowerCase()
-        const male = vs.find(
-          (x) => x.lang?.toLowerCase().startsWith('vi') && /nam/i.test(x.name) && !/huynh/i.test(x.name)
-        )
-        const first = vs.find((x) => x.lang?.toLowerCase().startsWith(want))
-        setVoiceURI((male || first)?.voiceURI ?? null)
-      }
-    }
+    const load = () => setVoices(window.speechSynthesis.getVoices())
     load()
     window.speechSynthesis.onvoiceschanged = load
     return () => {
@@ -88,23 +93,74 @@ export function BibleReader({
   }, [])
 
   function pickVoice(l: string): SpeechSynthesisVoice | undefined {
-    const want = l.split('-')[0].toLowerCase()
+    const want = l.split("-")[0].toLowerCase()
     const langVoices = voices.filter((v) => v.lang?.toLowerCase().startsWith(want))
-    if (want === 'vi') {
-      // Ưu tiên giọng Nam (miền Nam / nam tính), loại trừ giọng nữ (Huynh)
+    if (want === "vi") {
       const male = langVoices.find((v) => /nam/i.test(v.name) && !/huynh/i.test(v.name))
       if (male) return male
     }
-    return langVoices[0] || voices.find((v) => v.lang?.toLowerCase().startsWith('vi')) || voices[0]
+    return langVoices[0] || voices.find((v) => v.lang?.toLowerCase().startsWith("vi")) || voices[0]
   }
 
   function stopPlayback() {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel()
+    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel()
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = "" }
+    if (preloadRef.current) { preloadRef.current.pause(); preloadRef.current.src = "" }
+    audioRef.current = null
+    preloadRef.current = null
     isPlayingRef.current = false
+    pausedRef.current = false
     setIsPlaying(false)
   }
 
+  function vbeeUrl(text: string, voice: string, r: number): string {
+    return `/api/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}&rate=${r}`
+  }
+
+  function startAudio(a: HTMLAudioElement, index: number) {
+    const items = queueRef.current
+    audioRef.current = a
+    a.onplay = () => setCurrentVerse(items[index].verse)
+    a.onended = () => advance()
+    a.onerror = () => advance()
+    a.play().catch(() => {})
+    if (index + 1 < items.length) {
+      const n = new Audio(vbeeUrl(items[index + 1].text, vbeeVoiceRef.current, rateRef.current))
+      preloadRef.current = n
+      n.load()
+    }
+  }
+
+  function advance() {
+    if (!isPlayingRef.current) return
+    idxRef.current += 1
+    const items = queueRef.current
+    if (idxRef.current < items.length) {
+      const next = preloadRef.current
+      preloadRef.current = null
+      if (next) startAudio(next, idxRef.current)
+      else startAudio(new Audio(vbeeUrl(items[idxRef.current].text, vbeeVoiceRef.current, rateRef.current)), idxRef.current)
+    } else {
+      stopPlayback()
+    }
+  }
+
   function speakCurrent() {
+    if (useVbee) speakVbee()
+    else speakSpeech()
+  }
+
+  function speakVbee() {
+    const items = queueRef.current
+    if (idxRef.current >= items.length) {
+      stopPlayback()
+      setCurrentVerse(null)
+      return
+    }
+    startAudio(new Audio(vbeeUrl(items[idxRef.current].text, vbeeVoiceRef.current, rateRef.current)), idxRef.current)
+  }
+
+  function speakSpeech() {
     const synth = window.speechSynthesis
     const items = queueRef.current
     if (idxRef.current >= items.length) {
@@ -138,8 +194,8 @@ export function BibleReader({
   function buildQueue(startVerse?: number) {
     const code = primaryRef.current
     const items = verses
-      .filter((v) => v.texts[code ?? ''])
-      .map((v) => ({ verse: v.verse, text: v.texts[code ?? ''] }))
+      .filter((v) => v.texts[code ?? ""])
+      .map((v) => ({ verse: v.verse, text: v.texts[code ?? ""] }))
     let idx = startVerse != null ? items.findIndex((i) => i.verse === startVerse) : 0
     if (idx < 0) idx = 0
     queueRef.current = items
@@ -147,31 +203,37 @@ export function BibleReader({
   }
 
   function playChapter() {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
-    const synth = window.speechSynthesis
-    if (synth.paused && isPlayingRef.current) {
-      synth.resume()
+    if (typeof window === "undefined") return
+    if (pausedRef.current && isPlayingRef.current) {
+      pausedRef.current = false
+      if (useVbee) audioRef.current?.play().catch(() => {})
+      else if ("speechSynthesis" in window) window.speechSynthesis.resume()
       setIsPlaying(true)
       return
     }
+    stopPlayback()
     buildQueue(currentVerse ?? verses[0]?.verse)
     isPlayingRef.current = true
+    pausedRef.current = false
     setIsPlaying(true)
     speakCurrent()
   }
 
   function playVerse(v: number) {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
-    window.speechSynthesis.cancel()
+    if (typeof window === "undefined") return
+    stopPlayback()
     buildQueue(v)
     isPlayingRef.current = true
+    pausedRef.current = false
     setIsPlaying(true)
     speakCurrent()
   }
 
   function pause() {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
-    window.speechSynthesis.pause()
+    if (typeof window === "undefined") return
+    pausedRef.current = true
+    if (useVbee) audioRef.current?.pause()
+    else if ("speechSynthesis" in window) window.speechSynthesis.pause()
     setIsPlaying(false)
   }
 
@@ -181,7 +243,7 @@ export function BibleReader({
   }
 
   function step(dir: -1 | 1) {
-    const list = verses.filter((v) => v.texts[primaryCode ?? '']).map((v) => v.verse)
+    const list = verses.filter((v) => v.texts[primaryCode ?? ""]).map((v) => v.verse)
     if (!list.length) return
     const cur = currentVerse ?? list[0]
     const i = list.indexOf(cur)
@@ -213,25 +275,27 @@ export function BibleReader({
           <button onClick={() => step(1)} className="inline-flex h-9 w-9 items-center justify-center rounded-md border hover:bg-accent" aria-label="Câu sau"><SkipForward className="h-4 w-4" /></button>
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">{primary ? primary.abbreviation : ''}</span>
+          <span className="font-medium text-foreground">{primary ? primary.abbreviation : ""}</span>
           <span>·</span>
-          <span>{currentVerse != null ? `Câu ${currentVerse}` : 'Sẵn sàng'}</span>
+          <span>{currentVerse != null ? `Câu ${currentVerse}` : "Sẵn sàng"}</span>
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <label className="font-medium text-foreground">Giọng</label>
-          <select
-            value={voiceURI ?? ''}
-            onChange={(e) => setVoiceURI(e.target.value || null)}
-            className="h-8 rounded-md border bg-background px-2 text-xs"
-          >
-            {voices
-              .filter((v) => v.lang?.toLowerCase().startsWith(lang.split('-')[0].toLowerCase()))
-              .map((v) => (
-                <option key={v.voiceURI} value={v.voiceURI}>
-                  {v.name}
-                </option>
+          {useVbee ? (
+            <select value={vbeeVoice} onChange={(e) => setVbeeVoice(e.target.value)} className="h-8 rounded-md border bg-background px-2 text-xs">
+              {VBEE_VOICES.map((vv) => (
+                <option key={vv.code} value={vv.code}>{vv.name}</option>
               ))}
-          </select>
+            </select>
+          ) : (
+            <select value={voiceURI ?? ""} onChange={(e) => setVoiceURI(e.target.value || null)} className="h-8 rounded-md border bg-background px-2 text-xs">
+              {voices
+                .filter((v) => v.lang?.toLowerCase().startsWith(lang.split("-")[0].toLowerCase()))
+                .map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
+                ))}
+            </select>
+          )}
         </div>
         <div className="ml-auto flex items-center gap-2">
           <label className="text-xs text-muted-foreground">Tốc độ</label>
@@ -242,7 +306,7 @@ export function BibleReader({
             <option value={1.5}>1.5x</option>
           </select>
         </div>
-        {!supported && <span className="text-xs text-muted-foreground">Thiết bị không hỗ trợ đọc tự động.</span>}
+        {!supported && !useVbee && <span className="text-xs text-muted-foreground">Thiết bị không hỗ trợ đọc tự động.</span>}
       </div>
 
       {/* Điều hướng chương */}
@@ -257,13 +321,13 @@ export function BibleReader({
       </div>
 
       {/* Các cột bản dịch song song */}
-      <div className="reader-cols" style={{ '--cols': versions.length } as CSSProperties}>
+      <div className="reader-cols" style={{ "--cols": versions.length } as CSSProperties}>
         {versions.map((v) => (
           <section key={v.code} className="rounded-xl border bg-card">
             <header className="flex items-center justify-between border-b px-4 py-2">
               <span className="text-sm font-semibold">{v.name}</span>
-              <span className={'rounded px-1.5 py-0.5 text-[10px] font-bold ' + (v.language === 'en' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300')}>
-                {v.language === 'en' ? 'ANH' : 'VIỆT'}
+              <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold " + (v.language === "en" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" : "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300")}>
+                {v.language === "en" ? "ANH" : "VIỆT"}
               </span>
             </header>
             <div className="space-y-3 p-4 reader-verses">
@@ -275,8 +339,8 @@ export function BibleReader({
                     key={verse.verse}
                     data-verse={verse.verse}
                     className={
-                      'flex gap-2 rounded-md px-1 py-0.5 transition-colors ' +
-                      (active ? 'bg-primary/10 ring-1 ring-primary/30' : '')
+                      "flex gap-2 rounded-md px-1 py-0.5 transition-colors " +
+                      (active ? "bg-primary/10 ring-1 ring-primary/30" : "")
                     }
                   >
                     <sup className="select-none pt-1 text-xs font-semibold text-muted-foreground">{verse.verse}</sup>
