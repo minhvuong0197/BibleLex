@@ -51,3 +51,4 @@ prisma/dev.db
 
 # generated data (run `npm run prepare:data` to regenerate)
 /data
+.env*
