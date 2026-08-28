@@ -4,6 +4,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Search, Menu, X, BookOpen, BookText, Brain, Link as LinkIcon, GitBranch, Bookmark } from "lucide-react"
+import { AuthMenu } from "@/components/layout/auth-menu"
 import { Brand } from "@/components/layout/brand"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { QuickSearch } from "@/components/layout/quick-search"
@@ -64,6 +65,7 @@ export function Header() {
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           <ThemeSwitcher />
+          <AuthMenu />
         </div>
       </div>
 
@@ -71,6 +73,7 @@ export function Header() {
         <div className="md:hidden border-t px-4 py-4 space-y-3">
            <QuickSearch />
            <BibleNav variant="button" />
+           <AuthMenu />
            <nav className="space-y-1" role="navigation" aria-label="Mobile navigation">
             {navigation.map((item) => (
               <Link

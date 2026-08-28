@@ -1,9 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState, type CSSProperties } from "react"
+import { useEffect, useRef, useState, Fragment, type CSSProperties } from "react"
 import { useRouter } from "next/navigation"
-import { Play, Pause, Square, SkipBack, SkipForward, Volume2, ChevronLeft, ChevronRight } from "lucide-react"
+import { Play, Pause, Square, SkipBack, SkipForward, Volume2, ChevronLeft, ChevronRight, BookA } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { useStudy, VerseStudyButtons } from "@/components/reader/verse-study"
+import { StrongsHoverCard } from "@/components/strongs/strongs-hover-card"
 
 interface ReaderVerse {
   verse: number
@@ -31,6 +34,8 @@ export function BibleReader({
   verses,
   versions,
   navigation,
+  userId,
+  verseWords,
 }: {
   book: string
   bookAbbrev: string
@@ -38,9 +43,12 @@ export function BibleReader({
   verses: ReaderVerse[]
   versions: ReaderVersion[]
   navigation: Navigation
+  userId?: string
+  verseWords?: Record<number, any[]>
 }) {
   const router = useRouter()
-  const study = useStudy()
+  const study = useStudy(userId)
+  const [showStrong, setShowStrong] = useState(false)
   const primary = versions[0]
   const primaryCode = primary?.code
   const lang = ttsLang(primary?.language)
@@ -246,6 +254,19 @@ export function BibleReader({
         </button>
       </div>
 
+      {/* Công tắc hiện số Strong's */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant={showStrong ? "default" : "outline"}
+          size="sm"
+          onClick={() => setShowStrong((s) => !s)}
+          aria-pressed={showStrong}
+        >
+          <BookA className="h-4 w-4" /> Số Strong's
+        </Button>
+        {showStrong && <span className="text-xs text-muted-foreground">Rê chuột vào số Strong's để xem định nghĩa (Hê-bơ-rơ xanh / Hy-lạp xanh dương).</span>}
+      </div>
+
       {/* Các cột bản dịch song song */}
       <div className="reader-cols" style={{ "--cols": versions.length } as CSSProperties}>
         {versions.map((v) => (
@@ -262,33 +283,66 @@ export function BibleReader({
                 const active = currentVerse === verse.verse && v.code === primaryCode
                 const vref = `${bookAbbrev} ${chapter}:${verse.verse}`
                 const hl = study.state.highlights[vref]
+                const words = verseWords?.[verse.verse]
                 return (
-                  <p
-                    key={verse.verse}
-                    data-verse={verse.verse}
-                    className={
-                      "flex gap-2 rounded-md px-1 py-0.5 transition-colors " +
-                      (active ? "bg-primary/10 ring-1 ring-primary/30 " : "") +
-                      (hl ? hl + " " : "")
-                    }
-                  >
-                    <sup className="select-none pt-1 text-xs font-semibold text-muted-foreground">{verse.verse}</sup>
-                    <span className="flex-1 leading-relaxed">
-                      {text ? text : <span className="text-muted-foreground/50">—</span>}
-                    </span>
-                    {v.code === primaryCode && (
-                      <span className="relative flex items-start gap-0.5 self-start pt-1">
-                        <button
-                          onClick={() => playVerse(verse.verse)}
-                          className="text-muted-foreground hover:text-primary"
-                          aria-label={`Đọc câu ${verse.verse}`}
-                        >
-                          <Volume2 className="h-4 w-4" />
-                        </button>
-                        <VerseStudyButtons ref={vref} study={study} />
+                  <Fragment key={verse.verse}>
+                    <p
+                      data-verse={verse.verse}
+                      className={
+                        "flex gap-2 rounded-md px-1 py-0.5 transition-colors " +
+                        (active ? "bg-primary/10 ring-1 ring-primary/30 " : "") +
+                        (hl ? hl + " " : "")
+                      }
+                    >
+                      <sup className="select-none pt-1 text-xs font-semibold text-muted-foreground">{verse.verse}</sup>
+                      <span className="flex-1 leading-relaxed">
+                        {text ? text : <span className="text-muted-foreground/50">—</span>}
+                      </span>
+                      {v.code === primaryCode && (
+                        <span className="relative flex items-start gap-0.5 self-start pt-1">
+                          <button
+                            onClick={() => playVerse(verse.verse)}
+                            className="text-muted-foreground hover:text-primary"
+                            aria-label={`Đọc câu ${verse.verse}`}
+                          >
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                          <VerseStudyButtons ref={vref} study={study} />
+                        </span>
+                      )}
+                    </p>
+                    {v.code === primaryCode && showStrong && words && (
+                      <span className="block flex flex-wrap gap-1 px-1 pb-2 pl-7">
+                        {words.map((w, i) => {
+                          const entry = w.strongEntry
+                          const token = (
+                            <span
+                              className={cn(
+                                "inline-flex items-baseline gap-1 rounded px-1 py-0.5 text-xs",
+                                entry
+                                  ? entry.language === "HEBREW"
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                                    : "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300"
+                                  : "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              <span className={entry?.language === "HEBREW" ? "hebrew-font" : "greek-font"}>
+                                {w.hebrewGreek}
+                              </span>
+                              {w.strongNumber && <span className="font-mono">{w.strongNumber}</span>}
+                            </span>
+                          )
+                          return entry ? (
+                            <StrongsHoverCard key={i} data={entry}>
+                              {token}
+                            </StrongsHoverCard>
+                          ) : (
+                            <span key={i}>{token}</span>
+                          )
+                        })}
                       </span>
                     )}
-                  </p>
+                  </Fragment>
                 )
               })}
             </div>

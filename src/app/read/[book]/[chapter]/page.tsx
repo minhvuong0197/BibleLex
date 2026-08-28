@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { resolveBibleBook, getBookViName } from '@/lib/utils'
+import { getCurrentUser } from '@/lib/auth'
 import { VersionMultiSelector } from '@/components/reader/version-multi-selector'
 import { BibleNav } from '@/components/layout/bible-nav'
 import { CommentaryPanel } from '@/components/reader/commentary-panel'
@@ -31,7 +32,7 @@ async function getReadChapter(book: string, chapterNum: number, codes: string[])
     async () => {
       const bibleBook = await resolveBibleBook(prisma, book)
       if (!bibleBook) return null
-      const [verses, translations, prevChapter, nextChapter] = await Promise.all([
+      const [verses, translations, prevChapter, nextChapter, verseWordsRaw] = await Promise.all([
         prisma.verse.findMany({
           where: { bookId: bibleBook.id, chapter: chapterNum },
           orderBy: { verse: 'asc' },
@@ -43,6 +44,11 @@ async function getReadChapter(book: string, chapterNum: number, codes: string[])
         }),
         prisma.verse.findFirst({ where: { bookId: bibleBook.id, chapter: chapterNum - 1 }, select: { chapter: true } }),
         prisma.verse.findFirst({ where: { bookId: bibleBook.id, chapter: chapterNum + 1 }, select: { chapter: true } }),
+        prisma.verseWord.findMany({
+          where: { book: bibleBook.name, chapter: chapterNum },
+          orderBy: { wordOrder: 'asc' },
+          include: { strongEntry: true },
+        }),
       ])
 
       const byVerse = new Map<number, Record<string, string>>()
@@ -51,9 +57,15 @@ async function getReadChapter(book: string, chapterNum: number, codes: string[])
         byVerse.get(t.verse)![t.versionId] = t.text
       }
       const readerVerses = verses.map((v) => ({ verse: v.verse, texts: byVerse.get(v.verse) ?? {} }))
+      const verseWordsByVerse: Record<number, any[]> = {}
+      for (const w of verseWordsRaw) {
+        if (!verseWordsByVerse[w.verse]) verseWordsByVerse[w.verse] = []
+        verseWordsByVerse[w.verse].push(w)
+      }
       return {
         bibleBook: { id: bibleBook.id, name: bibleBook.name, abbreviation: bibleBook.abbreviation },
         readerVerses,
+        verseWordsByVerse,
         prevChapter,
         nextChapter,
       }
@@ -66,6 +78,7 @@ async function getReadChapter(book: string, chapterNum: number, codes: string[])
 export default async function ReadPage({ params, searchParams }: PageProps) {
   const { book, chapter } = await params
   const { versions: versionsParam } = await searchParams
+  const me = await getCurrentUser()
   const cookieStore = await cookies()
   const chapterNum = parseInt(chapter, 10)
   if (isNaN(chapterNum)) notFound()
@@ -125,7 +138,9 @@ export default async function ReadPage({ params, searchParams }: PageProps) {
         chapter={chapterNum}
         verses={readerVerses}
         versions={selectedVersions}
+        verseWords={data.verseWordsByVerse}
         navigation={{ prevChapter: prevChapter?.chapter ?? null, nextChapter: nextChapter?.chapter ?? null }}
+        userId={me?.sub}
       />
 
       <CommentaryPanel book={bibleBook.name} chapter={chapterNum} />

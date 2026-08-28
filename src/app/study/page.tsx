@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { Bookmark, Highlighter, NotebookPen, BookMarked } from "lucide-react"
 import { useStudy } from "@/components/reader/verse-study"
@@ -20,7 +20,14 @@ function parseRef(ref: string) {
 }
 
 export default function StudyPage() {
-  const { state } = useStudy()
+  const [userId, setUserId] = useState<string | undefined>(undefined)
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : { user: null }))
+      .then((d) => setUserId(d.user?.id))
+      .catch(() => setUserId(undefined))
+  }, [])
+  const { state } = useStudy(userId)
 
   const bookmarks = useMemo(() => Object.keys(state.bookmarks).map(parseRef).sort((a, b) => a.href.localeCompare(b.href)), [state.bookmarks])
   const highlights = useMemo(() => Object.keys(state.highlights).map(parseRef).sort((a, b) => a.href.localeCompare(b.href)), [state.highlights])

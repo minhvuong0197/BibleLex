@@ -294,3 +294,67 @@ model VerseTranslation {
   @@index([versionId])
   @@map("verse_translations")
 }
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  notes      Note[]
+  bookmarks  Bookmark[]
+  highlights Highlight[]
+
+  @@map("users")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  book      String
+  chapter   Int
+  verse     Int
+  text      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, book, chapter, verse])
+  @@index([userId])
+  @@index([book, chapter, verse])
+  @@map("notes")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  book      String
+  chapter   Int
+  verse     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, book, chapter, verse])
+  @@index([userId])
+  @@map("bookmarks")
+}
+
+model Highlight {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  book      String
+  chapter   Int
+  verse     Int
+  color     String   @default("yellow")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, book, chapter, verse])
+  @@index([userId])
+  @@map("highlights")
+}

@@ -1,81 +1,11 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useState } from "react"
 import { Bookmark, Highlighter, NotebookPen, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useStudy } from "@/lib/use-study"
 
-export interface StudyState {
-  notes: Record<string, string>
-  bookmarks: Record<string, boolean>
-  highlights: Record<string, string>
-}
-
-const KEY = "scriptlex_study_v1"
-const EMPTY: StudyState = { notes: {}, bookmarks: {}, highlights: {} }
-
-function load(): StudyState {
-  try {
-    const r = localStorage.getItem(KEY)
-    return r ? { ...EMPTY, ...JSON.parse(r) } : EMPTY
-  } catch {
-    return EMPTY
-  }
-}
-
-export function useStudy() {
-  const [state, setState] = useState<StudyState>(EMPTY)
-
-  useEffect(() => {
-    setState(load())
-    const onStorage = () => setState(load())
-    window.addEventListener("storage", onStorage)
-    return () => window.removeEventListener("storage", onStorage)
-  }, [])
-
-  const persist = useCallback((next: StudyState) => {
-    setState(next)
-    try {
-      localStorage.setItem(KEY, JSON.stringify(next))
-    } catch {
-      /* ignore */
-    }
-  }, [])
-
-  const toggleBookmark = useCallback(
-    (ref: string) => {
-      const s = load()
-      const bookmarks = { ...s.bookmarks }
-      if (bookmarks[ref]) delete bookmarks[ref]
-      else bookmarks[ref] = true
-      persist({ ...s, bookmarks })
-    },
-    [persist]
-  )
-
-  const toggleHighlight = useCallback(
-    (ref: string) => {
-      const s = load()
-      const highlights = { ...s.highlights }
-      if (highlights[ref]) delete highlights[ref]
-      else highlights[ref] = "bg-yellow-200/60 dark:bg-yellow-500/20"
-      persist({ ...s, highlights })
-    },
-    [persist]
-  )
-
-  const setNote = useCallback(
-    (ref: string, text: string) => {
-      const s = load()
-      const notes = { ...s.notes }
-      if (text.trim()) notes[ref] = text
-      else delete notes[ref]
-      persist({ ...s, notes })
-    },
-    [persist]
-  )
-
-  return { state, toggleBookmark, toggleHighlight, setNote }
-}
+export { useStudy }
 
 export function VerseStudyButtons({ ref, study }: { ref: string; study: ReturnType<typeof useStudy> }) {
   const [noteOpen, setNoteOpen] = useState(false)
