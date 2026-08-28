@@ -8,6 +8,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function generateStaticParams() {
   const topics = await prisma.topicalEntry.findMany({ select: { id: true } })
   return topics.map((t) => ({ id: t.id }))

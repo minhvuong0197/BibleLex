@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { Search, BookOpen, Link as LinkIcon, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Chủ đề & Tham chiếu chéo",
   description: "Khảo cứu Kinh Thánh theo chủ đề: chỉ mục chủ đề, tham chiếu chéo, sự song song các đoạn Kinh Thánh, và chuỗi tham chiếu. Tìm mọi câu liên quan đến một chủ đề.",

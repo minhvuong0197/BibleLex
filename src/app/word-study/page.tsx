@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Brain, Search, BookOpen, TrendingUp, Hash } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Khảo cứu từ vựng",
   description: "Khảo cứu chuyên sâu từ vựng Hê-bơ-rơ/Hy-lạp: phân tích hình thái học, thống kê sự xuất hiện, từ đồng nghĩa/trái nghĩa, gốc từ và từ phái sinh.",

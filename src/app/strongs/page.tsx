@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { ChevronRight, BookOpen, Hash } from 'lucide-react'
 import { BOOKS_OT, BOOKS_NT, getBookAbbreviation, getBookViName } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Tra cứu Strongs",
   description: "Tra cứu định nghĩa từ vựng nguyên ngữ Hê-bơ-rơ và Hy-lạp trong Kinh Thánh theo số Strongs (G1234/H1234), gồm Thayer, BDB, LSJ, phân tích hình thái và tham chiếu chéo.",

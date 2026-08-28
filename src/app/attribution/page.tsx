@@ -2,6 +2,8 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { PrismaClient } from "@prisma/client"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Nguồn dữ liệu & Giấy phép · Scriptlex",
   description:
