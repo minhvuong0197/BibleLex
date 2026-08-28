@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: false,
-  serverExternalPackages: ['@prisma/client', '@prisma/adapter-pg', 'pg'],
+  serverExternalPackages: ['@prisma/client'],
   typescript: {
     ignoreBuildErrors: false,
   },
