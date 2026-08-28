@@ -2,7 +2,7 @@
 
 import { useEffect, useState, FormEvent } from "react"
 import Link from "next/link"
-import { User, LogOut, BookMarked, X, AlertTriangle } from "lucide-react"
+import { User, LogOut, BookMarked, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -26,8 +26,6 @@ export function AuthMenu() {
   const [forgot, setForgot] = useState(false)
   const [forgotEmail, setForgotEmail] = useState("")
   const [forgotMsg, setForgotMsg] = useState("")
-  const [resendBusy, setResendBusy] = useState(false)
-  const [resendMsg, setResendMsg] = useState("")
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -77,19 +75,6 @@ export function AuthMenu() {
     await fetch("/api/auth/logout", { method: "POST" })
     setUser(null)
     setMenu(false)
-  }
-
-  async function resend() {
-    if (!user) return
-    setResendBusy(true)
-    setResendMsg("")
-    const res = await fetch("/api/auth/resend-verification", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: user.email }),
-    })
-    setResendBusy(false)
-    if (res.ok) setResendMsg("Đã gửi lại link xác nhận vào email.")
   }
 
   if (user === undefined) return <div className="h-9 w-9" />
@@ -168,7 +153,7 @@ export function AuthMenu() {
               )}
 
               <p className="mt-3 text-xs text-muted-foreground">
-                Chưa xác nhận email? Kiểm tra hộp thư (hoặc console dev) để lấy link xác nhận.
+                Dữ liệu học tập (ghi chú, đánh dấu, Highlight) được lưu trên tài khoản của bạn.
               </p>
             </div>
             </div>
@@ -185,23 +170,6 @@ export function AuthMenu() {
       </Button>
       {menu && (
         <div className="absolute right-0 z-50 mt-2 w-56 rounded-xl border bg-card p-2 shadow-xl">
-          {!user.emailVerified && (
-            <div className="mb-2 space-y-1 rounded-lg bg-amber-100/70 p-2 text-xs text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                <span>Email chưa xác nhận. Kiểm tra hộp thư để kích hoạt.</span>
-              </div>
-              <button
-                type="button"
-                onClick={resend}
-                disabled={resendBusy}
-                className="rounded-md bg-amber-200 px-2 py-1 font-medium hover:bg-amber-300 disabled:opacity-60"
-              >
-                {resendBusy ? "Đang gửi…" : "Gửi lại xác nhận"}
-              </button>
-              {resendMsg && <p className="text-amber-800 dark:text-amber-100">{resendMsg}</p>}
-            </div>
-          )}
           <Link
             href="/study"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-accent"
