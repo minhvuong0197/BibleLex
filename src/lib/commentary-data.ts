@@ -148,6 +148,55 @@ export const COMMENTARIES: Record<string, CommentaryEntry[]> = {
         "Phước cho những kẻ nghèo khó trong tâm thần, vì nước thiên đàng là của những người ấy. Sự nghèo khó tâm thần là nhận biết mình thiếu thốn và cần đến Đức Chúa Trời.",
     },
   ],
+  "Exodus 20:1": [
+    {
+      section: "Matthew Henry's Commentary",
+      content:
+        "Đức Chúa Trời phán mọi lời nầy, lập nên giao ước tại Si-na-i. Mười điều răn là nền tảng luân lý và thờ phượng của dân Ngài, bắt đầu bằng sự thờ phượng một Đức Chúa Trời duy nhất.",
+    },
+  ],
+  "Psalm 1:1": [
+    {
+      section: "Matthew Henry's Commentary",
+      content:
+        "Phước cho người chẳng theo mưu kế kẻ dữ, chẳng đứng trong đường tội nhân, chẳng ngồi chung với kẻ nhạo báng. Người đẹp lòng Chúa là người vui thỏa trong luật pháp Ngài và gẫm suy ngày đêm.",
+    },
+  ],
+  "Proverbs 1:7": [
+    {
+      section: "Matthew Henry's Commentary",
+      content:
+        "Sự kính sợ Đức Giê-hô-va là đầu nguồn của sự tri thức. Kính sợ Ngài là thái độ khiêm nhu nhận lãnh sự khôn ngoan, trái ngược với sự khinh thường sự dạy dỗ.",
+    },
+  ],
+  "Isaiah 40:31": [
+    {
+      section: "Matthew Henry's Commentary",
+      content:
+        "Nhưng ai trông cậy Đức Giê-hô-va thì sẽ đổi mới sức lực mình. Sự trông cậy Ngài ban sức bền bỉ, giúp người tin vượt qua thử thách như chim ưng tắp cánh bay cao.",
+    },
+  ],
+  "Romans 12:1": [
+    {
+      section: "Matthew Henry's Commentary",
+      content:
+        "Hỡi anh em, tôi lấy sự thương xót của Đức Chúa Trời khuyên anh em dâng thân thể mình làm của lễ sống và thánh, đẹp lòng Ngài. Đây là sự thờ phượng thiêng liêng và hợp lý của người được cứu.",
+    },
+  ],
+  "2 Timothy 3:16": [
+    {
+      section: "Matthew Henry's Commentary",
+      content:
+        "Cả Kinh Thánh đều là bởi Đức Chúa Trời soi dẫn, có ích cho sự dạy dỗ, bẻ trách, sửa trị, dạy người trong sự công bình. Lời Ngài đủ để trang bị tín hữu cho mọi việc lành.",
+    },
+  ],
+  "Revelation 21:4": [
+    {
+      section: "Matthew Henry's Commentary",
+      content:
+        "Ngài sẽ lau sạch mọi nước mắt họ; sẽ không còn sự chết, sự buồn thảm, tiếng khóc, hay là đau đớn nữa. Đây là cảnh vinh hiển cuối cùng khi Đức Chúa Trời ngự giữa dân Ngài.",
+    },
+  ],
 }
 
 export function findCommentary(bookEn: string, chapter: number, verse?: number): CommentaryEntry[] {

@@ -67,6 +67,14 @@ export function sessionCookieOptions() {
   }
 }
 
+export function generateToken(): string {
+  return crypto.randomBytes(32).toString("hex")
+}
+
+export function tokenExpiry(hours = 24): Date {
+  return new Date(Date.now() + hours * 3600 * 1000)
+}
+
 export async function getCurrentUser(): Promise<SessionPayload | null> {
   const c = await cookies()
   const token = c.get(SESSION_COOKIE)?.value

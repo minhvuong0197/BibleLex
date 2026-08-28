@@ -14,9 +14,13 @@
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
     "import:data": "tsx scripts/import-data.ts",
+    "seed:commentary": "tsx scripts/seed-commentary.ts",
     "prepare:data": "node scripts/prepare-data.mjs",
     "download:data": "node scripts/prepare-data.mjs",
     "test": "node --test"
+  },
+  "prisma": {
+    "seed": "tsx scripts/seed-commentary.ts"
   },
   "engines": {
     "node": ">=20.9.0"

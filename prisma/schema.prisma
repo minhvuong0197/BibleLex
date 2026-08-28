@@ -296,18 +296,38 @@ model VerseTranslation {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String?
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                String   @id @default(cuid())
+  email             String   @unique
+  name              String?
+  passwordHash      String   @map("password_hash")
+  emailVerified     Boolean  @default(false) @map("email_verified")
+  verifyToken       String?  @map("verify_token")
+  verifyTokenExpiry DateTime? @map("verify_token_expiry")
+  resetToken        String?  @map("reset_token")
+  resetTokenExpiry  DateTime? @map("reset_token_expiry")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   notes      Note[]
   bookmarks  Bookmark[]
   highlights Highlight[]
 
   @@map("users")
+}
+
+model Commentary {
+  id        String   @id @default(cuid())
+  book      String
+  chapter   Int
+  verse     Int?
+  section   String
+  content   String   @db.Text
+  source    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([book, chapter, verse, section])
+  @@index([book, chapter, verse])
+  @@map("commentaries")
 }
 
 model Note {
