@@ -4,10 +4,11 @@ import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { useRouter } from "next/navigation"
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, ChevronLeft, ChevronRight } from "lucide-react"
 
-// Giọng Azure TTS (tiếng Việt, miễn phí F0) — mặc định Nam (NamMinh)
+// Giọng ElevenLabs (tiếng Việt, gói Free, không cần thẻ) — mặc định Nam (Adam)
 const TTS_VOICES = [
-  { code: "vi-VN-NamMinhNeural", name: "Nam (NamMinh)" },
-  { code: "vi-VN-HoaiMyNeural", name: "Nữ (HoaiMy)" },
+  { code: "pNInz6obpgDQGcFmaJgB", name: "Nam (Adam)" },
+  { code: "CwhRBWXzGAHq8TQ4Fs17", name: "Nam (Ravi)" },
+  { code: "21m00Tcm4TlvDq8ikWAM", name: "Nữ (Rachel)" },
 ]
 
 interface ReaderVerse {
@@ -48,7 +49,7 @@ export function BibleReader({
   const primary = versions[0]
   const primaryCode = primary?.code
   const lang = ttsLang(primary?.language)
-  const useVbee = lang.toLowerCase().startsWith("vi")
+  const useTts = lang.toLowerCase().startsWith("vi")
 
   const [currentVerse, setCurrentVerse] = useState<number | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -110,19 +111,20 @@ export function BibleReader({
     setIsPlaying(false)
   }
 
-  function vbeeUrl(text: string, voice: string, r: number): string {
-    return `/api/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}&rate=${r}`
+  function ttsUrl(text: string, voice: string): string {
+    return `/api/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`
   }
 
   function startAudio(a: HTMLAudioElement, index: number) {
     const items = queueRef.current
     audioRef.current = a
+    a.playbackRate = Math.min(2, Math.max(0.5, rateRef.current))
     a.onplay = () => setCurrentVerse(items[index].verse)
     a.onended = () => advance()
     a.onerror = () => advance()
     a.play().catch(() => {})
     if (index + 1 < items.length) {
-      const n = new Audio(vbeeUrl(items[index + 1].text, ttsVoiceRef.current, rateRef.current))
+      const n = new Audio(ttsUrl(items[index + 1].text, ttsVoiceRef.current))
       preloadRef.current = n
       n.load()
     }
@@ -136,25 +138,25 @@ export function BibleReader({
       const next = preloadRef.current
       preloadRef.current = null
       if (next) startAudio(next, idxRef.current)
-      else startAudio(new Audio(vbeeUrl(items[idxRef.current].text, ttsVoiceRef.current, rateRef.current)), idxRef.current)
+      else startAudio(new Audio(ttsUrl(items[idxRef.current].text, ttsVoiceRef.current)), idxRef.current)
     } else {
       stopPlayback()
     }
   }
 
   function speakCurrent() {
-    if (useVbee) speakVbee()
+    if (useTts) speakTts()
     else speakSpeech()
   }
 
-  function speakVbee() {
+  function speakTts() {
     const items = queueRef.current
     if (idxRef.current >= items.length) {
       stopPlayback()
       setCurrentVerse(null)
       return
     }
-    startAudio(new Audio(vbeeUrl(items[idxRef.current].text, ttsVoiceRef.current, rateRef.current)), idxRef.current)
+    startAudio(new Audio(ttsUrl(items[idxRef.current].text, ttsVoiceRef.current)), idxRef.current)
   }
 
   function speakSpeech() {
@@ -203,7 +205,7 @@ export function BibleReader({
     if (typeof window === "undefined") return
     if (pausedRef.current && isPlayingRef.current) {
       pausedRef.current = false
-      if (useVbee) audioRef.current?.play().catch(() => {})
+      if (useTts) audioRef.current?.play().catch(() => {})
       else if ("speechSynthesis" in window) window.speechSynthesis.resume()
       setIsPlaying(true)
       return
@@ -229,7 +231,7 @@ export function BibleReader({
   function pause() {
     if (typeof window === "undefined") return
     pausedRef.current = true
-    if (useVbee) audioRef.current?.pause()
+    if (useTts) audioRef.current?.pause()
     else if ("speechSynthesis" in window) window.speechSynthesis.pause()
     setIsPlaying(false)
   }
@@ -278,7 +280,7 @@ export function BibleReader({
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <label className="font-medium text-foreground">Giọng</label>
-          {useVbee ? (
+          {useTts ? (
             <select value={ttsVoice} onChange={(e) => setTtsVoice(e.target.value)} className="h-8 rounded-md border bg-background px-2 text-xs">
               {TTS_VOICES.map((vv) => (
                 <option key={vv.code} value={vv.code}>{vv.name}</option>
@@ -303,7 +305,7 @@ export function BibleReader({
             <option value={1.5}>1.5x</option>
           </select>
         </div>
-        {!supported && !useVbee && <span className="text-xs text-muted-foreground">Thiết bị không hỗ trợ đọc tự động.</span>}
+        {!supported && !useTts && <span className="text-xs text-muted-foreground">Thiết bị không hỗ trợ đọc tự động.</span>}
       </div>
 
       {/* Điều hướng chương */}
